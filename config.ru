@@ -7,17 +7,6 @@ module Caskbot
 
     attr_accessor :bot
 
-    def github
-      stack = Faraday::RackBuilder.new do |builder|
-        builder.use Faraday::HttpCache
-        builder.use Octokit::Response::RaiseError
-        builder.adapter Faraday.default_adapter
-      end
-
-      Octokit.middleware = stack
-      Octokit::Client.new access_token: ENV['GITHUB_TOKEN']
-    end
-
     def config
       c = Hashie::Mash.new
       ENV.each { |k,v| c[k.downcase] = v }
@@ -36,22 +25,7 @@ module Caskbot
       Tilt.new(root + '/templates/' + file + '.hbs')
     end
 
-    def shorten(url)
-      begin
-        GitIo.shorten url
-      rescue
-        url
-      end
-    end
-
-    def gisten(filename, contents, opts = {})
-      opts[:filename] ||= filename
-      opts[:public] ||= false
-      opts[:anonymous] ||= true
-      Caskbot.shorten Gist.gist(contents, opts)['html_url']
-    end
-
-    memoize :config, :gisten, :github, :root, :shorten, :template
+    memoize :config, :mainchan, :root, :template
   end
 
   module Plugins
@@ -59,15 +33,8 @@ module Caskbot
       self.constants.map { |c| self.const_get c }
     end
   end
-
-  module Hookins
-    def self.to_a
-      self.constants.map { |c| self.const_get c }
-    end
-  end
 end
 
-Dir['./hookins/*.rb'].each { |p| require p }
 Dir['./plugins/*.rb'].each { |p| require p }
 require './bot'
 require './web'
