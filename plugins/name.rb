@@ -45,14 +45,14 @@ class Caskbot::Plugins::Name
     end
 
     args[:n] = 100 if args[:n] > 100
-    joined = args[:n].times.map do
+    joined = (args[:n] * 2).times.map do
       n = @@generator.send(args[:call], args[:freq], args[:full])
       if args[:last]
         n.split.last
       else
         n
       end
-    end.join ', '
+    end.uniq.first(args[:n]).join ', '
     m.reply joined
   end
 end
