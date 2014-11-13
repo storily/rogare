@@ -5,7 +5,7 @@ class Caskbot::Plugins::Name
   extend Memoist
 
   match /name(.*)/
-  @@commands = ['name [N] [male|female|common|rare|all|first|last|full] [name|names]']
+  @@commands = ['name put some words and numbers here and hope they do something']
 
   @@generator = Namey::Generator.new
 
@@ -20,7 +20,7 @@ class Caskbot::Plugins::Name
       end
     end.each do |p|
       if p =~ /^(help|\?|how|what|--help|-h)$/
-        return m.reply @@commands.first
+        return m.reply '!' + @@commands.first
       elsif p.is_a? Integer
         args[:n] = p
       elsif p =~ /^(male|man|boy)$/
@@ -29,7 +29,7 @@ class Caskbot::Plugins::Name
         args[:call] = :female
       elsif p =~ /^(common)$/
         args[:freq] = :common
-      elsif p =~ /^(rare|weird)$/
+      elsif p =~ /^(rare|weird|funny)$/
         args[:freq] = :rare
       elsif p =~ /^(all|both)$/
         args[:freq] = :all
@@ -44,7 +44,7 @@ class Caskbot::Plugins::Name
       end
     end
 
-    args[:n] = 10 if args[:n] > 10
+    args[:n] = 100 if args[:n] > 100
     joined = args[:n].times.map do
       n = @@generator.send(args[:call], args[:freq], args[:full])
       if args[:last]
