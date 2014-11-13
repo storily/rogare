@@ -20,7 +20,7 @@ class Caskbot::Plugins::Name
       end
     end.each do |p|
       if p =~ /^(help|\?|how|what|--help|-h)$/
-        return m.reply '!' + @@commands.first
+        return m.reply 'Usage: !' + @@commands.first
       elsif p.is_a? Integer
         args[:n] = p
       elsif p =~ /^(male|man|boy)$/
