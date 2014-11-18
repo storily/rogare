@@ -11,7 +11,7 @@ WORKDIR /app
 
 ADD .bundle Gemfile Gemfile.lock vendor /app/
 RUN pacman -S --noconfirm --needed base-devel &&\
-  /.gem/ruby/2.1.0/bin/bundle install --deployment --local --binstubs &&\
+  /.gem/ruby/2.1.0/bin/bundle install --deployment --binstubs &&\
   /usr/bin/bash -c "comm -13 <(pacman -Qg base|cut -c6-) <(pacman -Qg base-devel|cut -c12-)|xargs pacman -Rsn --noconfirm" &&\
   pacman -Scc --noconfirm &&\
   rm -rf /var/cache/pacman/pkg/*
