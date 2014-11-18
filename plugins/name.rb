@@ -23,13 +23,15 @@ class Caskbot::Plugins::Name
         return m.reply 'Usage: !' + @@commands.first
       elsif p.is_a? Integer
         args[:n] = p
-      elsif p =~ /^(male|man|boy)$/
+      elsif p =~ /^(males?|m[ae]n|boys?)$/
         args[:call] = :male
-      elsif p =~ /^(female|woman|girl)$/
+      elsif p =~ /^(females?|wom[ae]n|girls?)$/
         args[:call] = :female
+      elsif p =~ /^(enby|nb)s?$/
+        args[:call] = [:female, :male].shuffle.first
       elsif p =~ /^(common)$/
         args[:freq] = :common
-      elsif p =~ /^(rare|weird|funny)$/
+      elsif p =~ /^(rare|weird|funny|evil|bad)$/
         args[:freq] = :rare
       elsif p =~ /^(all|both)$/
         args[:freq] = :all
