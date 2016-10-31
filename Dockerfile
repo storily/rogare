@@ -16,4 +16,6 @@ RUN pacman -S --noconfirm --needed base-devel &&\
   pacman -Scc --noconfirm &&\
   rm -rf /var/cache/pacman/pkg/*
   
-ADD .env Procfile config.ru bot.rb web.rb plugins templates /app/
+ADD .env Procfile config.ru bot.rb web.rb /app/
+ADD plugins /app/plugins
+ADD templates /app/templates
