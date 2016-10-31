@@ -7,7 +7,7 @@ class Caskbot::Plugins::Plot
   match /plot/
   @@commands = ['plot']
 
-  def execute(m, param)
+  def execute(m)
     (last_requested, plots) = list
     if last_requested < (Time.new - 15*60)
       plots = list(true).last
