@@ -1,4 +1,5 @@
 require 'namey'
+require_relative 'nbnames'
 
 class Caskbot::Plugins::Name
   include Cinch::Plugin
@@ -28,7 +29,7 @@ class Caskbot::Plugins::Name
       elsif p =~ /^(females?|wom[ae]n|girls?)$/
         args[:call] = :female
       elsif p =~ /^(enby|nb)s?$/
-        args[:call] = [:female, :male].shuffle.first
+        args[:call] = :unisex
       elsif p =~ /^(common)$/
         args[:freq] = :common
       elsif p =~ /^(rare|weird|funny|evil|bad)$/
@@ -48,6 +49,7 @@ class Caskbot::Plugins::Name
 
     args[:n] = 100 if args[:n] > 100
     joined = (args[:n] * 2).times.map do
+      next ENBYNAMES.sample(2).join(' ') if args[:call] == :unisex
       n = @@generator.send(args[:call], args[:freq], args[:full])
       if args[:last]
         n.split.last
