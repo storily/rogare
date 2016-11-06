@@ -7,6 +7,7 @@ gem 'hashie', '~>3.3.1'
 gem 'memoist', '~>0.15.0'
 gem 'namey', '~>0.0.10'
 gem 'nokogiri', '~>1.6.8.1'
+gem 'numbers_in_words', '~>0.4.0'
 gem 'pry', group: :development
 gem 'puma'
 gem 'sinatra', '~>1.4.5', require: 'sinatra/base'

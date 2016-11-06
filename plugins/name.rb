@@ -1,5 +1,6 @@
 require 'namey'
 require_relative 'nbnames'
+require 'numbers_in_words'
 
 class Caskbot::Plugins::Name
   include Cinch::Plugin
@@ -12,7 +13,10 @@ class Caskbot::Plugins::Name
 
   def execute(m, param)
     param ||= ''
-    args = {n: 1, call: :name, full: true, last: false, freq: :all}
+    args = {call: :name, full: true, last: false, freq: :all}
+
+    args[:n] = NumbersInWords.in_numbers(params.strip)
+
     param.strip.split(' ').map do |p|
       if p.to_i > 0
         p.to_i
@@ -48,8 +52,10 @@ class Caskbot::Plugins::Name
     end
 
     args[:n] = 100 if args[:n] > 100
+    args[:n] = 1 if args[:n] < 1
+
     joined = (args[:n] * 2).times.map do
-      next ENBYNAMES.sample(2).join(' ') if args[:call] == :unisex
+      next ENBYNAMES.sample(if args[:full] then 2 else 1 end).join(' ') if args[:call] == :unisex
       n = @@generator.send(args[:call], args[:freq], args[:full])
       if args[:last]
         n.split.last
