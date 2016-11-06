@@ -15,7 +15,7 @@ class Caskbot::Plugins::Name
     param ||= ''
     args = {call: :name, full: true, last: false, freq: :all}
 
-    args[:n] = NumbersInWords.in_numbers(params.strip)
+    args[:n] = NumbersInWords.in_numbers(param.strip)
 
     param.strip.split(' ').map do |p|
       if p.to_i > 0
