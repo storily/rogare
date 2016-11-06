@@ -32,7 +32,7 @@ class Caskbot::Plugins::Name
         args[:call] = :male
       elsif p =~ /^(females?|wom[ae]n|girls?)$/
         args[:call] = :female
-      elsif p =~ /^(enby|nb)s?$/
+      elsif p =~ /^(enby|nb|enbie)s?$/
         args[:call] = :unisex
       elsif p =~ /^(common)$/
         args[:freq] = :common
