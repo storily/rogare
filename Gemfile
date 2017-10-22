@@ -10,3 +10,4 @@ gem 'nokogiri', '~>1.6.8.1'
 gem 'numbers_in_words', '~>0.4.0'
 gem 'pry', group: :development
 gem 'typhoeus', '~>0.6.9'
+gem 'redis', '~>4.0.1'
