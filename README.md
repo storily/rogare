@@ -26,6 +26,8 @@ IRC bot for NaNoWriMo (NZ channel).
 
 - `RACK_ENV=` Currently only used for Bundler loading. Defaults to `production`.
 
+- `DICERE_URL=` Point to the Dicere API url.
+
 ## Installation & Development
 
 To run locally:
