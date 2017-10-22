@@ -28,6 +28,8 @@ IRC bot for NaNoWriMo (NZ channel).
 
 - `DICERE_URL=` Point to the Dicere API url.
 
+- `REDIS_URL=` Point to a Redis server.
+
 ## Installation & Development
 
 To run locally:
