@@ -1,4 +1,4 @@
-require 'namey'
+require_relative '../lib/namey'
 require_relative '../lib/nbnames'
 require 'numbers_in_words'
 
