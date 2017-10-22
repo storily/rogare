@@ -1,23 +1,27 @@
-class Rogare::Plugins::Nano
+class Rogare::Plugins::Wordcount
   include Cinch::Plugin
   extend Memoist
 
-  match /count(.*)/
-  @@commands = ['count username']
+  match /(wordcount|words?|count|wc)(.*)/
+  @@commands = ['count [nano username] (will use your IRC nickname if you don\'t give a username)']
 
-  def execute(m, param)
-    param ||= ''
+  def execute(m, _, param)
+    param = param.strip
+    if param =~ /^(help|\?|how|what|--help|-h)/
+      m.reply 'Usage: !' + @@commands.first
+      m.reply 'Also see https://cogitare.nz' if rand > 0.9
+      return
+    end
+
     names = []
-    param.strip.split.each do |p|
-      p = p.downcase.to_sym
-      if p =~ /^(help|\?|how|what|--help|-h)$/
-        return m.reply 'Usage: !' + @@commands.first
-      elsif p =~ /^(me|self|myself|i)$/
+    param.split.each do |p|
+      p.downcase!
+      if p =~ /^(me|self|myself|i)$/
         names.push m.user.nick
       elsif p =~ /^(random|rand|any)$/
         names.push m.channel.users.keys.shuffle.first
       else
-        names.push p
+        names.push p.to_sym
       end
     end
     names.push m.user.nick if names.empty?
