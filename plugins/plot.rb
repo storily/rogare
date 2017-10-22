@@ -3,8 +3,8 @@ require_relative '../lib/dicere'
 class Rogare::Plugins::Plot
   include Cinch::Plugin
 
-  match /(plot|prompt)(.*)/
-  @@commands = ['plot (or !prompt) [optional keywords to filter plots/prompts]']
+  match /(plot|prompt|seed|idea)(.*)/
+  @@commands = ['plot [optional filter keywords]']
 
   def execute(m, _, param)
     param = param.strip
@@ -13,11 +13,11 @@ class Rogare::Plugins::Plot
       m.reply 'Also see https://cogitare.nz' if rand > 0.9
       return
     end
-    
+
     if param.empty?
       return m.reply Dicere.random.to_s
     end
-    
+
     if param.to_i > 0
       item = Dicere.item(param)
       m.reply item.to_s
