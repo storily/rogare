@@ -1,9 +1,9 @@
-class Rogare::Plugins::List
+class Rogare::Plugins::Help
   include Cinch::Plugin
   extend Memoist
 
-  match /list/
-  @@commands = ['list']
+  match /(help|list)/
+  @@commands = ['help']
 
   def bot_prefix
     prefix = (self.class.prefix || Rogare.bot.config.plugins.prefix).to_s
