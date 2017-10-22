@@ -6,7 +6,7 @@ class Rogare::Plugins::Name
   include Cinch::Plugin
   extend Memoist
 
-  match /name(.*)/
+  match /names?(.*)/
   @@commands = ['name [optionally put some words and numbers here and hope they do something]']
 
   @@generator = Namey::Generator.new
