@@ -2,7 +2,7 @@ class Rogare::Plugins::Nano
   include Cinch::Plugin
   extend Memoist
 
-  match /count(.*)/
+  match /(count|wc)(.*)/
   @@commands = ['count [username(s) to search, or "set" then a username to remember your NaNoWriMo username]']
 
   @@redis = Redis.new
