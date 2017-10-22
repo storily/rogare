@@ -5,13 +5,12 @@ IRC bot for NaNoWriMo (NZ channel).
 - Runs on Heroku with one dyno.
 - Queries [Cogitare](https://cogitare.nz) for the `!plot` command.
 - Has various built-in lists of names for the `!name` command.
+- Also provides `!wordcount`, `!choose`, and `!wordwar`.
 
 ## Configuration
 
 - `IRC_CHANNELS=` Space-delimited list of channels the bot should connect
-  to. The first one will be "mainchan", to which messages that aren't
-  replies to commands or patterns (such as responses from webhooks)
-  will be sent.
+  to. The first one will be "mainchan".
 
 - `IRC_NICK=`
 
@@ -28,7 +27,7 @@ IRC bot for NaNoWriMo (NZ channel).
 
 - `DICERE_URL=` Point to the Dicere API url.
 
-- `REDIS_URL=` Point to a Redis server.
+- `REDIS_URL=` Points to a redis server (defaults to a local server).
 
 ## Installation & Development
 
@@ -41,4 +40,3 @@ To run locally:
 5. Start the bot: `bundle exec foreman start`.
 
 The bot needs to be restarted at every change.
-
