@@ -1,5 +1,5 @@
 require 'namey'
-require_relative 'nbnames'
+require_relative '../lib/nbnames'
 require 'numbers_in_words'
 
 class Rogare::Plugins::Name
@@ -7,7 +7,7 @@ class Rogare::Plugins::Name
   extend Memoist
 
   match /name(.*)/
-  @@commands = ['name put some words and numbers here and hope they do something']
+  @@commands = ['name [optionally put some words and numbers here and hope they do something]']
 
   @@generator = Namey::Generator.new
 

@@ -23,12 +23,12 @@ class Rogare::Plugins::Nano
     names.push m.user.nick if names.empty?
 
     counts = names.map do |name|
-      res = Typhoeus.get "http://nanowrimo.org/wordcount_api/wc/#{name}"
+      res = Typhoeus.get "https://nanowrimo.org/wordcount_api/wc/#{name}"
       if res.code == 200
         doc = Nokogiri::XML(res.body)
         if doc.css('error').length == 0
           wc = doc.at_css('user_wordcount').content
-          "#{name}: #{wc}"
+          "#{name}: #{wc} (#{(wc.to_i / 500).round}%)"
         else
           nil
         end

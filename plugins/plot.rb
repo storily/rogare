@@ -1,4 +1,5 @@
-require 'namey'
+require 'graphql/client'
+require 'graphql/client/http'
 
 class Rogare::Plugins::Plot
   include Cinch::Plugin
@@ -7,30 +8,14 @@ class Rogare::Plugins::Plot
   match /(plot|prompt)(.*)/
   @@commands = ['plot (or !prompt) [optional keywords to filter plots/prompts]']
 
-  def execute(m)
-    (last_requested, plots) = list
-    if last_requested < (Time.new - 15*60)
-      plots = list(true).last
+  def execute(m, _, param)
+    param = param.strip
+    if param =~ /^(help|\?|how|what|--help|-h)/
+      m.reply 'Usage: !' + @@commands.first
+      m.reply 'Also see https://cogitare.nz' if rand > 0.9
+      return
     end
 
-    m.reply plots.sample
+    m.reply 'Not implemented'
   end
-
-  def url
-    'https://gist.githubusercontent.com/passcod/866cb3ae04fe25479d7c9232bf699a3a/raw/plots.list'
-  end
-
-  def list
-    [
-      Time.new,
-      Typhoeus
-      .get(url, followlocation: true)
-      .body
-      .split("\n")
-      .reject { |l| l.empty? }
-      .map { |l| l.strip }
-    ]
-  end
-
-  memoize :url, :list
 end

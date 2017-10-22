@@ -32,15 +32,7 @@ module Rogare
       Rogare.bot.channel_list.find ENV['IRC_CHANNELS'].split.first
     end
 
-    def root
-      __dir__
-    end
-
-    def template(file)
-      Tilt.new(root + '/templates/' + file + '.hbs')
-    end
-
-    memoize :bot, :config, :mainchan, :root, :template
+    memoize :bot, :config, :mainchan
   end
 
   module Plugins
