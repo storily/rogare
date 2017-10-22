@@ -1,11 +1,11 @@
 require 'namey'
 
-class Caskbot::Plugins::Plot
+class Rogare::Plugins::Plot
   include Cinch::Plugin
   extend Memoist
 
-  match /plot/
-  @@commands = ['plot']
+  match /(plot|prompt)(.*)/
+  @@commands = ['plot (or !prompt) [optional keywords to filter plots/prompts]']
 
   def execute(m)
     (last_requested, plots) = list

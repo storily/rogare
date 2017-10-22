@@ -2,7 +2,7 @@ require 'namey'
 require_relative 'nbnames'
 require 'numbers_in_words'
 
-class Caskbot::Plugins::Name
+class Rogare::Plugins::Name
   include Cinch::Plugin
   extend Memoist
 

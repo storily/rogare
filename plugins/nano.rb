@@ -1,4 +1,4 @@
-class Caskbot::Plugins::Nano
+class Rogare::Plugins::Nano
   include Cinch::Plugin
   extend Memoist
 

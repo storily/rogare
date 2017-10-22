@@ -1,10 +1,10 @@
-class Caskbot::Plugins::List
+class Rogare::Plugins::List
   include Cinch::Plugin
 
   match /list/
   @@commands = ['list']
 
   def execute(m)
-    m.reply 'Additional commands: !plot and !name'
+    m.reply 'Additional commands: !name and !plot (alias: !prompt)'
   end
 end
