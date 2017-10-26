@@ -59,10 +59,18 @@ module Namey
         params[:max_freq] = 4 if params[:max_freq] < 4
       end
 
-      name = get_name(params[:type], params[:min_freq], params[:max_freq])
+      name = nil
+      while name == nil
+        name = get_name(params[:type], params[:min_freq], params[:max_freq])
+      end
 
       if params[:type] != :surname && params[:with_surname] == true
-        name = "#{name} #{get_name(:surname, params[:min_freq], params[:max_freq])}"
+        surname = nil
+        while surname == nil
+          surname = get_name(:surname, params[:min_freq], params[:max_freq])
+        end
+
+        name = "#{name} #{surname}"
       end
       name
     end
