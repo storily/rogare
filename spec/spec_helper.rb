@@ -20,9 +20,6 @@ RSpec.configure do |config|
   config.disable_monkey_patching!
   #config.warnings = true
 
-  # Print the 10 slowest examples and groups at end of the spec run.
-  config.profile_examples = 10
-
   # Run specs in random order to surface order dependencies.
   config.order = :random
   Kernel.srand config.seed
@@ -47,10 +44,15 @@ RSpec.configure do |config|
 =end
 end
 
-require 'cinch'
-require 'memoist'
+require 'bundler'
+Bundler.require :default, :testing
+require_relative '../lib/rogare.rb'
 
 module Rogare
-  module Plugins
+  class << self
+    def bot
+      Cinch::Bot.new
+    end
   end
 end
+

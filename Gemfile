@@ -16,5 +16,5 @@ group :development do
 end
 
 group :testing do
-  gem 'rspec', '~>3.1.0'
+  gem 'rspec', '~>3.6.0'
 end
