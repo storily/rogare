@@ -3,7 +3,7 @@ require_relative '../lib/dicere'
 class Rogare::Plugins::Plot
   include Cinch::Plugin
 
-  match /(plot|prompt|seed|idea|event)(.*)/
+  match /(plot|prompt|seed|event)\s*(.*)/
   @@commands = ['plot [optional filter keywords]']
 
   def execute(m, cat, param)

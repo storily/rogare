@@ -22,8 +22,12 @@ class Rogare::Plugins::Help
         next if self.class.matchers.map{|p| p.pattern == handler.pattern.pattern}.any?
 
         pattern = handler.pattern.pattern.to_s[1..-2]
+
         pattern.gsub! "?-mix:", ""
         pattern.gsub! "(.*)", ""
+        pattern.gsub! "\\s*", ""
+        pattern.gsub! "?", ""
+
         pattern = pattern[1..-2] if (pattern.index("(") == 0) && (pattern.index(")") == pattern.length - 1)
 
         commands.push pattern.split("|")
@@ -42,7 +46,7 @@ class Rogare::Plugins::Help
       out = prefixed[0]
       out = "#{out} (aliases: #{prefixed[1..-1].join(', ')})" if prefixed.length > 1
       out
-    end
+    end.sort
   end
 
   def execute(m)
