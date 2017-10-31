@@ -10,7 +10,7 @@ class Rogare::Plugins::Wordwar
       'Also say !wordwar alone to get a list of current/scheduled ones.'
   ]
 
-  @@redis = Redis.new
+  @@redis = Redis.new db: 3
 
   def execute(m, cat, param)
     param = param.strip
@@ -66,6 +66,11 @@ class Rogare::Plugins::Wordwar
     if timeat < Time.now
       # If time is still in the past, something is wrong
       m.reply "#{time} is in the past, what???"
+      return
+    end
+
+    if timeat > Time.now + 12 * 60 * 60
+      m.reply "Cannot schedule more than 12 hours in the future, sorry"
       return
     end
 
