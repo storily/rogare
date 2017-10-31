@@ -20,33 +20,15 @@ class Rogare::Plugins::Wordwar
     end
 
     if param.empty?
-      wars = all_wars
-        .reject {|w| w[:end] < Time.now}
-        .sort_by {|w| w[:start]}
+      return ex_list_wars(m)
+    end
 
-      wars.each do |war|
-        togo, neg = dur_display war[:start]
-        dur, _ = dur_display war[:end], war[:start]
-        others = war[:members].reject {|u| u == war[:owner]}
+    if param =~ /^join /
+      return ex_join_war(m, param)
+    end
 
-        m.reply [
-          "#{war[:id]}: #{nixnotif war[:owner]}'s war",
-          if neg
-            "started #{togo} ago"
-          else
-            "starting in #{togo}"
-          end,
-          "for #{dur}",
-          unless others.empty?
-            "with #{others.count} others"
-          end
-        ].compact.join(', ')
-      end
-
-      if wars.empty?
-        m.reply "No current wordwars"
-      end
-      return
+    if param =~ /^leave /
+      return ex_leave_war(m, param)
     end
 
     time, durstr = param.split('for').map {|p| p.strip}
@@ -100,6 +82,41 @@ class Rogare::Plugins::Wordwar
       "Others can join it with: !wordwar join #{k}"
   end
 
+  def ex_list_wars(m)
+    wars = all_wars
+      .reject {|w| w[:end] < Time.now}
+      .sort_by {|w| w[:start]}
+
+    wars.each do |war|
+      togo, neg = dur_display war[:start]
+      dur, _ = dur_display war[:end], war[:start]
+      others = war[:members].reject {|u| u == war[:owner]}
+
+      m.reply [
+        "#{war[:id]}: #{nixnotif war[:owner]}'s war",
+        if neg
+          "started #{togo} ago"
+        else
+          "starting in #{togo}"
+        end,
+        "for #{dur}",
+        unless others.empty?
+          "with #{others.count} others"
+        end
+      ].compact.join(', ')
+    end
+
+    if wars.empty?
+      m.reply "No current wordwars"
+    end
+  end
+
+  def ex_join_war(m, param)
+  end
+
+  def ex_leave_war(m, param)
+  end
+
   def dur_display(time, now = Time.now)
     diff = time - now
     minutes = diff / 60.0
@@ -127,10 +144,6 @@ class Rogare::Plugins::Wordwar
     # clients may see a space, and people with bad clients may see a
     # weird box or invalid char thing.
     nick.sub(/^(.)/, "\\1\u200B")
-  end
-
-  def cleannix(nick)
-    nick.gsub("\u200B", '')
   end
 
   def rk(war, sub = nil)
