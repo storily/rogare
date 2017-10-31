@@ -5,7 +5,7 @@ class Rogare::Plugins::Nano
   match /(count|wc)(.*)/
   @@commands = ['count [username(s) to search, or "set" then a username to remember your NaNoWriMo username]']
 
-  @@redis = Redis.new db: 2
+  @@redis = Rogare.redis(2)
 
   def get_count_by_name(name)
     res = Typhoeus.get "https://nanowrimo.org/wordcount_api/wc/#{name}"

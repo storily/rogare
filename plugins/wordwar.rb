@@ -10,7 +10,7 @@ class Rogare::Plugins::Wordwar
       'Also say !wordwar alone to get a list of current/scheduled ones.'
   ]
 
-  @@redis = Redis.new db: 3
+  @@redis = Rogare.redis(3)
 
   def execute(m, cat, param)
     param = param.strip
