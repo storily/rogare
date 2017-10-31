@@ -20,10 +20,11 @@ class Rogare::Plugins::Wordwar
     end
 
     if param.empty?
-      all_wars
-      .reject {|w| w[:end] < Time.now}
-      .sort_by {|w| w[:start]}
-      .each do |war|
+      wars = all_wars
+        .reject {|w| w[:end] < Time.now}
+        .sort_by {|w| w[:start]}
+
+      wars.each do |war|
         togo, neg = dur_display war[:start]
         dur, _ = dur_display war[:end], war[:start]
 
@@ -41,6 +42,10 @@ class Rogare::Plugins::Wordwar
           end,
           "for #{dur}"
         ].join(', ')
+      end
+
+      if wars.empty?
+        m.reply "No current wordwars"
       end
       return
     end
