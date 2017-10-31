@@ -47,13 +47,25 @@ class Rogare::Plugins::Wordwar
 
     time, durstr = param.split('for').map {|p| p.strip}
 
-    time = time.sub(/^at/).strip if time.start_with? 'at'
+    time = time.sub(/^at/, '').strip if time.start_with? 'at'
     durstr = "20 minutes" if durstr.nil? || durstr.empty?
 
     timeat = Chronic.parse(time)
     timeat = Chronic.parse("in #{time}") if timeat.nil?
     if timeat.nil?
       m.reply "Can't parse time: #{time}"
+      return
+    end
+
+    if timeat < Time.now && time.to_i < 13
+      # This is if someone entered 12-hour PM time,
+      # and it parsed as AM time, e.g. 9:00.
+      timeat += 12 * 60 * 60
+    end
+
+    if timeat < Time.now
+      # If time is still in the past, something is wrong
+      m.reply "#{time} is in the past, what???"
       return
     end
 
@@ -110,6 +122,7 @@ class Rogare::Plugins::Wordwar
   def store_war(user, time, duration)
     k = @@redis.incr rk('count')
     ex = ((time + duration + 5) - Time.now).to_i # Expire 5 seconds after it ends
+    return if ex < 6 # War is in the past???
 
     #@@redis.multi do
       @@redis.set rk(k, 'owner'), user, ex: ex
