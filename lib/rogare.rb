@@ -31,7 +31,7 @@ module Rogare
 
     def redis(n)
       if ENV['RACK_ENV'] == 'production'
-        redis(0)
+        Redis.new
       else
         Redis.new db: n
       end
