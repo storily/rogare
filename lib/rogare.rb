@@ -25,10 +25,6 @@ module Rogare
       return c
     end
 
-    def mainchan
-      Rogare.bot.channel_list.find ENV['IRC_CHANNELS'].split.first
-    end
-
     def redis(n)
       if ENV['RACK_ENV'] == 'production'
         Redis.new
@@ -37,7 +33,7 @@ module Rogare
       end
     end
 
-    memoize :bot, :config, :mainchan, :redis
+    memoize :bot, :config, :redis
   end
 
   module Plugins

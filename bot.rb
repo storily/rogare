@@ -19,8 +19,9 @@ end
 Thread.new do
   sleep 3
   logs '=====> Loading wordwars from Redis'
-  n = Rogare::Plugins::Wordwar.load_existing_wars.each { |t| t.join }.count
-  logs "=====> Loaded #{n} wordwars"
+  wars = Rogare::Plugins::Wordwar.load_existing_wars
+  logs "=====> Loaded #{wars.count} wordwars, now waiting on timers"
+  wars.each { |t| t.join }
 end
 
 logs '=====> Starting bot'

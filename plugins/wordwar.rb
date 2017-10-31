@@ -80,6 +80,7 @@ class Rogare::Plugins::Wordwar
     m.reply "Got it! " +
       "Your wordwar will start in #{togo} and last #{dur}. " +
       "Others can join it with: !wordwar join #{k}"
+
     self.class.set_war_timer(k, timeat, duration).join
   end
 
@@ -144,26 +145,35 @@ class Rogare::Plugins::Wordwar
   class << self
     def set_war_timer(id, start, duration)
       Thread.new do
-        to_start = start - Time.now
+        channel = @@redis.get rk(id, 'channel')
+        chan = Rogare.bot.channel_list.find channel
+        reply = lambda {|msg| chan.send msg}
 
-        if to_start > 1
+        if chan.nil?
+          puts "=====> Error: no such channel: #{channel}"
+          STDOUT.flush
+          next
+        end
+
+        to_start = start - Time.now
+        if to_start > 0
           # We're before the start of the war
 
           if to_start > 25
             # If we're at least 25 seconds before the start, we have
             # time to send a reminder. Otherwise, skip sending it.
             sleep to_start - 20
-            Rogare.mainchan.send "Wordwar #{id} is starting in 20 seconds!"
+            reply.call "Wordwar #{id} is starting in 20 seconds!"
             sleep 20
           else
             # In any case, we sleep until the beginning
             sleep to_start
           end
 
-          Rogare.mainchan.send "Wordwar #{id} is starting now!"
+          reply.call "Wordwar #{id} is starting now!"
           start_war id
           sleep duration
-          Rogare.mainchan.send "Wordwar #{id} is ended!"
+          reply.call "Wordwar #{id} is ended!"
           erase_war id
         else
           # We're AFTER the start of the war. Probably because the
@@ -175,19 +185,19 @@ class Rogare::Plugins::Wordwar
             # the keys, and also the keys were not erased manually, so
             # it must be that the war ended as the bot was restarting!
             # Oh no. That means we're probably a bit late.
-            Rogare.mainchan.send "Wordwar #{id} is ended!"
+            reply.call "Wordwar #{id} is ended!"
             erase_war id
           else
             unless @@redis.exists rk(id, 'started')
               # The war is not marked as started but it is started, so
               # the bot probably restarted at the exact moment the war
               # was supposed to start. That means we're probably late.
-              Rogare.mainchan.send "Wordwar #{id} has started!"
+              reply.call "Wordwar #{id} has started!"
               start_war id
             end
 
             sleep to_end
-            Rogare.mainchan.send "Wordwar #{id} is ended!"
+            reply.call "Wordwar #{id} is ended!"
             erase_war id
           end
         end
@@ -259,6 +269,7 @@ class Rogare::Plugins::Wordwar
       return if ex < 60 # War is in the past???
 
       @@redis.multi do
+        @@redis.set rk(k, 'channel'), m.channel.to_s, ex: ex
         @@redis.set rk(k, 'owner'), m.user.nick, ex: ex
         @@redis.sadd rk(k, 'members'), m.user.nick
         @@redis.expire rk(k, 'members'), ex

@@ -9,8 +9,7 @@ IRC bot for NaNoWriMo (NZ channel).
 
 ## Configuration
 
-- `IRC_CHANNELS=` Space-delimited list of channels the bot should connect
-  to. The first one will be "mainchan".
+- `IRC_CHANNELS=` List of channels the bot should connect to.
 
 - `IRC_NICK=`
 
