@@ -19,7 +19,7 @@ class Rogare::Plugins::Nano
     nil
   end
 
-  def execute(m, param)
+  def execute(m, _, param)
     candidates = []
     names = []
 
@@ -72,8 +72,8 @@ class Rogare::Plugins::Nano
 
       count = get_count_by_name(name)
 
-      next if random_user && !count
-      next "#{name}: user does not exist or has no current novel" unless count
+      next if random_user && count.nil?
+      next "#{name}: user does not exist or has no current novel" if count.nil?
       random_found = true
 
       "#{name}: #{count} (#{(count / 500).round}%)"
