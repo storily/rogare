@@ -30,12 +30,7 @@ class Rogare::Plugins::Wordwar
         others = war[:members].reject {|u| u == war[:owner]}
 
         m.reply [
-          # Insert a zero-width space as the second character of the nick
-          # so that it doesn't notify that user. People using web clients
-          # or desktop clients shouldn't see anything, people with terminal
-          # clients may see a space, and people with bad clients may see a
-          # weird box or invalid char thing.
-          "#{war[:id]}: #{war[:owner].sub(/^(.)/, "\\1\u200B")}'s war",
+          "#{war[:id]}: #{nixnotif war[:owner]}'s war",
           if neg
             "started #{togo} ago"
           else
@@ -123,6 +118,19 @@ class Rogare::Plugins::Wordwar
     else
       "#{secs.round}s"
     end, neg]
+  end
+
+  def nixnotif(nick)
+    # Insert a zero-width space as the second character of the nick
+    # so that it doesn't notify that user. People using web clients
+    # or desktop clients shouldn't see anything, people with terminal
+    # clients may see a space, and people with bad clients may see a
+    # weird box or invalid char thing.
+    nick.sub(/^(.)/, "\\1\u200B")
+  end
+
+  def cleannix(nick)
+    nick.gsub("\u200B", '')
   end
 
   def rk(war, sub = nil)
