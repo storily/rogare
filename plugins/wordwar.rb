@@ -68,7 +68,7 @@ class Rogare::Plugins::Wordwar
       return
     end
 
-    k = store_war(m.user.nick, timeat, duration)
+    k = self.class.store_war(m.user.nick, timeat, duration)
     togo, neg = dur_display(timeat, timenow)
     dur, _ = dur_display(timeat + duration, timeat)
 
@@ -80,7 +80,13 @@ class Rogare::Plugins::Wordwar
     m.reply "Got it! " +
       "Your wordwar will start in #{togo} and last #{dur}. " +
       "Others can join it with: !wordwar join #{k}"
+    self.class.set_war_timer k, timeat, duration
   end
+
+  def rk(*args) self.class.rk(*args) end
+  def nixnotif(*args) self.class.nixnotif(*args) end
+  def dur_display(*args) self.class.dur_display(*args) end
+  def all_wars(*args) self.class.all_wars(*args) end
 
   def ex_list_wars(m)
     wars = all_wars
@@ -135,65 +141,87 @@ class Rogare::Plugins::Wordwar
     m.reply "You're out."
   end
 
-  def dur_display(time, now = Time.now)
-    diff = time - now
-    minutes = diff / 60.0
-    secs = (minutes - minutes.to_i).abs * 60.0
-
-    neg = false
-    if minutes < 0
-      minutes = minutes.abs
-      neg = true
+  class << self
+    def set_war_timer(id, start, duration)
+      Thread.new do
+        to_reminder = start - Time.now - 30
+        sleep to_reminder
+        Rogare.mainchan.reply "Wordwar #{id} is starting in 30 seconds!"
+        sleep 30
+        Rogare.mainchan.reply "Wordwar #{id} is starting now!"
+        sleep duration
+        Rogare.mainchan.reply "Wordwar #{id} is ended!"
+      end
     end
 
-    [if minutes > 5
-      "#{minutes.round}m"
-    elsif minutes > 1
-      "#{minutes.floor}m #{secs.round}s"
-    else
-      "#{secs.round}s"
-    end, neg]
-  end
+    def dur_display(time, now = Time.now)
+      diff = time - now
+      minutes = diff / 60.0
+      secs = (minutes - minutes.to_i).abs * 60.0
 
-  def nixnotif(nick)
-    # Insert a zero-width space as the second character of the nick
-    # so that it doesn't notify that user. People using web clients
-    # or desktop clients shouldn't see anything, people with terminal
-    # clients may see a space, and people with bad clients may see a
-    # weird box or invalid char thing.
-    nick.sub(/^(.)/, "\\1\u200B")
-  end
+      neg = false
+      if minutes < 0
+        minutes = minutes.abs
+        neg = true
+      end
 
-  def rk(war, sub = nil)
-    ['wordwar', war, sub].compact.join ':'
-  end
-
-  def all_wars
-    @@redis.keys(rk('*', 'start')).map do |k|
-      k.gsub /(^wordwar:|:start$)/, ''
-    end.map do |k|
-      {
-        id: k,
-        owner: @@redis.get(rk(k, 'owner')),
-        members: @@redis.smembers(rk(k, 'members')),
-        start: Chronic.parse(@@redis.get(rk(k, 'start'))),
-        end: Chronic.parse(@@redis.get(rk(k, 'end'))),
-      }
+      [if minutes > 5
+        "#{minutes.round}m"
+      elsif minutes > 1
+        "#{minutes.floor}m #{secs.round}s"
+      else
+        "#{secs.round}s"
+      end, neg]
     end
-  end
 
-  def store_war(user, time, duration)
-    k = @@redis.incr rk('count')
-    ex = ((time + duration + 5) - Time.now).to_i # Expire 5 seconds after it ends
-    return if ex < 6 # War is in the past???
-
-    @@redis.multi do
-      @@redis.set rk(k, 'owner'), user, ex: ex
-      @@redis.sadd rk(k, 'members'), user
-      @@redis.expire rk(k, 'members'), ex
-      @@redis.set rk(k, 'start'), "#{time}", ex: ex
-      @@redis.set rk(k, 'end'), "#{time + duration}", ex: ex
+    def nixnotif(nick)
+      # Insert a zero-width space as the second character of the nick
+      # so that it doesn't notify that user. People using web clients
+      # or desktop clients shouldn't see anything, people with terminal
+      # clients may see a space, and people with bad clients may see a
+      # weird box or invalid char thing.
+      nick.sub(/^(.)/, "\\1\u200B")
     end
-    k
+
+    def rk(war, sub = nil)
+      ['wordwar', war, sub].compact.join ':'
+    end
+
+    def all_wars
+      @@redis.keys(rk('*', 'start')).map do |k|
+        k.gsub /(^wordwar:|:start$)/, ''
+      end.map do |k|
+        {
+          id: k,
+          owner: @@redis.get(rk(k, 'owner')),
+          members: @@redis.smembers(rk(k, 'members')),
+          start: Chronic.parse(@@redis.get(rk(k, 'start'))),
+          end: Chronic.parse(@@redis.get(rk(k, 'end'))),
+        }
+      end
+    end
+
+    def store_war(user, time, duration)
+      k = @@redis.incr rk('count')
+      ex = ((time + duration + 5) - Time.now).to_i # Expire 5 seconds after it ends
+      return if ex < 6 # War is in the past???
+
+      @@redis.multi do
+        @@redis.set rk(k, 'owner'), user, ex: ex
+        @@redis.sadd rk(k, 'members'), user
+        @@redis.expire rk(k, 'members'), ex
+        @@redis.set rk(k, 'start'), "#{time}", ex: ex
+        @@redis.set rk(k, 'end'), "#{time + duration}", ex: ex
+      end
+      k
+    end
+
+    def load_existing_wars
+      all_wars.reject {|w| w[:end] < Time.now}.each do |war|
+        set_war_timer(war[:id], war[:start], war[:end] - war[:start])
+      end
+    end
   end
 end
+
+Rogare::Plugins::Wordwar.load_existing_wars

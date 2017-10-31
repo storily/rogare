@@ -25,7 +25,11 @@ module Rogare
       return c
     end
 
-    memoize :bot, :config
+    def mainchan
+      Rogare.bot.channel_list.find ENV['IRC_CHANNELS'].split.first
+    end
+
+    memoize :bot, :config, :mainchan
   end
 
   module Plugins
