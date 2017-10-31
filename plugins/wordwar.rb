@@ -124,6 +124,15 @@ class Rogare::Plugins::Wordwar
   end
 
   def ex_leave_war(m, param)
+    k = param.sub(/^leave/, '').strip.to_i
+    return m.reply "You need to specify the wordwar ID" if k == 0
+
+    unless @@redis.exists rk(k, 'start')
+      return m.reply "No such wordwar"
+    end
+
+    @@redis.srem rk(k, 'members'), m.user.nick
+    m.reply "You're out."
   end
 
   def dur_display(time, now = Time.now)
