@@ -23,11 +23,11 @@ class Rogare::Plugins::Wordwar
       return ex_list_wars(m)
     end
 
-    if param =~ /^join /
+    if param =~ /^join/
       return ex_join_war(m, param)
     end
 
-    if param =~ /^leave /
+    if param =~ /^leave/
       return ex_leave_war(m, param)
     end
 
@@ -112,6 +112,15 @@ class Rogare::Plugins::Wordwar
   end
 
   def ex_join_war(m, param)
+    k = param.sub(/^join/, '').strip.to_i
+    return m.reply "You need to specify the wordwar ID" if k == 0
+
+    unless @@redis.exists rk(k, 'start')
+      return m.reply "No such wordwar"
+    end
+
+    @@redis.sadd rk(k, 'members'), m.user.nick
+    m.reply "You're in!"
   end
 
   def ex_leave_war(m, param)
