@@ -6,7 +6,7 @@ class Rogare::Plugins::Wordwar
       'Use: !wordwar in [time before it starts (in minutes)] for [duration]',
       'Or:  !wordwar at [wall time e.g. 12:35] for [duration]',
       'Or even (defaulting to a 20 minute run): !wordwar at/in [time]',
-      'And then everyone should: !wordwar join [username / wordwar ID]',
+      'And then everyone should: !wordwar join [wordwar ID]',
       'Also say !wordwar alone to get a list of current/scheduled ones.'
   ]
 
@@ -27,6 +27,7 @@ class Rogare::Plugins::Wordwar
       wars.each do |war|
         togo, neg = dur_display war[:start]
         dur, _ = dur_display war[:end], war[:start]
+        others = war[:members].reject {|u| u == war[:owner]}
 
         m.reply [
           # Insert a zero-width space as the second character of the nick
@@ -40,8 +41,11 @@ class Rogare::Plugins::Wordwar
           else
             "starting in #{togo}"
           end,
-          "for #{dur}"
-        ].join(', ')
+          "for #{dur}",
+          unless others.empty?
+            "with #{others.count} others"
+          end
+        ].compact.join(', ')
       end
 
       if wars.empty?
@@ -55,6 +59,8 @@ class Rogare::Plugins::Wordwar
     time = time.sub(/^at/, '').strip if time.start_with? 'at'
     durstr = "20 minutes" if durstr.nil? || durstr.empty?
 
+    timenow = Time.now
+
     timeat = Chronic.parse(time)
     timeat = Chronic.parse("in #{time}") if timeat.nil?
     if timeat.nil?
@@ -62,19 +68,19 @@ class Rogare::Plugins::Wordwar
       return
     end
 
-    if timeat < Time.now && time.to_i < 13
+    if timeat < timenow && time.to_i < 13
       # This is if someone entered 12-hour PM time,
       # and it parsed as AM time, e.g. 9:00.
       timeat += 12 * 60 * 60
     end
 
-    if timeat < Time.now
+    if timeat < timenow
       # If time is still in the past, something is wrong
       m.reply "#{time} is in the past, what???"
       return
     end
 
-    if timeat > Time.now + 12 * 60 * 60
+    if timeat > timenow + 12 * 60 * 60
       m.reply "Cannot schedule more than 12 hours in the future, sorry"
       return
     end
@@ -85,10 +91,18 @@ class Rogare::Plugins::Wordwar
       return
     end
 
-    m.reply "Time: #{timeat}, Duration: #{duration}"
+    k = store_war(m.user.nick, timeat, duration)
+    togo, neg = dur_display(timeat, timenow)
+    dur, _ = dur_display(timeat + duration, timeat)
 
-    store_war(m.user.nick, timeat, duration)
-    m.reply "Stored"
+    if k.nil? || neg
+      m.reply "Got an error, check your times and try again."
+      return
+    end
+
+    m.reply "Got it! " +
+      "Your wordwar will start in #{togo} and last #{dur}. " +
+      "Others can join it with: !wordwar join #{k}"
   end
 
   def dur_display(time, now = Time.now)
@@ -134,12 +148,13 @@ class Rogare::Plugins::Wordwar
     ex = ((time + duration + 5) - Time.now).to_i # Expire 5 seconds after it ends
     return if ex < 6 # War is in the past???
 
-    #@@redis.multi do
+    @@redis.multi do
       @@redis.set rk(k, 'owner'), user, ex: ex
       @@redis.sadd rk(k, 'members'), user
       @@redis.expire rk(k, 'members'), ex
       @@redis.set rk(k, 'start'), "#{time}", ex: ex
       @@redis.set rk(k, 'end'), "#{time + duration}", ex: ex
-    #end
+    end
+    k
   end
 end
