@@ -68,7 +68,7 @@ class Rogare::Plugins::Wordwar
       return
     end
 
-    k = self.class.store_war(m.user.nick, timeat, duration)
+    k = self.class.store_war(m, timeat, duration)
     togo, neg = dur_display(timeat, timenow)
     dur, _ = dur_display(timeat + duration, timeat)
 
@@ -251,7 +251,7 @@ class Rogare::Plugins::Wordwar
       end
     end
 
-    def store_war(user, time, duration)
+    def store_war(m, time, duration)
       k = @@redis.incr rk('count')
 
       # Expire a minute after it ends, in case of long bot failure
@@ -259,8 +259,8 @@ class Rogare::Plugins::Wordwar
       return if ex < 60 # War is in the past???
 
       @@redis.multi do
-        @@redis.set rk(k, 'owner'), user, ex: ex
-        @@redis.sadd rk(k, 'members'), user
+        @@redis.set rk(k, 'owner'), m.user.nick, ex: ex
+        @@redis.sadd rk(k, 'members'), m.user.nick
         @@redis.expire rk(k, 'members'), ex
         @@redis.set rk(k, 'start'), "#{time}", ex: ex
         @@redis.set rk(k, 'end'), "#{time + duration}", ex: ex
