@@ -13,13 +13,10 @@ class Rogare::Plugins::Nano
       doc = Nokogiri::XML(res.body)
       if doc.css('error').length == 0
         wc = doc.at_css('user_wordcount').content
-        wc.to_i
-      else
-        nil
+        return wc.to_i
       end
-    else
-      nil
     end
+    nil
   end
 
   def execute(m, param)
