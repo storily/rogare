@@ -24,5 +24,9 @@ Thread.new do
   wars.each { |t| t.join }
 end
 
+Thread.new do
+  binding.remote_pry
+end
+
 logs '=====> Starting bot'
 Rogare.bot.start

@@ -9,6 +9,7 @@ gem 'hashie', '~>3.3.1'
 gem 'memoist', '~>0.15.0'
 gem 'nokogiri', '~>1.6.8.1'
 gem 'numbers_in_words', '~>0.4.0'
+gem 'pry-remote', '~>0.1.8'
 gem 'typhoeus', '~>0.6.9'
 gem 'redis', '~>4.0.1'
 
