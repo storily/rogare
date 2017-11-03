@@ -14,7 +14,7 @@ class Rogare::Plugins::Wordwar
 
   def execute(m, cat, param)
     param = param.strip
-    if param =~ /^(help|\?|how|what|--help|-h)/
+    if param =~ /^(help|\?|how|what|--help|-h)/i
       @@usage.each {|l| m.reply l}
       return
     end
@@ -23,17 +23,17 @@ class Rogare::Plugins::Wordwar
       return ex_list_wars(m)
     end
 
-    if param =~ /^join/
+    if param =~ /^join/i
       return ex_join_war(m, param)
     end
 
-    if param =~ /^leave/
+    if param =~ /^leave/i
       return ex_leave_war(m, param)
     end
 
-    time, durstr = param.split('for').map {|p| p.strip}
+    time, durstr = param.split(/for/i).map {|p| p.strip}
 
-    time = time.sub(/^at/, '').strip if time.start_with? 'at'
+    time = time.sub(/^at/i, '').strip if time.start_with? /at/i
     durstr = "20 minutes" if durstr.nil? || durstr.empty?
 
     timenow = Time.now

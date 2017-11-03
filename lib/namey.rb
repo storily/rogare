@@ -17,7 +17,7 @@ module Namey
       }
     end
   end
-  
+
   class Generator
     def initialize()
       @db = [:male, :female, :surname].map do |name|
@@ -28,26 +28,26 @@ module Namey
     def name(frequency = :common, surname = true)
       generate(:frequency => frequency, :with_surname =>surname)
     end
-    
+
     def male(frequency = :common, surname = true)
       generate(:type => :male, :frequency => frequency, :with_surname => surname)
     end
 
     def female(frequency = :common, surname = true)
-      generate(:type => :female, :frequency => frequency, :with_surname => surname)      
+      generate(:type => :female, :frequency => frequency, :with_surname => surname)
     end
 
     def surname(frequency = :common)
       generate(:type => :surname, :frequency => frequency)
     end
-    
+
     def generate(params = {})
       params = {
         :type => random_gender,
         :frequency => :common,
         :with_surname => true
       }.merge(params)
-      
+
       if ! ( params[:min_freq] || params[:max_freq] )
         params[:min_freq], params[:max_freq] = frequency_values(params[:frequency])
       else
@@ -94,7 +94,7 @@ module Namey
 
       [ low, high ]
     end
-    
+
     def random_gender
       rand > 0.5 ? :male : :female
     end
@@ -103,7 +103,7 @@ module Namey
       low = min_freq * 1000
       high = max_freq * 1000
       bucket = rand(low..high)
-      
+
       names = @db[src.to_sym][bucket]
       if names.empty?
         if try > 10
