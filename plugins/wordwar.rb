@@ -31,6 +31,10 @@ class Rogare::Plugins::Wordwar
       return ex_leave_war(m, param)
     end
 
+    if param =~ /^cancel/i
+      return ex_cancel_war(m, param)
+    end
+
     time, durstr = param.split(/for/i).map {|p| p.strip}
 
     time = time.sub(/^at/i, '').strip if time.start_with? /at/i
@@ -78,7 +82,7 @@ class Rogare::Plugins::Wordwar
     end
 
     m.reply "Got it! " +
-      "Your wordwar will start in #{togo} and last #{dur}. " +
+      "Your new wordwar will start in #{togo} and last #{dur}. " +
       "Others can join it with: !wordwar join #{k}"
 
     self.class.set_war_timer(k, timeat, duration).join
@@ -119,7 +123,7 @@ class Rogare::Plugins::Wordwar
   end
 
   def ex_join_war(m, param)
-    k = param.sub(/^join/, '').strip.to_i
+    k = param.sub(/^join/i, '').strip.to_i
     return m.reply "You need to specify the wordwar ID" if k == 0
 
     unless @@redis.exists rk(k, 'start')
@@ -131,7 +135,7 @@ class Rogare::Plugins::Wordwar
   end
 
   def ex_leave_war(m, param)
-    k = param.sub(/^leave/, '').strip.to_i
+    k = param.sub(/^leave/i, '').strip.to_i
     return m.reply "You need to specify the wordwar ID" if k == 0
 
     unless @@redis.exists rk(k, 'start')
@@ -140,6 +144,18 @@ class Rogare::Plugins::Wordwar
 
     @@redis.srem rk(k, 'members'), m.user.nick
     m.reply "You're out."
+  end
+
+  def ex_cancel_war(m, param)
+    k = param.sub(/^cancel/i, '').strip.to_i
+    return m.reply "You need to specify the wordwar ID" if k == 0
+
+    unless @@redis.exists rk(k, 'start')
+      return m.reply "No such wordwar"
+    end
+
+    self.class.erase_war k
+    m.reply "Wordwar #{k} deleted."
   end
 
   class << self
@@ -156,9 +172,9 @@ class Rogare::Plugins::Wordwar
 
         reply = lambda {|msg| chan.send msg}
 
-        starting = lambda {|time|
+        starting = lambda {|time, extra|
           members = war_info(id)[:members].join(', ')
-          reply.call "Wordwar #{id} is starting #{time}! #{members}"
+          reply.call "Wordwar #{id} is starting #{time}! #{members}#{extra || ''}"
         }
 
         ending = lambda {
@@ -174,7 +190,7 @@ class Rogare::Plugins::Wordwar
             # If we're at least 25 seconds before the start, we have
             # time to send a reminder. Otherwise, skip sending it.
             sleep to_start - 20
-            starting.call 'in 20 seconds'
+            starting.call 'in 20 seconds', ' — be ready; tell us your starting wordcount'
             sleep 20
           else
             # In any case, we sleep until the beginning
