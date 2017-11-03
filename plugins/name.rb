@@ -42,7 +42,7 @@ class Rogare::Plugins::Name
         args[:freq] = :all
       elsif p =~ /^(first|given)$/
         args[:full] = false
-      elsif p =~ /^(last|family)$/
+      elsif p =~ /^(last(name)?|family|surname)$/
         args[:full] = true
         args[:last] = true
       elsif p =~ /^(full)$/
