@@ -3,22 +3,22 @@ require_relative '../lib/dicere'
 class Rogare::Plugins::Plot
   include Cinch::Plugin
 
-  match /(plot|prompt|seed|event)\s*(.*)/
+  match /(plot|prompt|seed|event)\s*(.*)/i
   @@commands = ['plot [optional filter keywords]']
 
   def execute(m, cat, param)
     param = param.strip
-    if param =~ /^(help|\?|how|what|--help|-h)/
+    if param =~ /^(help|\?|how|what|--help|-h)/i
       m.reply 'Usage: !' + @@commands.first
       m.reply 'Also see https://cogitare.nz' if rand > 0.9
       return
     end
 
-    if cat =~ /seed/
+    if cat =~ /seed/i
       param += ' seed'
-    elsif cat =~ /event/
+    elsif cat =~ /event/i
       param += ' event'
-    elsif cat =~ /prompt/
+    elsif cat =~ /prompt/i
       param += ' prompt'
     end
 

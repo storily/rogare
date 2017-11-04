@@ -2,7 +2,7 @@ class Rogare::Plugins::Help
   include Cinch::Plugin
   extend Memoist
 
-  match /(help|list)/
+  match /(help|list)/i
   @@commands = ['help']
 
   def bot_prefix
@@ -23,7 +23,7 @@ class Rogare::Plugins::Help
 
         pattern = handler.pattern.pattern.to_s[1..-2]
 
-        pattern.gsub! "?-mix:", ""
+        pattern.gsub! /^?[-mix]+:/, ""
         pattern.gsub! "(.*)", ""
         pattern.gsub! "\\s*", ""
         pattern.gsub! "?", ""

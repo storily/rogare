@@ -1,7 +1,7 @@
 class Rogare::Plugins::Wordwar
   include Cinch::Plugin
 
-  match /(wordwar|war|ww)\s*(.*)/
+  match /(wordwar|war|ww)\s*(.*)/i
   @@usage = [
       'Use: !wordwar in [time before it starts (in minutes)] for [duration]',
       'Or:  !wordwar at [wall time e.g. 12:35] for [duration]',
@@ -37,7 +37,7 @@ class Rogare::Plugins::Wordwar
 
     time, durstr = param.split(/for/i).map {|p| p.strip}
 
-    time = time.sub(/^at/i, '').strip if time.start_with? /at/i
+    time = time.sub(/^at/i, '').strip if time.downcase.start_with? 'at'
     durstr = "20 minutes" if durstr.nil? || durstr.empty?
 
     timenow = Time.now

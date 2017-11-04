@@ -2,7 +2,7 @@ class Rogare::Plugins::Nano
   include Cinch::Plugin
   extend Memoist
 
-  match /(count|wc)(.*)/
+  match /(count|wc)(.*)/i
   @@commands = ['count [username(s) to search, or "set" then a username to remember your NaNoWriMo username]']
 
   @@redis = Rogare.redis(2)
@@ -29,13 +29,13 @@ class Rogare::Plugins::Nano
     param ||= ''
     param.strip.split.each do |p|
       p = p.downcase.to_sym
-      if p =~ /^(help|\?|how|what|--help|-h)$/
+      if p =~ /^(help|\?|how|what|--help|-h)$/i
         return m.reply 'Usage: !' + @@commands.first
-      elsif p =~ /^(set|-s|--set)$/
+      elsif p =~ /^(set|-s|--set)$/i
         setting = true
-      elsif !setting && p =~ /^(me|self|myself|i)$/
+      elsif !setting && p =~ /^(me|self|myself|i)$/i
         candidates.push m.user.nick
-      elsif !setting && p =~ /^(random|rand|any)$/
+      elsif !setting && p =~ /^(random|rand|any)$/i
         random_user = true
         m.channel.users.keys.shuffle.map do |n|
           candidates.push n.nick

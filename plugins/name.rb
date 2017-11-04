@@ -6,7 +6,7 @@ class Rogare::Plugins::Name
   include Cinch::Plugin
   extend Memoist
 
-  match /name\s*(.*)/
+  match /name\s*(.*)/i
   @@commands = ['name [optionally put some words and numbers here and hope they do something]']
 
   @@generator = Namey::Generator.new
@@ -24,28 +24,28 @@ class Rogare::Plugins::Name
         p.downcase.to_sym
       end
     end.each do |p|
-      if p =~ /^(help|\?|how|what|--help|-h)$/
+      if p =~ /^(help|\?|how|what|--help|-h)$/i
         return m.reply 'Usage: !' + @@commands.first
       elsif p.is_a? Integer
         args[:n] = p
-      elsif p =~ /^(males?|m[ae]n|boys?)$/
+      elsif p =~ /^(males?|m[ae]n|boys?)$/i
         args[:call] = :male
-      elsif p =~ /^(females?|wom[ae]n|girls?)$/
+      elsif p =~ /^(females?|wom[ae]n|girls?)$/i
         args[:call] = :female
-      elsif p =~ /^(enby|nb|enbie)s?$/
+      elsif p =~ /^(enby|nb|enbie)s?$/i
         args[:call] = :unisex
-      elsif p =~ /^(common)$/
+      elsif p =~ /^(common)$/i
         args[:freq] = :common
-      elsif p =~ /^(rare|weird|funny|evil|bad)$/
+      elsif p =~ /^(rare|weird|funny|evil|bad)$/i
         args[:freq] = :rare
-      elsif p =~ /^(all|both)$/
+      elsif p =~ /^(all|both)$/i
         args[:freq] = :all
-      elsif p =~ /^(first|given)$/
+      elsif p =~ /^(first|given)$/i
         args[:full] = false
-      elsif p =~ /^(last(name)?|family|surname)$/
+      elsif p =~ /^(last(name)?|family|surname)$/i
         args[:full] = true
         args[:last] = true
-      elsif p =~ /^(full)$/
+      elsif p =~ /^(full)$/i
         args[:full] = true
         args[:last] = false
       end
