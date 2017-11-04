@@ -172,7 +172,7 @@ class Rogare::Plugins::Wordwar
 
         reply = lambda {|msg| chan.send msg}
 
-        starting = lambda {|time, extra|
+        starting = lambda {|time, extra = nil|
           members = war_info(id)[:members].join(', ')
           reply.call "Wordwar #{id} is starting #{time}! #{members}#{extra || ''}"
         }
