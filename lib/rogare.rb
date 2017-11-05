@@ -64,7 +64,7 @@ module Rogare
     end
 
     def aliases(*a)
-      myhelp[:aliases] += a
+      myhelp[:aliases] = a
     end
 
     def usage(message)

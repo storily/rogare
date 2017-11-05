@@ -28,6 +28,8 @@ IRC bot for NaNoWriMo (NZ channel).
 
 - `REDIS_URL=` Points to a redis server (defaults to a local server).
 
+- `WOLFRAM_KEY=` With a valid Wolfram|Alpha key for the `!calc` plugin.
+
 ## Installation & Development
 
 To run locally:

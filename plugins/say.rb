@@ -1,5 +1,3 @@
-require 'set'
-
 class Rogare::Plugins::Say
   include Cinch::Plugin
   extend Rogare::Help

@@ -1,5 +1,3 @@
-require 'set'
-
 class Rogare::Plugins::Choose
   include Cinch::Plugin
   extend Rogare::Help
@@ -15,7 +13,7 @@ class Rogare::Plugins::Choose
   def execute(m, param)
     args = param.split.map{|x| x.downcase == 'or' ? x.downcase : x}.join(' ').split(' or ')
 
-    s = args.to_set
+    s = Set.new args
     if s.length > 1 && (args.length == s.length)
       choice = args.sample
       if choice.end_with? '?'
