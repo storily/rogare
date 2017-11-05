@@ -10,26 +10,22 @@ class Rogare::Plugins::Nano
 
   @@redis = Rogare.redis(2)
 
-  def get_count_by_name(name)
-    res = Typhoeus.get "https://nanowrimo.org/wordcount_api/wchistory/#{name}"
-    if res.code == 200
-      doc = Nokogiri::XML(res.body)
-      if doc.css('error').length == 0
-        hist = doc.css('wcentry').map do |entry|
-          {
-            date: entry.at_css('wcdate').content,
-            count: entry.at_css('wc').content.to_i
-          }
-        end.sort_by {|e| e[:date] }
+  def get_today(name)
+    res = Typhoeus.get "https://nanowrimo.org/participants/#{name}/stats"
+    return unless res.code == 200
 
-        return [
-          doc.at_css('user_wordcount').content.to_i, # now
-          hist.last[:count], # yesterday
-          hist.length # days done
-        ]
-      end
-    end
-    []
+    doc = Nokogiri::HTML res.body
+    doc.at_css('#novel_stats .stat:nth-child(2) .value').content.gsub(/[,\s]/, '').to_i
+  end
+
+  def get_count(name)
+    res = Typhoeus.get "https://nanowrimo.org/wordcount_api/wc/#{name}"
+    return unless res.code == 200
+
+    doc = Nokogiri::XML(res.body)
+    return unless doc.css('error').length == 0
+
+    doc.at_css('user_wordcount').content.to_i
   end
 
   match_command /set\s+(.+)/, method: :set_username
@@ -82,9 +78,10 @@ class Rogare::Plugins::Nano
     counts = names.map do |name|
       next if random && random_found
 
-      count, yesterday, nth = get_count_by_name(name)
+      today = get_today(name)
+      count = get_count(name)
+      nth = ((Time.now - Chronic.parse('1st November')) / (60*60*24)).ceil
       goal = (50_000 / 30.0 * nth).round
-      today = count - yesterday
       diff = goal - count
 
       next if random && count.nil?
@@ -93,7 +90,7 @@ class Rogare::Plugins::Nano
 
       "#{name}: #{count} (#{[
         "#{(count / 500).round(1)}%",
-        "today: #{today}",
+        if today then "today: #{today}" end,
         if diff == 0
           "up to date"
         elsif diff > 0
