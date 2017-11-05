@@ -76,17 +76,17 @@ class Rogare::Plugins::Nano
     # that has a valid count.
     random_found = false
     counts = names.map do |name|
-      next if random && random_found
+      break if random && random_found
 
-      today = get_today(name)
       count = get_count(name)
-      nth = ((Time.now - Chronic.parse('1st November')) / (60*60*24)).ceil
-      goal = (50_000 / 30.0 * nth).round
-      diff = goal - count
-
       next if random && count.nil?
       next "#{name}: user does not exist or has no current novel" if count.nil?
       random_found = true
+
+      today = get_today(name)
+      nth = ((Time.now - Chronic.parse('1st November')) / (60*60*24)).ceil
+      goal = (50_000 / 30.0 * nth).round
+      diff = goal - count
 
       "#{name}: #{count} (#{[
         "#{(count / 500).round(1)}%",
