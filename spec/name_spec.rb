@@ -2,25 +2,7 @@ require_relative '../plugins/name.rb'
 Name = Rogare::Plugins::Name
 
 RSpec.describe Rogare::Plugins::Name do
-  context ': its matcher' do
-    before do
-      @matcher = Name.matchers.first.pattern
-    end
-
-    it 'responds to !name' do
-      expect(@matcher).to match '!name'
-    end
-
-    it 'responds to !name<space>' do
-      expect(@matcher).to match '!name '
-    end
-
-    it 'responds to !name some words' do
-      expect(@matcher).to match '!name some words'
-    end
-  end
-
-  context ': its executor' do
+  context '#execute' do
     before do
       @bot = spy('bot')
       @plugin = Name.new(@bot)

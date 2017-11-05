@@ -18,6 +18,4 @@ group :development do
   gem 'pry'
 end
 
-group :testing do
-  gem 'rspec', '~>3.6.0'
-end
+gem 'rspec', '~>3.6.0'

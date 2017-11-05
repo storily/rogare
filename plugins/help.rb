@@ -21,7 +21,6 @@ class Rogare::Plugins::Help
   def command_list
     Rogare::Plugins.to_a.map do |plugin|
       help = Rogare::Help.helps[plugin.inspect.to_sym]
-      logs help.inspect
       next if help[:hidden]
       [help[:command], help[:aliases]].flatten
     end.compact

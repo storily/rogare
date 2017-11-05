@@ -2,21 +2,7 @@ require_relative '../plugins/help.rb'
 Help = Rogare::Plugins::Help
 
 RSpec.describe Rogare::Plugins::Help do
-  context ': its matcher' do
-    before do
-      @matcher = Help.matchers.first.pattern
-    end
-
-    it 'responds to !help' do
-      expect(@matcher).to match '!help'
-    end
-
-    it 'responds to !list' do
-      expect(@matcher).to match '!list'
-    end
-  end
-
-  context ': its executor' do
+  context '#execute' do
     before do
       @bot = spy('bot')
       @plugin = Help.new(@bot)

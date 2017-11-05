@@ -1,14 +1,11 @@
-def logs(msg)
-  puts msg
-  STDOUT.flush
-end
+require './lib/logs'
 
 logs '=====> Bootstrapping'
 require 'bundler'
 Bundler.require :default, (ENV['RACK_ENV'] || 'production').to_sym
 
 logs '=====> Loading framework'
-require_relative 'lib/rogare.rb'
+require './lib/rogare'
 
 logs '=====> Loading modules'
 Dir['./plugins/*.rb'].each do |p|

@@ -45,7 +45,8 @@ RSpec.configure do |config|
 end
 
 require 'bundler'
-Bundler.require :default, :testing
+Bundler.require :default
+require_relative '../lib/logs.rb'
 require_relative '../lib/rogare.rb'
 
 module Rogare
