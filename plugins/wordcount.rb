@@ -84,7 +84,7 @@ class Rogare::Plugins::Nano
       random_found = true
 
       today = get_today(name)
-      nth = ((Time.now - Chronic.parse('1st November')) / (60*60*24)).ceil
+      nth = ((Time.now - Chronic.parse('1st november 00:00')) / (60*60*24)).ceil
       goal = (50_000 / 30.0 * nth).round
       diff = goal - count
 
