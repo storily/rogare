@@ -83,7 +83,7 @@ class Rogare::Plugins::Nano
       next if random && random_found
 
       count, yesterday, nth = get_count_by_name(name)
-      goal = (50_000 / 30.0 * (nth + 1)).round
+      goal = (50_000 / 30.0 * nth).round
       today = count - yesterday
       diff = goal - count
 
