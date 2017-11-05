@@ -45,36 +45,39 @@ module Rogare
   module Help
     @@helps = {}
 
-    def self.extended(mod)
-      @@helpname = mod.inspect.to_sym
-      @@helps[@@helpname] = { aliases: [] }
-      @@help = @@helps[@@helpname]
-    end
-
     def self.helps
       @@helps
     end
 
+    def myhelp
+      @@helps[self.inspect.to_sym] ||= { aliases: [] }
+    end
+
+    def myhelp=(val)
+      @@helps[self.inspect.to_sym] = val
+    end
+
     def command(c, opts = {})
       opts[:hidden] || false
-      @@help.merge!(opts)
-      @@help[:command] = c
+      myhelp.merge!(opts)
+      myhelp[:command] = c
     end
 
     def aliases(*a)
-      @@help[:aliases] += a
+      myhelp[:aliases] += a
     end
 
     def usage(message)
-      @@help[:usage] = [message].flatten.compact
+      myhelp[:usage] = [message].flatten.compact
     end
 
     def handle_help
       match_command /(help|\?|how|what|--help|-h)/, method: :help_message
+      h = myhelp
       define_method :help_message do |m|
-        m.reply "No help message :(" if @@help[:usage].empty?
-        usage = @@help[:usage].map do |line|
-          line.gsub('!%', "!#{@@help[:command]}")
+        m.reply "No help message :(" if h[:usage].empty?
+        usage = h[:usage].map do |line|
+          line.gsub('!%', "!#{h[:command]}")
         end
 
         usage[0] = "Usage: #{usage[0]}"
@@ -84,8 +87,8 @@ module Rogare
 
     def match_command(pattern = nil, opts = {})
       pattern = pattern.source if pattern.respond_to? :source
-      excl = if @@help[:include_command] then '' else '?:' end
-      pat = "(#{excl}#{[@@help[:command], *@@help[:aliases]].map {|c| Regexp.escape(c)}.join('|')})"
+      excl = if myhelp[:include_command] then '' else '?:' end
+      pat = "(#{excl}#{[myhelp[:command], *myhelp[:aliases]].map {|c| Regexp.escape(c)}.join('|')})"
       pat = "#{pat}\\s+#{pattern}" if pattern
       logs '       matching: ' + pat.inspect
       opts[:group] ||= :commands
