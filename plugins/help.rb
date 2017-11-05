@@ -1,9 +1,13 @@
 class Rogare::Plugins::Help
   include Cinch::Plugin
+  extend Rogare::Help
   extend Memoist
 
-  match /(help|list)/i
-  @@commands = ['help']
+  command 'help', hidden: true
+  aliases 'list'
+
+  match_command /(.*)/
+  match_empty :execute
 
   def bot_prefix
     prefix = (self.class.prefix || Rogare.bot.config.plugins.prefix).to_s
@@ -15,43 +19,25 @@ class Rogare::Plugins::Help
   end
 
   def command_list
-    commands = []
-
-    Rogare.bot.plugins.each do |plugin|
-      plugin.handlers.each do |handler|
-        next if self.class.matchers.map{|p| p.pattern == handler.pattern.pattern}.any?
-
-        pattern = handler.pattern.pattern.to_s[1..-2]
-
-        pattern.gsub! /^?[-mix]+:/, ""
-        pattern.gsub! "(.*)", ""
-        pattern.gsub! "\\s*", ""
-        pattern.gsub! "?", ""
-
-        pattern = pattern[1..-2] if (pattern.index("(") == 0) && (pattern.index(")") == pattern.length - 1)
-
-        commands.push pattern.split("|")
-      end
-    end
-
-    commands
+    Rogare::Plugins.to_a.map do |plugin|
+      help = Rogare::Help.helps[plugin.inspect.to_sym]
+      logs help.inspect
+      next if help[:hidden]
+      [help[:command], help[:aliases]].flatten
+    end.compact
   end
 
   def readable_commands
-    command_list.map do |commandlist|
-      prefixed = commandlist.map do |command|
-        "#{bot_prefix}#{command}"
-      end
-
-      out = prefixed[0]
-      out = "#{out} (aliases: #{prefixed[1..-1].join(', ')})" if prefixed.length > 1
+    command_list.map do |coms|
+      coms.map! {|c| "#{bot_prefix}#{c}" }
+      out = "#{coms.shift}"
+      out += " (aliases: #{coms.join(', ')})" unless coms.empty?
       out
     end.sort
   end
 
   def execute(m)
     m.reply "Commands: #{readable_commands.join(', ')}"
-    m.reply 'Also see https://cogitare.nz for prompts' if rand > 0.95
   end
 
   memoize :bot_prefix, :command_list, :readable_commands

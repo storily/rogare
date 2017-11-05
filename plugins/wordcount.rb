@@ -1,9 +1,12 @@
 class Rogare::Plugins::Nano
   include Cinch::Plugin
+  extend Rogare::Help
   extend Memoist
 
-  match /(count|wc)(.*)/i
-  @@commands = ['count [username(s) to search, or "set" then a username to remember your NaNoWriMo username]']
+  command 'count'
+  aliases 'wc'
+  usage '!% [username(s) to search, or "set" then a username to remember your NaNoWriMo username]'
+  handle_help
 
   @@redis = Rogare.redis(2)
 
@@ -19,47 +22,46 @@ class Rogare::Plugins::Nano
     nil
   end
 
-  def execute(m, _, param)
-    candidates = []
-    names = []
+  match_command /set\s+(.+)/, method: :set_username
+  match_command /(.+)/
+  match_empty :own_count
 
-    setting = false
+  def own_count(m)
+    get_counts(m, [m.user.nick])
+  end
+
+  def set_username(m, param)
+    name = param.strip.split.join("_")
+    @@redis.set("nick:#{m.user.nick.downcase}:nanouser", name)
+    m.reply "Your username has been set to #{name}."
+    get_counts(m, [name])
+  end
+
+  def execute(m, param = '')
+    names = []
     random_user = false
 
-    param ||= ''
     param.strip.split.each do |p|
       p = p.downcase.to_sym
-      if p =~ /^(help|\?|how|what|--help|-h)$/i
-        return m.reply 'Usage: !' + @@commands.first
-      elsif p =~ /^(set|-s|--set)$/i
-        setting = true
-      elsif !setting && p =~ /^(me|self|myself|i)$/i
-        candidates.push m.user.nick
-      elsif !setting && p =~ /^(random|rand|any)$/i
+      case p
+      when /^(me|self|myself|i)$/i
+        names << m.user.nick
+      when /^(random|rand|any)$/i
         random_user = true
-        m.channel.users.keys.shuffle.map do |n|
-          candidates.push n.nick
-        end
+        names.push(*m.channel.users.keys.shuffle.map {|n| n.nick })
       else
-        candidates.push p
+        names << p
       end
     end
-    candidates.push m.user.nick if (!setting && candidates.empty?)
+    names << m.user.nick if names.empty?
+    names.uniq!
 
-    if setting
-      names = [candidates.join("_")]
-      if names.first.length == 0
-        m.reply "Please specify a NaNoWriMo username to set."
-        return
-      end
+    get_counts(m, names, random_user)
+  end
 
-      m.reply "Your username has been set to #{names.first}."
-
-      @@redis.set("nick:#{m.user.nick.downcase}:nanouser", names.first)
-    else
-      candidates.map do |c|
-        names.push @@redis.get("nick:#{c.downcase}:nanouser") || c
-      end
+  def get_counts(m, names, random = false)
+    names.map! do |c|
+      @@redis.get("nick:#{c.downcase}:nanouser") || c
     end
 
     # `random_found` exists so that we don't check every single user in the
@@ -68,18 +70,18 @@ class Rogare::Plugins::Nano
     # that has a valid count.
     random_found = false
     counts = names.map do |name|
-      next if random_user && random_found
+      next if random && random_found
 
       count = get_count_by_name(name)
 
-      next if random_user && count.nil?
+      next if random && count.nil?
       next "#{name}: user does not exist or has no current novel" if count.nil?
       random_found = true
 
       "#{name}: #{count} (#{(count / 500).round}%)"
     end
 
-    if random_user && counts.compact.length == 0
+    if random && counts.compact.length == 0
       m.reply "No users in this channel have novels!"
       return
     end

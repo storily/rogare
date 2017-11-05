@@ -2,17 +2,18 @@ require_relative '../lib/dicere'
 
 class Rogare::Plugins::Plot
   include Cinch::Plugin
+  extend Rogare::Help
 
-  match /(plot|prompt|seed|event)\s*(.*)/i
-  @@commands = ['plot [optional filter keywords]']
+  command 'plot', include_command: true
+  aliases 'prompt', 'seed', 'event'
+  usage '!% [optional filter keywords]'
+  handle_help
 
-  def execute(m, cat, param)
+  match_command /(.*)/
+  match_empty :execute
+
+  def execute(m, cat, param = '')
     param = param.strip
-    if param =~ /^(help|\?|how|what|--help|-h)/i
-      m.reply 'Usage: !' + @@commands.first
-      m.reply 'Also see https://cogitare.nz' if rand > 0.9
-      return
-    end
 
     if cat =~ /seed/i
       param += ' seed'

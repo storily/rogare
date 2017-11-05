@@ -41,4 +41,60 @@ module Rogare
       self.constants.map { |c| self.const_get c }
     end
   end
+
+  module Help
+    @@helps = {}
+
+    def self.extended(mod)
+      @@helpname = mod.inspect.to_sym
+      @@helps[@@helpname] = { aliases: [] }
+      @@help = @@helps[@@helpname]
+    end
+
+    def self.helps
+      @@helps
+    end
+
+    def command(c, opts = {})
+      opts[:hidden] || false
+      @@help.merge!(opts)
+      @@help[:command] = c
+    end
+
+    def aliases(*a)
+      @@help[:aliases] += a
+    end
+
+    def usage(message)
+      @@help[:usage] = [message].flatten.compact
+    end
+
+    def handle_help
+      match_command /(help|\?|how|what|--help|-h)/, method: :help_message
+      define_method :help_message do |m|
+        m.reply "No help message :(" if @@help[:usage].empty?
+        usage = @@help[:usage].map do |line|
+          line.gsub('!%', "!#{@@help[:command]}")
+        end
+
+        usage[0] = "Usage: #{usage[0]}"
+        usage.each {|l| m.reply(l) }
+      end
+    end
+
+    def match_command(pattern = nil, opts = {})
+      pattern = pattern.source if pattern.respond_to? :source
+      excl = if @@help[:include_command] then '' else '?:' end
+      pat = "(#{excl}#{[@@help[:command], *@@help[:aliases]].map {|c| Regexp.escape(c)}.join('|')})"
+      pat = "#{pat}\\s+#{pattern}" if pattern
+      logs '       matching: ' + pat.inspect
+      opts[:group] ||= :commands
+      match Regexp.new(pat, Regexp::IGNORECASE), opts
+    end
+
+    def match_empty(method, opts = {})
+      opts[:method] ||= method
+      match_command(nil, opts)
+    end
+  end
 end

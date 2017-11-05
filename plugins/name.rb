@@ -4,14 +4,19 @@ require 'numbers_in_words'
 
 class Rogare::Plugins::Name
   include Cinch::Plugin
+  extend Rogare::Help
   extend Memoist
 
-  match /name\s*(.*)/i
-  @@commands = ['name [optionally put some words and numbers here and hope they do something]']
+  command 'name'
+  usage '!% [optionally put some words and numbers here and hope they do something]'
+  handle_help
+
+  match_command /(.*)/
+  match_empty :execute
 
   @@generator = Namey::Generator.new
 
-  def execute(m, param)
+  def execute(m, param = nil)
     param ||= ''
     args = {call: :name, full: true, last: false, freq: :all}
 
@@ -24,9 +29,7 @@ class Rogare::Plugins::Name
         p.downcase.to_sym
       end
     end.each do |p|
-      if p =~ /^(help|\?|how|what|--help|-h)$/i
-        return m.reply 'Usage: !' + @@commands.first
-      elsif p.is_a? Integer
+      if p.is_a? Integer
         args[:n] = p
       elsif p =~ /^(males?|m[ae]n|boys?)$/i
         args[:call] = :male

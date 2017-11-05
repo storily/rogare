@@ -1,41 +1,28 @@
 class Rogare::Plugins::Wordwar
   include Cinch::Plugin
+  extend Rogare::Help
 
-  match /(wordwar|war|ww)\s*(.*)/i
-  @@usage = [
-      'Use: !wordwar in [time before it starts (in minutes)] for [duration]',
-      'Or:  !wordwar at [wall time e.g. 12:35] for [duration]',
-      'Or even (defaulting to a 20 minute run): !wordwar at/in [time]',
-      'And then everyone should: !wordwar join [wordwar ID]',
-      'Also say !wordwar alone to get a list of current/scheduled ones.'
+  command 'wordwar'
+  aliases 'war', 'ww'
+  usage [
+      '!% in [time before it starts (in minutes)] for [duration]',
+      'Or: !% at [wall time e.g. 12:35] for [duration]',
+      'Or even (defaulting to a 20 minute run): !% at/in [time]',
+      'And then everyone should: !% join [wordwar ID]',
+      'Also say !% alone to get a list of current/scheduled ones.'
   ]
+  handle_help
 
   @@redis = Rogare.redis(3)
 
-  def execute(m, cat, param)
-    param = param.strip
-    if param =~ /^(help|\?|how|what|--help|-h)/i
-      @@usage.each {|l| m.reply l}
-      return
-    end
+  match_command /join(.*)/, method: :ex_join_war
+  match_command /leave(.*)/, method: :ex_leave_war
+  match_command /cancel(.*)/, method: :ex_cancel_war
+  match_command /(.+)/
+  match_empty :ex_list_wars
 
-    if param.empty?
-      return ex_list_wars(m)
-    end
-
-    if param =~ /^join/i
-      return ex_join_war(m, param)
-    end
-
-    if param =~ /^leave/i
-      return ex_leave_war(m, param)
-    end
-
-    if param =~ /^cancel/i
-      return ex_cancel_war(m, param)
-    end
-
-    time, durstr = param.split(/for/i).map {|p| p.strip}
+  def execute(m, param)
+    time, durstr = param.strip.split(/for/i).map {|p| p.strip}
 
     time = time.sub(/^at/i, '').strip if time.downcase.start_with? 'at'
     durstr = "20 minutes" if durstr.nil? || durstr.empty?
@@ -123,7 +110,7 @@ class Rogare::Plugins::Wordwar
   end
 
   def ex_join_war(m, param)
-    k = param.sub(/^join/i, '').strip.to_i
+    k = param.strip.to_i
     return m.reply "You need to specify the wordwar ID" if k == 0
 
     unless @@redis.exists rk(k, 'start')
@@ -135,7 +122,7 @@ class Rogare::Plugins::Wordwar
   end
 
   def ex_leave_war(m, param)
-    k = param.sub(/^leave/i, '').strip.to_i
+    k = param.strip.to_i
     return m.reply "You need to specify the wordwar ID" if k == 0
 
     unless @@redis.exists rk(k, 'start')
@@ -147,7 +134,7 @@ class Rogare::Plugins::Wordwar
   end
 
   def ex_cancel_war(m, param)
-    k = param.sub(/^cancel/i, '').strip.to_i
+    k = param.strip.to_i
     return m.reply "You need to specify the wordwar ID" if k == 0
 
     unless @@redis.exists rk(k, 'start')
