@@ -72,7 +72,7 @@ module Rogare
     end
 
     def handle_help
-      match_command /(help|\?|how|what|--help|-h)/, method: :help_message
+      match_command /((-|--)?(help|usage)|-?\?)\s*$/, method: :help_message
       h = myhelp
       define_method :help_message do |m|
         m.reply "No help message :(" if h[:usage].empty?
