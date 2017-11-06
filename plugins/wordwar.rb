@@ -224,7 +224,8 @@ class Rogare::Plugins::Wordwar
 
     def erase_war(id)
       @@redis.keys(rk(id, '*')).each do |k|
-        @@redis.del k
+        @@redis.persist k # transitionary
+        @@redis.rename k, "archive:#{k}"
       end
     end
 
@@ -281,19 +282,16 @@ class Rogare::Plugins::Wordwar
     end
 
     def store_war(m, time, duration)
+      # War is in the past???
+      return if ((time + duration) - Time.now).to_i < 0
+
       k = @@redis.incr rk('count')
-
-      # Expire a minute after it ends, in case of long bot failure
-      ex = ((time + duration + 60) - Time.now).to_i
-      return if ex < 60 # War is in the past???
-
       @@redis.multi do
-        @@redis.set rk(k, 'channel'), m.channel.to_s, ex: ex
-        @@redis.set rk(k, 'owner'), m.user.nick, ex: ex
+        @@redis.set rk(k, 'channel'), m.channel.to_s
+        @@redis.set rk(k, 'owner'), m.user.nick
         @@redis.sadd rk(k, 'members'), m.user.nick
-        @@redis.expire rk(k, 'members'), ex
-        @@redis.set rk(k, 'start'), "#{time}", ex: ex
-        @@redis.set rk(k, 'end'), "#{time + duration}", ex: ex
+        @@redis.set rk(k, 'start'), "#{time}"
+        @@redis.set rk(k, 'end'), "#{time + duration}"
       end
       k
     end
