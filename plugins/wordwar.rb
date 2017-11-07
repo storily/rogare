@@ -87,17 +87,23 @@ class Rogare::Plugins::Wordwar
 
     wars.each do |war|
       togo, neg = dur_display war[:start]
-      dur, _ = dur_display war[:end], war[:start]
       others = war[:members].reject {|u| u == war[:owner]}
 
       m.reply [
         "#{war[:id]}: #{nixnotif war[:owner]}'s war",
+
         if neg
           "started #{togo} ago"
         else
           "starting in #{togo}"
         end,
-        "for #{dur}",
+
+        if neg
+          "#{dur_display(Time.now, war[:end]).first} left"
+        else
+          "for #{dur_display(war[:end], war[:start]).first}"
+        end,
+
         unless others.empty?
           "with #{others.count} others"
         end
@@ -173,12 +179,12 @@ class Rogare::Plugins::Wordwar
         if to_start > 0
           # We're before the start of the war
 
-          if to_start > 25
-            # If we're at least 25 seconds before the start, we have
+          if to_start > 35
+            # If we're at least 35 seconds before the start, we have
             # time to send a reminder. Otherwise, skip sending it.
-            sleep to_start - 20
-            starting.call 'in 20 seconds', ' — be ready; tell us your starting wordcount'
-            sleep 20
+            sleep to_start - 30
+            starting.call 'in 30 seconds', ' -- Be ready: tell us your starting wordcount.'
+            sleep 30
           else
             # In any case, we sleep until the beginning
             sleep to_start
