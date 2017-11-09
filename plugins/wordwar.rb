@@ -2,6 +2,7 @@ class Rogare::Plugins::Wordwar
   include Cinch::Plugin
   extend Rogare::Help
 
+  self.prefix = /^!!/
   command 'wordwar'
   aliases 'war', 'ww'
   usage [
@@ -106,6 +107,10 @@ class Rogare::Plugins::Wordwar
 
         unless others.empty?
           "with #{others.count} others"
+        end,
+
+        unless war[:channels].count < 2 && war[:channels].include?(m.channel.to_s)
+          "in #{war[:channels].join(', ')}"
         end
       ].compact.join(', ')
     end
