@@ -238,7 +238,6 @@ class Rogare::Plugins::Wordwar
 
     def erase_war(id)
       @@redis.keys(rk(id, '*')).each do |k|
-        @@redis.persist k # transitionary
         @@redis.rename k, "archive:#{k}"
       end
     end
