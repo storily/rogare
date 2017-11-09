@@ -2,7 +2,6 @@ class Rogare::Plugins::Wordwar
   include Cinch::Plugin
   extend Rogare::Help
 
-  self.prefix = /^!!/
   command 'wordwar'
   aliases 'war', 'ww'
   usage [
