@@ -123,6 +123,7 @@ class Rogare::Plugins::Wordwar
       return m.reply "No such wordwar"
     end
 
+    @@redis.sadd rk(k, 'channels'), m.channel.to_s
     @@redis.sadd rk(k, 'members'), m.user.nick
     m.reply "You're in!"
   end
@@ -154,16 +155,18 @@ class Rogare::Plugins::Wordwar
   class << self
     def set_war_timer(id, start, duration)
       Thread.new do
-        info = war_info(id)
-        chan = Rogare.bot.channel_list.find info[:channel]
+        reply = lambda do |msg|
+          war_info(id)[:channels].each do |cname|
+            chan = Rogare.bot.channel_list.find cname
 
-        if chan.nil?
-          puts "=====> Error: no such channel: #{info[:channel]}"
-          STDOUT.flush
-          next
+            if chan.nil?
+              logs "=====> Error: no such channel: #{cname}"
+              next
+            end
+
+            chan.send msg
+          end
         end
-
-        reply = lambda {|msg| chan.send msg}
 
         starting = lambda {|time, extra = nil|
           members = war_info(id)[:members].join(', ')
@@ -279,7 +282,11 @@ class Rogare::Plugins::Wordwar
     def war_info(id)
       {
         id: id,
-        channel: @@redis.get(rk(id, 'channel')),
+        channels: if @@redis.exists(rk(id, 'channels'))
+                    @@redis.smembers(rk(id, 'channels'))
+                  else # transitionary
+                    [@@redis.get(rk(id, 'channel'))]
+                  end,
         owner: @@redis.get(rk(id, 'owner')),
         members: @@redis.smembers(rk(id, 'members')),
         start: Chronic.parse(@@redis.get(rk(id, 'start'))),
@@ -293,7 +300,7 @@ class Rogare::Plugins::Wordwar
 
       k = @@redis.incr rk('count')
       @@redis.multi do
-        @@redis.set rk(k, 'channel'), m.channel.to_s
+        @@redis.sadd rk(k, 'channels'), m.channel.to_s
         @@redis.set rk(k, 'owner'), m.user.nick
         @@redis.sadd rk(k, 'members'), m.user.nick
         @@redis.set rk(k, 'start'), "#{time}"
