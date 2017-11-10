@@ -7,7 +7,7 @@ class Rogare::Plugins::Wordwar
   usage [
       '!% in [time before it starts (in minutes)] for [duration]',
       'Or: !% at [wall time e.g. 12:35] for [duration]',
-      'Or even (defaulting to a 20 minute run): !% at/in [time]',
+      'Or even (defaulting to a 15 minute run): !% at/in [time]',
       'And then everyone should: !% join [wordwar ID]',
       'Also say !% alone to get a list of current/scheduled ones.'
   ]
@@ -25,12 +25,13 @@ class Rogare::Plugins::Wordwar
     time, durstr = param.strip.split(/for/i).map {|p| p.strip}
 
     time = time.sub(/^at/i, '').strip if time.downcase.start_with? 'at'
-    durstr = "20 minutes" if durstr.nil? || durstr.empty?
+    durstr = "15 minutes" if durstr.nil? || durstr.empty?
 
     timenow = Time.now
 
     timeat = Chronic.parse(time)
     timeat = Chronic.parse("in #{time}") if timeat.nil?
+    timeat = Chronic.parse("in #{time} minutes") if timeat.nil?
     if timeat.nil?
       m.reply "Can't parse time: #{time}"
       return
