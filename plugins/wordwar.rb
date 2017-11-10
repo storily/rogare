@@ -22,6 +22,7 @@ class Rogare::Plugins::Wordwar
   match_empty :ex_list_wars
 
   def execute(m, param)
+    param.sub!(/#.+$/, '')
     time, durstr = param.strip.split(/for/i).map {|p| p.strip}
 
     time = time.sub(/^at/i, '').strip if time.downcase.start_with? 'at'
