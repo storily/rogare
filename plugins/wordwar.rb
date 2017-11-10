@@ -85,6 +85,12 @@ class Rogare::Plugins::Wordwar
     wars = all_wars
       .reject {|w| w[:end] < Time.now}
       .sort_by {|w| w[:start]}
+    
+    if rand < 0.9
+      # War 60 is a special long-running war. We want it to still be there,
+      # but not to advertise its presence all the time!
+      wars.reject!{|w| w[:id].to_s == "60"}
+    end
 
     wars.each do |war|
       togo, neg = dur_display war[:start]
