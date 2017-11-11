@@ -50,8 +50,8 @@ class Rogare::Plugins::Wordwar
       return
     end
 
-    if timeat > timenow + 12 * 60 * 60
-      m.reply "Cannot schedule more than 12 hours in the future, sorry"
+    if timeat > timenow + 36 * 60 * 60
+      m.reply "Cannot schedule more than 36 hours in the future, sorry"
       return
     end
 
