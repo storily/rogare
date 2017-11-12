@@ -37,6 +37,8 @@ class Rogare::Plugins::Name
         args[:call] = :female
       elsif p =~ /^(enby|nb|enbie)s?$/i
         args[:call] = :unisex
+      elsif p =~ /^(pierre|stone|rock|pebble)s?$/i
+        args[:call] = :pierre
       elsif p =~ /^(common)$/i
         args[:freq] = :common
       elsif p =~ /^(rare|weird|funny|evil|bad)$/i
@@ -59,6 +61,8 @@ class Rogare::Plugins::Name
 
     joined = (args[:n] * 2).times.map do
       next ENBYNAMES.sample(if args[:full] then 2 else 1 end).join(' ') if args[:call] == :unisex
+      next %w[Pierre Pierre].sample(if args[:full] then 2 else 1 end).join(' ') if args[:call] == :pierre
+
       n = @@generator.send(args[:call], args[:freq], args[:full])
       if args[:last]
         n.split.last
