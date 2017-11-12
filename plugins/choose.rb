@@ -3,7 +3,6 @@ class Rogare::Plugins::Choose
   extend Rogare::Help
 
   command 'choose'
-  aliases 'pick'
   usage '!% <first thing> or <second thing> [or <third thing> and so on]'
   handle_help
 
