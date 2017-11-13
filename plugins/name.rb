@@ -69,7 +69,7 @@ class Rogare::Plugins::Name
       else
         n
       end
-    end.uniq.first(args[:n]).join ', '
+    end.compact.first(args[:n]).join ', '
     m.reply joined
   end
 end
