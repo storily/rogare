@@ -33,7 +33,16 @@ module Rogare
       end
     end
 
-    memoize :bot, :config, :redis
+    def nixnotif(nick)
+      # Insert a zero-width space as the second character of the nick
+      # so that it doesn't notify that user. People using web clients
+      # or desktop clients shouldn't see anything, people with terminal
+      # clients may see a space, and people with bad clients may see a
+      # weird box or invalid char thing.
+      nick.sub(/^(.)/, "\\1\u200B")
+    end
+
+    memoize :bot, :config, :nixnotif, :redis
   end
 
   module Plugins

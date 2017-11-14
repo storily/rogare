@@ -28,6 +28,7 @@ class Rogare::Plugins::Nano
     doc.at_css('user_wordcount').content.to_i
   end
 
+  match_command /all\s*/, method: :all_counts
   match_command /set\s+(.+)/, method: :set_username
   match_command /goal\s+(\d+)/, method: :set_goal
   match_command /(.+)/
@@ -35,6 +36,14 @@ class Rogare::Plugins::Nano
 
   def own_count(m)
     get_counts(m, [m.user.nick])
+  end
+
+  def all_counts(m)
+    names = @@redis.keys('nick:*:nanouser').map do |k|
+      @@redis.get(k).downcase
+    end.compact.uniq
+    return m.reply 'No names set' if names.empty?
+    get_counts(m, names)
   end
 
   def set_username(m, param)
@@ -98,7 +107,7 @@ class Rogare::Plugins::Nano
       daygoal = (goal / 30.0 * nth).round
       diff = daygoal - count
 
-      "#{name}: #{count} (#{[
+      "#{Rogare.nixnotif(name.to_s)}: #{count} (#{[
         "#{(100.0 * count / goal).round(1)}%",
         if today then "today: #{today}" end,
         if diff == 0

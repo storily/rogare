@@ -78,7 +78,6 @@ class Rogare::Plugins::Wordwar
   end
 
   def rk(*args) self.class.rk(*args) end
-  def nixnotif(*args) self.class.nixnotif(*args) end
   def dur_display(*args) self.class.dur_display(*args) end
   def all_wars(*args) self.class.all_wars(*args) end
 
@@ -86,7 +85,7 @@ class Rogare::Plugins::Wordwar
     wars = all_wars
       .reject {|w| w[:end] < Time.now}
       .sort_by {|w| w[:start]}
-    
+
     if rand < 0.9
       # War 60 is a special long-running war. We want it to still be there,
       # but not to advertise its presence all the time!
@@ -98,7 +97,7 @@ class Rogare::Plugins::Wordwar
       others = war[:members].reject {|u| u == war[:owner]}
 
       m.reply [
-        "#{war[:id]}: #{nixnotif war[:owner]}'s war",
+        "#{war[:id]}: #{Rogare.nixnotif war[:owner]}'s war",
 
         if neg
           "started #{togo} ago"
@@ -267,15 +266,6 @@ class Rogare::Plugins::Wordwar
       else
         "#{secs.round}s"
       end, neg]
-    end
-
-    def nixnotif(nick)
-      # Insert a zero-width space as the second character of the nick
-      # so that it doesn't notify that user. People using web clients
-      # or desktop clients shouldn't see anything, people with terminal
-      # clients may see a space, and people with bad clients may see a
-      # weird box or invalid char thing.
-      nick.sub(/^(.)/, "\\1\u200B")
     end
 
     def rk(war, sub = nil)
