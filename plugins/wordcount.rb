@@ -99,7 +99,7 @@ class Rogare::Plugins::Nano
       diff = daygoal - count
 
       "#{name}: #{count} (#{[
-        "#{(100 * count / goal).round(1)}%",
+        "#{(100.0 * count / goal).round(1)}%",
         if today then "today: #{today}" end,
         if diff == 0
           "up to date"
