@@ -7,6 +7,18 @@ Bundler.require :default, (ENV['RACK_ENV'] || 'production').to_sym
 logs '=====> Loading framework'
 require './lib/rogare'
 
+if ENV['NICKSERV_USER'] && ENV['NICKSERV_PASS']
+  logs '=====> Loading identify plugin'
+  require 'cinch/plugins/identify'
+  Rogare::Plugins.add_plugin(Cinch::Plugins::Identify) do |c|
+    c.plugins.options[Cinch::Plugins::Identify] = {
+      username: ENV['NICKSERV_USER'],
+      password: ENV['NICKSERV_PASS'],
+      type: :nickserv,
+    }
+  end
+end
+
 logs '=====> Loading modules'
 Dir['./plugins/*.rb'].each do |p|
   logs "     > Loading #{p}"

@@ -1,3 +1,4 @@
+
 module Rogare
   class << self
     extend Memoist
@@ -15,6 +16,7 @@ module Rogare
           c.ssl.verify = ENV['IRC_SSL'].to_i >= 2 if ENV.include? 'IRC_SSL'
           c.user = ENV['IRC_USER'] if ENV.include? 'IRC_USER'
           c.plugins.plugins = Rogare::Plugins.to_a
+          Rogare::Plugins.config(c)
         end
       end
     end
@@ -47,7 +49,20 @@ module Rogare
 
   module Plugins
     def self.to_a
-      self.constants.map { |c| self.const_get c }
+      self.constants.map { |c| self.const_get c } + (@@custom_plugins || [])
+    end
+
+    def self.config(c)
+      @@custom_configs.each do |fn|
+        fn.call(c)
+      end
+    end
+
+    def self.add_plugin(const, &block)
+      @@custom_plugins ||= []
+      @@custom_plugins << const
+      @@custom_configs ||= []
+      @@custom_configs << block
     end
   end
 

@@ -4,6 +4,7 @@ ruby '~>2.4.2'
 gem 'chronic', '~>0.10.2'
 gem 'chronic_duration', '~>0.10.2'
 gem 'cinch', '~>2.1.0'
+gem 'cinch-identify', '~>1.7.0', require: false
 gem 'graphql-client', '~>0.12.1', require: false
 gem 'hashie', '~>3.3.1'
 gem 'memoist', '~>0.15.0'
