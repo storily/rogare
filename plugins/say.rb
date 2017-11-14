@@ -23,13 +23,15 @@ class Rogare::Plugins::Say
     @@redis.set(k, 0, ex: 60*60) if quota == 0
     @@redis.incr(k)
 
-    if quota >= 10
+    max = 5
+
+    if quota >= max
       m.reply "Sorry! Quota exceeded for this hour."
       return
     end
 
-    if quota >= 8
-      m.reply "You're approaching your quota of 10 !say per hour!"
+    if quota >= (max*0.8).floor
+      m.reply "You're approaching your quota of #{max} !say per hour!"
     end
 
     channel.send message
