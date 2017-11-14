@@ -29,6 +29,7 @@ class Rogare::Plugins::Nano
   end
 
   match_command /set\s+(.+)/, method: :set_username
+  match_command /goal\s+(\d+)/, method: :set_goal
   match_command /(.+)/
   match_empty :own_count
 
@@ -40,7 +41,15 @@ class Rogare::Plugins::Nano
     name = param.strip.split.join("_")
     @@redis.set("nick:#{m.user.nick.downcase}:nanouser", name)
     m.reply "Your username has been set to #{name}."
-    get_counts(m, [name])
+    own_count(m)
+  end
+
+  def set_goal(m, goal)
+    user = m.user.nick.downcase
+    name = @@redis.get("nick:#{user}:nanouser") || user
+    @@redis.set("nano:#{name}:goal", goal.to_i)
+    m.reply "Your goal has been set to #{goal}."
+    own_count(m)
   end
 
   def execute(m, param = '')
@@ -85,11 +94,12 @@ class Rogare::Plugins::Nano
 
       today = get_today(name)
       nth = ((Time.now - Chronic.parse('1st november 00:00')) / (60*60*24)).ceil
-      goal = (50_000 / 30.0 * nth).round
-      diff = goal - count
+      goal = (@@redis.get("nano:#{name}:goal") || 50_000).to_i
+      daygoal = (goal / 30.0 * nth).round
+      diff = daygoal - count
 
       "#{name}: #{count} (#{[
-        "#{(count / 500).round(1)}%",
+        "#{(100 * count / goal).round(1)}%",
         if today then "today: #{today}" end,
         if diff == 0
           "up to date"
@@ -97,8 +107,15 @@ class Rogare::Plugins::Nano
           "#{diff} behind"
         else
           "#{diff.abs} ahead"
+        end,
+        if goal != 50_000
+          if goal < 10_000
+            "#{(goal / 1_000).round(1)}k goal"
+          else
+            "#{(goal / 1_000).round}k goal"
+          end
         end
-      ].join(', ')})"
+      ].compact.join(', ')})"
     end
 
     if random && counts.compact.length == 0
