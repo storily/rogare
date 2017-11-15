@@ -3,7 +3,7 @@ class Rogare::Plugins::Calc
   extend Rogare::Help
 
   command 'calc'
-  aliases 'wa'
+  aliases '='
   usage '!% <a calculation>'
   handle_help
 
