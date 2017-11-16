@@ -35,9 +35,9 @@ class Rogare::Plugins::Nano
 
   match_command /all\s*/, method: :all_counts
   match_command /set\s+(.+)/, method: :set_username
-  match_command /goal\s+(\d+)/, method: :set_goal
-  match_command /@(\d+)\s+(.+)/, method: :with_goal
-  match_command /@(\d+)\s*$/, method: :own_count
+  match_command /goal\s+(\d+k)/, method: :set_goal
+  match_command /@(\d+k)\s+(.+)/, method: :with_goal
+  match_command /@(\d+k)\s*$/, method: :own_count
   match_command /(.+)/
   match_empty :own_count
 
@@ -63,6 +63,7 @@ class Rogare::Plugins::Nano
   def set_goal(m, goal)
     user = m.user.nick.downcase
     name = @@redis.get("nick:#{user}:nanouser") || user
+    goal.sub! /k$/, '000'
     @@redis.set("nano:#{name}:goal", goal.to_i)
     m.reply "Your goal has been set to #{goal}."
     own_count(m)
@@ -95,6 +96,10 @@ class Rogare::Plugins::Nano
   end
 
   def get_counts(m, names, opts = {})
+    if opts[:goal]
+      opts[:goal].sub! /k$/, '000'
+    end
+
     names.map! do |c|
       @@redis.get("nick:#{c.downcase}:nanouser") || c
     end
