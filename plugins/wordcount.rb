@@ -5,7 +5,11 @@ class Rogare::Plugins::Nano
 
   command 'count'
   aliases 'wc'
-  usage '!% [username(s) to search, or "set" then a username to remember your NaNoWriMo username]'
+  usage [
+    '!% nick [nick...], or: !% nanoname',
+    'To register your nano name against your current nick: !% set nanoname',
+    'To set your goal: !% goal <number> (do it after !% set)',
+  ]
   handle_help
 
   @@redis = Rogare.redis(2)
