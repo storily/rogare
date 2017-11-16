@@ -6,9 +6,10 @@ class Rogare::Plugins::Nano
   command 'count'
   aliases 'wc'
   usage [
-    '!% nick [nick...], or: !% nanoname',
+    '!%, or: !% nanoname, or: !% nick (to see others\' counts)',
     'To register your nano name against your current nick: !% set nanoname',
     'To set your goal: !% goal <number> (do it after !% set)',
+    'To use a goal just for this call: !% @<number> [nick]',
   ]
   handle_help
 
@@ -35,11 +36,13 @@ class Rogare::Plugins::Nano
   match_command /all\s*/, method: :all_counts
   match_command /set\s+(.+)/, method: :set_username
   match_command /goal\s+(\d+)/, method: :set_goal
+  match_command /@(\d+)\s+(.+)/, method: :with_goal
+  match_command /@(\d+)\s*$/, method: :own_count
   match_command /(.+)/
   match_empty :own_count
 
-  def own_count(m)
-    get_counts(m, [m.user.nick])
+  def own_count(m, goal = nil)
+    get_counts(m, [m.user.nick], goal: goal)
   end
 
   def all_counts(m)
@@ -65,7 +68,11 @@ class Rogare::Plugins::Nano
     own_count(m)
   end
 
-  def execute(m, param = '')
+  def with_goal(m, goal, param)
+    execute(m, param, goal)
+  end
+
+  def execute(m, param = '', goal = nil)
     names = []
     random_user = false
 
@@ -84,10 +91,10 @@ class Rogare::Plugins::Nano
     names << m.user.nick if names.empty?
     names.uniq!
 
-    get_counts(m, names, random_user)
+    get_counts(m, names, random: random_user, goal: goal)
   end
 
-  def get_counts(m, names, random = false)
+  def get_counts(m, names, opts = {})
     names.map! do |c|
       @@redis.get("nick:#{c.downcase}:nanouser") || c
     end
@@ -98,16 +105,16 @@ class Rogare::Plugins::Nano
     # that has a valid count.
     random_found = false
     counts = names.map do |name|
-      break if random && random_found
+      break if opts[:random] && random_found
 
       count = get_count(name)
-      next if random && count.nil?
+      next if opts[:random] && count.nil?
       next "#{name}: user does not exist or has no current novel" if count.nil?
       random_found = true
 
       today = get_today(name)
       nth = ((Time.now - Chronic.parse('1st november 00:00')) / (60*60*24)).ceil
-      goal = (@@redis.get("nano:#{name}:goal") || 50_000).to_i
+      goal = (opts[:goal] || @@redis.get("nano:#{name}:goal") || 50_000).to_i
       daygoal = (goal / 30.0 * nth).round
       diff = daygoal - count
 
@@ -131,7 +138,7 @@ class Rogare::Plugins::Nano
       ].compact.join(', ')})"
     end
 
-    if random && counts.compact.length == 0
+    if opts[:random] && counts.compact.length == 0
       m.reply "No users in this channel have novels!"
       return
     end
