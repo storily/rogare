@@ -179,9 +179,11 @@ class Rogare::Plugins::Wordwar
           end
         end
 
-        starting = lambda {|time, extra = nil|
-          members = war_info(id)[:members].join(', ')
-          reply.call "Wordwar #{id} is starting #{time}! #{members}#{extra || ''}"
+        starting = lambda {|time, &block|
+          war = war_info(id)
+          members = war[:members].join(', ')
+          extra = ' ' + block.call(war) unless block.nil?
+          reply.call "Wordwar #{id} is starting #{time}! #{members}#{extra}"
         }
 
         ending = lambda {
@@ -197,14 +199,14 @@ class Rogare::Plugins::Wordwar
             # If we're at least 35 seconds before the start, we have
             # time to send a reminder. Otherwise, skip sending it.
             sleep to_start - 30
-            starting.call 'in 30 seconds', ' -- Be ready: tell us your starting wordcount.'
+            starting.call('in 30 seconds') {'-- Be ready: tell us your starting wordcount.'}
             sleep 30
           else
             # In any case, we sleep until the beginning
             sleep to_start
           end
 
-          starting.call 'now'
+          starting.call('now') {|war| "(for #{dur_display(war[:end], war[:start]).first})" }
           start_war id
           sleep duration
           ending.call
