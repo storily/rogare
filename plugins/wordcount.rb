@@ -34,6 +34,7 @@ class Rogare::Plugins::Wordcount
   end
 
   match_command /all\s*/, method: :all_counts
+  match_command /live(?:\s+(.+))?/, method: :live_counts
   match_command /set\s+(.+)/, method: :set_username
   match_command /goal\s+(\d+k?)/, method: :set_goal
   match_command /@(\d+k?)\s+(.+)/, method: :with_goal
@@ -43,6 +44,14 @@ class Rogare::Plugins::Wordcount
 
   def own_count(m, goal = nil)
     get_counts(m, [m.user.nick], goal: goal)
+  end
+
+  def live_counts(m, param = nil)
+    if param
+      execute(m, param, live: true)
+    else
+      get_counts(m, [m.user.nick], live: true)
+    end
   end
 
   def all_counts(m)
@@ -70,10 +79,10 @@ class Rogare::Plugins::Wordcount
   end
 
   def with_goal(m, goal, param)
-    execute(m, param, goal)
+    execute(m, param, goal: goal)
   end
 
-  def execute(m, param = '', goal = nil)
+  def execute(m, param = '', opts = {})
     names = []
     random_user = false
 
@@ -92,7 +101,8 @@ class Rogare::Plugins::Wordcount
     names << m.user.nick if names.empty?
     names.uniq!
 
-    get_counts(m, names, random: random_user, goal: goal)
+    opts[:random] = random_user
+    get_counts(m, names, opts)
   end
 
   def get_counts(m, names, opts = {})
@@ -118,10 +128,17 @@ class Rogare::Plugins::Wordcount
       random_found = true
 
       today = get_today(name)
-      nth = ((Time.now - Chronic.parse('1st november 00:00')) / (60*60*24)).ceil
-      goal = (opts[:goal] || @@redis.get("nano:#{name}:goal") || 50_000).to_i
-      daygoal = (goal / 30.0 * nth).round
-      diff = daygoal - count
+      timediff = Time.now - Chronic.parse('1st november 00:00')
+      day_secs = 60*60*24
+      month_secs = day_secs * 30
+
+      nth = (timediff / day_secs).ceil
+      goal = (opts[:goal] || @@redis.get("nano:#{name}:goal") || 50_000).to_f
+      diff = if opts[:live]
+        ((goal / month_secs) * timediff).round
+      else
+        (goal / 30 * nth).round
+      end - count
 
       "#{Rogare.nixnotif(name.to_s)}: #{count} (#{[
         "#{(100.0 * count / goal).round(1)}%",
