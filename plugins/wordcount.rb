@@ -3,8 +3,8 @@ class Rogare::Plugins::Wordcount
   extend Rogare::Help
   extend Memoist
 
-  command 'count'
-  aliases 'wc'
+  command 'wc'
+  aliases 'count'
   usage [
     '!%, or: !% nanoname, or: !% nick (to see others\' counts)',
     'To register your nano name against your current nick: !% set nanoname',
