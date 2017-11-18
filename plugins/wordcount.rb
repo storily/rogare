@@ -128,7 +128,7 @@ class Rogare::Plugins::Wordcount
       random_found = true
 
       today = get_today(name)
-      timediff = Time.now - Chronic.parse('1st november 00:00')
+      timediff = Time.now - Chronic.parse('1st')
       day_secs = 60*60*24
       month_secs = day_secs * 30
 
