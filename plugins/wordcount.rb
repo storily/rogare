@@ -35,9 +35,9 @@ class Rogare::Plugins::Nano
 
   match_command /all\s*/, method: :all_counts
   match_command /set\s+(.+)/, method: :set_username
-  match_command /goal\s+(\d+k)/, method: :set_goal
-  match_command /@(\d+k)\s+(.+)/, method: :with_goal
-  match_command /@(\d+k)\s*$/, method: :own_count
+  match_command /goal\s+(\d+k?)/, method: :set_goal
+  match_command /@(\d+k?)\s+(.+)/, method: :with_goal
+  match_command /@(\d+k?)\s*$/, method: :own_count
   match_command /(.+)/
   match_empty :own_count
 
