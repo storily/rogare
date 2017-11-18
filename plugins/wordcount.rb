@@ -1,4 +1,4 @@
-class Rogare::Plugins::Nano
+class Rogare::Plugins::Wordcount
   include Cinch::Plugin
   extend Rogare::Help
   extend Memoist
