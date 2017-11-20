@@ -11,7 +11,7 @@ class Rogare::Plugins::Name
   usage '!% [optionally put some words and numbers here and hope they do something]'
   handle_help
 
-  match_command /(.*)/
+  match_command /s?\s+(.*)/
   match_empty :execute
 
   @@generator = Namey::Generator.new
