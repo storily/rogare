@@ -301,7 +301,33 @@ class Rogare::Plugins::Wordwar
       # War is in the past???
       return if ((time + duration) - Time.now).to_i < 0
 
-      k = @@redis.incr rk('count')
+
+      ### Special reclaim
+      reclaim = [119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 32, 33]
+
+      k = @@redis.get rk('count')
+      if k.to_i < 202
+        @@redis.keys('archive:wordwar:*:start').each do |w|
+          w = w.split(':')[2].to_i
+          reclaim.del(w) if reclaim.include?(w)
+        end
+
+        @@redis.keys('wordwar:*:start').each do |w|
+          w = w.split(':')[2].to_i
+          reclaim.del(w) if reclaim.include?(w)
+        end
+
+        k = if reclaim.empty?
+          @@redis.incr rk('count')
+        else
+          m.reply "This is a reclaim war! #{reclaim.count - 1} remaining until normal count resumes."
+          reclaim.sort.first
+        end
+      else
+      ### End reclaim code
+        k = @@redis.incr rk('count')
+      end
+
       @@redis.multi do
         @@redis.sadd rk(k, 'channels'), m.channel.to_s
         @@redis.set rk(k, 'owner'), m.user.nick
