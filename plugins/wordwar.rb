@@ -309,12 +309,12 @@ class Rogare::Plugins::Wordwar
       if k.to_i < 202
         @@redis.keys('archive:wordwar:*:start').each do |w|
           w = w.split(':')[2].to_i
-          reclaim.del(w) if reclaim.include?(w)
+          reclaim.delete(w) if reclaim.include?(w)
         end
 
         @@redis.keys('wordwar:*:start').each do |w|
           w = w.split(':')[2].to_i
-          reclaim.del(w) if reclaim.include?(w)
+          reclaim.delete(w) if reclaim.include?(w)
         end
 
         k = if reclaim.empty?
