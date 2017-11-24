@@ -8,6 +8,7 @@ class Rogare::Plugins::Name
   extend Memoist
 
   command 'name'
+  aliases 'names'
   usage '!% [optionally put some words and numbers here and hope they do something]'
   handle_help
 
