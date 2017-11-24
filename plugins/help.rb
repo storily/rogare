@@ -30,7 +30,9 @@ class Rogare::Plugins::Help
       coms.map! {|c| "#{bot_prefix}#{c}" }
       [
         coms.shift,
-        "(aliases: #{coms.join(', ')})" unless coms.empty?
+        unless coms.empty?
+          "(aliases: #{coms.join(', ')})"
+        end
       ].compact.join ' '
     end.sort
   end
