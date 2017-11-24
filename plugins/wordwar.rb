@@ -303,17 +303,17 @@ class Rogare::Plugins::Wordwar
 
 
       ### Special reclaim
-      reclaim = [119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 32, 33]
+      reclaim = [119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 32, 33].uniq
 
       k = @@redis.get rk('count')
       if k.to_i < 202
-        @@redis.keys('archive:wordwar:*:start').each do |w|
+        @@redis.keys('archive:' + rk('*')).each do |w|
           w = w.split(':')[2].to_i
           reclaim.delete(w) if reclaim.include?(w)
         end
 
-        @@redis.keys('wordwar:*:start').each do |w|
-          w = w.split(':')[2].to_i
+        @@redis.keys(rk('*')).each do |w|
+          w = w.split(':')[1].to_i
           reclaim.delete(w) if reclaim.include?(w)
         end
 
