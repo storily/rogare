@@ -11,9 +11,12 @@ class Rogare::Plugins::Help
 
   def bot_prefix
     (self.class.prefix || Rogare.bot.config.plugins.prefix).to_s
-      .gsub(/(^\(|\))$/, '')
-      .gsub('?-mix:', '')
-      .gsub(/^\^/, '')
+      .gsub(/(
+          ^\(
+        | \)$
+        | \^
+        | \?-mix:
+      )/x, '')
   end
 
   def command_list
