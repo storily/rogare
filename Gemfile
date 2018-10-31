@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby '~>2.4.2'
+ruby '~>2.5.1'
 
 gem 'chronic', '~>0.10.2'
 gem 'chronic_duration', '~>0.10.2'
