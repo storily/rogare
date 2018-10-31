@@ -8,7 +8,7 @@ gem 'cinch-identify', '~>1.7.0', require: false
 gem 'graphql-client', '~>0.12.1', require: false
 gem 'hashie', '~>3.3.1'
 gem 'memoist', '~>0.15.0'
-gem 'nokogiri', '~>1.6.8.1'
+gem 'nokogiri', '~>1.8.2'
 gem 'numbers_in_words', '~>0.4.0'
 gem 'pry-remote', '~>0.1.8'
 gem 'typhoeus', '~>0.6.9'
