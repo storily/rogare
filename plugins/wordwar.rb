@@ -9,7 +9,8 @@ class Rogare::Plugins::Wordwar
       'Or: !% at [wall time e.g. 12:35] for [duration]',
       'Or even (defaulting to a 15 minute run): !% at/in [time]',
       'And then everyone should: !% join [wordwar ID]',
-      'Also say !% alone to get a list of current/scheduled ones.'
+      'Also say !% alone to get a list of current/scheduled ones',
+      'To get some details about a war: !% info [ID] or !% members [ID].'
   ]
   handle_help
 
@@ -18,6 +19,8 @@ class Rogare::Plugins::Wordwar
   match_command /join(.*)/, method: :ex_join_war
   match_command /leave(.*)/, method: :ex_leave_war
   match_command /cancel(.*)/, method: :ex_cancel_war
+  match_command /info(.*)/, method: :ex_war_info
+  match_command /members(.*)/, method: :ex_war_members
   match_command /(.+)/
   match_empty :ex_list_wars
 
@@ -80,6 +83,36 @@ class Rogare::Plugins::Wordwar
   def rk(*args) self.class.rk(*args) end
   def dur_display(*args) self.class.dur_display(*args) end
   def all_wars(*args) self.class.all_wars(*args) end
+  def war_info(*args) self.class.war_info(*args) end
+
+  def say_war_info(m, war)
+    togo, neg = dur_display war[:start]
+    others = war[:members].reject {|u| u == war[:owner]}
+
+    m.reply [
+      "#{war[:id]}: #{Rogare.nixnotif war[:owner]}'s war",
+
+      if neg
+        "started #{togo} ago"
+      else
+        "starting in #{togo}"
+      end,
+
+      if neg
+        "#{dur_display(Time.now, war[:end]).first} left"
+      else
+        "for #{dur_display(war[:end], war[:start]).first}"
+      end,
+
+      unless others.empty?
+        "with #{others.count} others"
+      end,
+
+      unless war[:channels].count < 2 && war[:channels].include?(m.channel.to_s)
+        "in #{war[:channels].join(', ')}"
+      end
+    ].compact.join(', ')
+  end
 
   def ex_list_wars(m)
     wars = all_wars
@@ -93,36 +126,39 @@ class Rogare::Plugins::Wordwar
     end
 
     wars.each do |war|
-      togo, neg = dur_display war[:start]
-      others = war[:members].reject {|u| u == war[:owner]}
-
-      m.reply [
-        "#{war[:id]}: #{Rogare.nixnotif war[:owner]}'s war",
-
-        if neg
-          "started #{togo} ago"
-        else
-          "starting in #{togo}"
-        end,
-
-        if neg
-          "#{dur_display(Time.now, war[:end]).first} left"
-        else
-          "for #{dur_display(war[:end], war[:start]).first}"
-        end,
-
-        unless others.empty?
-          "with #{others.count} others"
-        end,
-
-        unless war[:channels].count < 2 && war[:channels].include?(m.channel.to_s)
-          "in #{war[:channels].join(', ')}"
-        end
-      ].compact.join(', ')
+      say_war_info m, war
     end
 
     if wars.empty?
       m.reply "No current wordwars"
+    end
+  end
+
+  def ex_war_info(m, param)
+    k = param.strip.to_i
+    return m.reply "You need to specify the wordwar ID" if k == 0
+
+    unless @@redis.exists rk(k, 'start')
+      return m.reply "No such wordwar"
+    end
+
+    say_war_info m, war_info(k)
+  end
+
+  def ex_war_members(m, param)
+    k = param.strip.to_i
+    return m.reply "You need to specify the wordwar ID" if k == 0
+
+    unless @@redis.exists rk(k, 'start')
+      return m.reply "No such wordwar"
+    end
+
+    war = war_info(k)
+    others = war[:members].reject {|u| u == war[:owner]}
+    m.reply "#{war[:id]}: #{Rogare.nixnotif war[:owner]}'s war, with: " + if others.empty?
+      "no one else :("
+    else
+      others.map{|u| Rogare.nixnotif u}.join(', ')
     end
   end
 
