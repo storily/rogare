@@ -86,9 +86,9 @@ class Rogare::Plugins::Wordwar
       .reject {|w| w[:end] < Time.now}
       .sort_by {|w| w[:start]}
 
-    if rand < 0.9
+    if rand < 0.9 && (Time.now < Time.at(1541847600))
       # War 60 is a special long-running war. We want it to still be there,
-      # but not to advertise its presence all the time!
+      # but not to advertise its presence all the time, unless we're close!
       wars.reject!{|w| w[:id].to_s == "60"}
     end
 
