@@ -60,7 +60,7 @@ class Rogare::Plugins::Name
     args[:n] = 100 if args[:n] > 100
     args[:n] = 1 if args[:n] < 1
 
-    joined = (args[:n] * 2).times.map do
+    joined = (args[:n] * 3).times.map do
       next ENBYNAMES.sample(if args[:full] then 2 else 1 end).join(' ') if args[:call] == :unisex
       next %w[Pierre Pierre].sample(if args[:full] then 2 else 1 end).join(' ') if args[:call] == :pierre
 
