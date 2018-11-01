@@ -29,13 +29,13 @@ logs '=====> Preparing threads'
 require 'thwait'
 threads = []
 
-# threads << Thread.new do
-#   sleep 3
-#   logs '=====> Loading wordwars from Redis'
-#   wars = Rogare::Plugins::Wordwar.load_existing_wars
-#   logs "=====> Loaded #{wars.count} wordwars, now waiting on timers"
-#   wars.each { |t| t.join }
-# end
+threads << Thread.new do
+  sleep 3
+  logs '=====> Loading wordwars from Redis'
+  wars = Rogare::Plugins::Wordwar.load_existing_wars
+  logs "=====> Loaded #{wars.count} wordwars, now waiting on timers"
+  wars.each { |t| t.join }
+end
 
 threads << Thread.new do
   binding.remote_pry
