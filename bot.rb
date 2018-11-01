@@ -21,7 +21,7 @@ end
 
 logs '=====> Loading modules'
 Dir['./plugins/*.rb'].each do |p|
-  next if /(help|say|wordcunt|wordwar)/ =~ p
+  next if /(say|wordwar)/ =~ p
   require p
 end
 

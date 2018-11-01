@@ -2,6 +2,10 @@ module Rogare
   class << self
     extend Memoist
 
+    def prefix
+      '!'
+    end
+
     def irc
       return unless ENV['IRC_SERVER'] && ENV['IRC_CHANNELS']
 
