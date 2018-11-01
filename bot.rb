@@ -41,7 +41,7 @@ threads << Thread.new do
   binding.remote_pry
 end
 
-if ENV['IRC_SERVERS'] && ENV['IRC_CHANNELS']
+if ENV['IRC_SERVER'] && ENV['IRC_CHANNELS']
   threads << Thread.new do
     logs '=====> Starting IRC'
     Rogare.irc.start
