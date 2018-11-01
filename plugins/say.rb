@@ -1,6 +1,6 @@
 class Rogare::Plugins::Say
   include Cinch::Plugin
-  extend Rogare::Help
+  extend Rogare::Plugin
 
   command 'say'
   usage '!% <channel> <message>'

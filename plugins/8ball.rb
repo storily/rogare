@@ -1,12 +1,14 @@
 class Rogare::Plugins::EightBall
   include Cinch::Plugin
-  extend Rogare::Help
+  extend Rogare::Plugin
+
+
 
   command '8ball'
   usage '!% <derp>'
   handle_help
 
-  match_command /(.+)/
+  match_command /.+/
   match_empty :help_message
 
   def execute(m, param)

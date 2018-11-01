@@ -21,21 +21,38 @@ end
 
 logs '=====> Loading modules'
 Dir['./plugins/*.rb'].each do |p|
-  logs "     > Loading #{p}"
+  next if /(help|say|wordcunt|wordwar)/ =~ p
   require p
 end
 
-Thread.new do
-  sleep 3
-  logs '=====> Loading wordwars from Redis'
-  wars = Rogare::Plugins::Wordwar.load_existing_wars
-  logs "=====> Loaded #{wars.count} wordwars, now waiting on timers"
-  wars.each { |t| t.join }
-end
+logs '=====> Preparing threads'
+require 'thwait'
+threads = []
 
-Thread.new do
+# threads << Thread.new do
+#   sleep 3
+#   logs '=====> Loading wordwars from Redis'
+#   wars = Rogare::Plugins::Wordwar.load_existing_wars
+#   logs "=====> Loaded #{wars.count} wordwars, now waiting on timers"
+#   wars.each { |t| t.join }
+# end
+
+threads << Thread.new do
   binding.remote_pry
 end
 
-logs '=====> Starting bot'
-Rogare.bot.start
+if ENV['IRC_SERVERS'] && ENV['IRC_CHANNELS']
+  threads << Thread.new do
+    logs '=====> Starting IRC'
+    Rogare.irc.start
+  end
+end
+
+if ENV['DISCORD_TOKEN']
+  threads << Thread.new do
+    logs '=====> Starting Discord'
+    Rogare.discord.run
+  end
+end
+
+ThreadsWait.all_waits(*threads)

@@ -2,9 +2,9 @@ require_relative '../lib/dicere'
 
 class Rogare::Plugins::Plot
   include Cinch::Plugin
-  extend Rogare::Help
+  extend Rogare::Plugin
 
-  command 'plot', include_command: true
+  command 'plot', help_includes_command: true
   aliases 'prompt', 'seed', 'event'
   usage '!% [optional filter keywords]'
   handle_help

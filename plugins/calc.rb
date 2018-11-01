@@ -1,13 +1,13 @@
 class Rogare::Plugins::Calc
   include Cinch::Plugin
-  extend Rogare::Help
+  extend Rogare::Plugin
 
   command 'calc'
   aliases '='
   usage '!% <a calculation>'
   handle_help
 
-  match_command /(.+)/
+  match_command /.+/
   match_empty :help_message
 
   def execute(m, param)

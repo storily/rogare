@@ -1,6 +1,6 @@
 class Rogare::Plugins::Wordcount
   include Cinch::Plugin
-  extend Rogare::Help
+  extend Rogare::Plugin
   extend Memoist
 
   command 'wc'
@@ -39,7 +39,7 @@ class Rogare::Plugins::Wordcount
   match_command /goal\s+(\d+k?)/, method: :set_goal
   match_command /@(\d+k?)\s+(.+)/, method: :with_goal
   match_command /@(\d+k?)\s*$/, method: :own_count
-  match_command /(.+)/
+  match_command /.+/
   match_empty :own_count
 
   def own_count(m, goal = nil)

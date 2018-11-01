@@ -1,6 +1,6 @@
 class Rogare::Plugins::Pick
   include Cinch::Plugin
-  extend Rogare::Help
+  extend Rogare::Plugin
 
   command 'pick'
   usage '!% <start> <end> - Picks a number/letter between start and end'

@@ -1,6 +1,6 @@
 class Rogare::Plugins::Help
   include Cinch::Plugin
-  extend Rogare::Help
+  extend Rogare::Plugin
   extend Memoist
 
   command 'help', hidden: true
@@ -21,10 +21,10 @@ class Rogare::Plugins::Help
 
   def command_list
     Rogare::Plugins.to_a.map do |plugin|
-      help = Rogare::Help.helps[plugin.inspect.to_sym]
-      next if help.nil?
-      next if help[:hidden]
-      [help[:command], help[:aliases]].flatten
+      one = Rogare::Plugin.allmine[plugin.inspect.to_sym]
+      next if one.nil?
+      next if one[:hidden]
+      [one[:command], one[:aliases]].flatten
     end.compact
   end
 

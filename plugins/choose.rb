@@ -1,12 +1,12 @@
 class Rogare::Plugins::Choose
   include Cinch::Plugin
-  extend Rogare::Help
+  extend Rogare::Plugin
 
   command 'choose'
   usage '!% <first thing> or <second thing> [or <third thing> and so on]'
   handle_help
 
-  match_command /(.+)/
+  match_command /.+/
   match_empty :help_message
 
   def execute(m, param)

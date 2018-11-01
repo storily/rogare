@@ -1,6 +1,6 @@
 class Rogare::Plugins::Wordwar
   include Cinch::Plugin
-  extend Rogare::Help
+  extend Rogare::Plugin
 
   command 'wordwar'
   aliases 'war', 'ww'

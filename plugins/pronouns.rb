@@ -1,6 +1,6 @@
 class Rogare::Plugins::Pronouns
   include Cinch::Plugin
-  extend Rogare::Help
+  extend Rogare::Plugin
 
   command 'pronouns', hidden: true
   usage '!% - You\'re a sweetie'
