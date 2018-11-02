@@ -43,6 +43,10 @@ class DiscordUserShim
     true
   end
 
+  def id
+    @member.id
+  end
+
   def nick
     @member.nick || @member.username
   end
