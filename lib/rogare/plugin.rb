@@ -70,7 +70,10 @@ module Rogare::Plugin
       Rogare.discord.remove_handler my[:discord_handler] if my[:discord_handler]
       my[:discord_handler] = Rogare.discord.message(contains: my[:common_pattern]) do |event|
         logs "---> Discord message: ‘#{event.message.content}’ from #{event.author.username} (#{event.author.id})"
+        logs "---> Handling by #{self}"
+
         pattern = my[:patterns].find {|pat| pat[0] =~ event.message.content}
+        logs "---> Detected pattern: #{pattern[0]} (#{pattern[1]})"
         plug = new nil, :discord
 
         params = DiscordMessageShim.new(event, pattern, my).params

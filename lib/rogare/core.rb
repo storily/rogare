@@ -2,6 +2,11 @@ module Rogare
   class << self
     extend Memoist
 
+    @@boot = Time.now
+    def boot
+      @@boot
+    end
+
     def prefix
       '!'
     end

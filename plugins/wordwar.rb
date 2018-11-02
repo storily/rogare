@@ -322,11 +322,7 @@ class Rogare::Plugins::Wordwar
     def war_info(id)
       {
         id: id,
-        channels: if @@redis.exists(rk(id, 'channels'))
-                    @@redis.smembers(rk(id, 'channels'))
-                  else # transitionary
-                    [@@redis.get(rk(id, 'channel'))]
-                  end,
+        channels: @@redis.smembers(rk(id, 'channels')),
         owner: @@redis.get(rk(id, 'owner')),
         members: @@redis.smembers(rk(id, 'members')),
         start: Chronic.parse(@@redis.get(rk(id, 'start'))),
