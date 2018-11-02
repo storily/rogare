@@ -53,14 +53,18 @@ module Rogare
       end
     end
 
+    def from_discord_mid(mid)
+      id = mid.gsub(/[^\d]/, '').to_i
+      du = discord.users[id]
+      return unless du
+      DiscordUserShim.new(du)
+    end
+
     def nixnotif(nick)
       # If we get a mentionable discord ID, lookup the user and retrieve a nick:
       if discord && nick =~ /<@\d+>/
-        id = nick.gsub(/[^\d]/, '').to_i
-        du = discord.users[id]
-        if du
-          nick = DiscordUserShim.new(du).nick
-        end
+        du = from_discord_mid(nick)
+        nick = du.nick if du
       end
 
       # Insert a zero-width space as the second character of the nick

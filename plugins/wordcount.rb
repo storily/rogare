@@ -43,7 +43,7 @@ class Rogare::Plugins::Wordcount
   match_empty :own_count
 
   def own_count(m, goal = nil)
-    get_counts(m, [m.user.nick], goal: goal)
+    get_counts(m, [m.user.discordian? ? m.user.mid : m.user.nick], goal: goal)
   end
 
   def live_counts(m, param = nil)
@@ -90,15 +90,15 @@ class Rogare::Plugins::Wordcount
       p = p.downcase.to_sym
       case p
       when /^(me|self|myself|i)$/i
-        names << m.user.nick
+        names << (m.user.discordian? ? m.user.mid : m.user.nick)
       when /^(random|rand|any)$/i
         random_user = true
-        names.push(*m.channel.users.keys.shuffle.map {|n| n.nick })
+        names.push(*m.channel.users.keys.shuffle.map {|n| (n.discordian? ? n.mid : n.nick) })
       else
         names << p
       end
     end
-    names << m.user.nick if names.empty?
+    names << (m.user.discordian? ? m.user.mid : m.user.nick) if names.empty?
     names.uniq!
 
     opts[:random] = random_user
@@ -111,7 +111,17 @@ class Rogare::Plugins::Wordcount
     end
 
     names.map! do |c|
-      @@redis.get("nick:#{c.downcase}:nanouser") || c
+      rks = []
+      if Rogare.discord && c =~ /^<@\d+>$/
+        du = Rogare.from_discord_mid(c)
+        if du
+          rks << "nick:#{du.id}:nanouser"
+          c = du.nick
+        end
+      end
+      rks << "nick:#{c.downcase}:nanouser"
+
+      rks.map {|r| @@redis.get(r) }.compact.first || c
     end
 
     # `random_found` exists so that we don't check every single user in the
