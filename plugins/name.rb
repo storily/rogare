@@ -70,7 +70,9 @@ class Rogare::Plugins::Name
       else
         n
       end
-    end.compact.uniq.first(args[:n]).join ', '
-    m.reply joined
+    end.compact
+
+    joined = joined.uniq if args[:call] != :pierre
+    m.reply joined.first(args[:n]).join ', '
   end
 end
