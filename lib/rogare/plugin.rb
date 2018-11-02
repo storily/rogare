@@ -64,7 +64,7 @@ module Rogare::Plugin
     if Rogare.discord
       opts[:method] ||= :execute
 
-      my[:patterns] << [/!#{pattern}/, opts]
+      my[:patterns] << [/^\s*!#{pattern}/, opts]
       my[:common_pattern] = Regexp.union my[:patterns].map{|pat| pat[0]}
 
       Rogare.discord.remove_handler my[:discord_handler] if my[:discord_handler]
