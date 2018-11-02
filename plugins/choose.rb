@@ -6,7 +6,7 @@ class Rogare::Plugins::Choose
   usage '!% <first thing> or <second thing> [or <third thing> and so on]'
   handle_help
 
-  match_command /.+/
+  match_command /(.+)/
   match_empty :help_message
 
   def execute(m, param)

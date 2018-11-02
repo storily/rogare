@@ -8,9 +8,17 @@ class DiscordMessageShim
 
   def params
     msg = @event.message.content
-    param = msg.sub(/^!#{@plug[:command]}/i, '')
     groups = msg.match(@pattern).captures
-    [self, param, *groups]
+    if groups.empty?
+      [self, param]
+    else
+      [self, *groups]
+    end
+  end
+
+  def param
+    msg = @event.message.content
+    msg.sub(/^\s*!#{@plug[:command]}/i, '')
   end
 
   def reply(message)

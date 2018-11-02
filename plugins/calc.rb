@@ -7,7 +7,7 @@ class Rogare::Plugins::Calc
   usage '!% <a calculation>'
   handle_help
 
-  match_command /.+/
+  match_command /(.+)/
   match_empty :help_message
 
   def execute(m, param)

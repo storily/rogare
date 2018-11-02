@@ -8,7 +8,7 @@ class Rogare::Plugins::EightBall
   usage '!% <derp>'
   handle_help
 
-  match_command /.+/
+  match_command /(.+)/
   match_empty :help_message
 
   def execute(m, param)
