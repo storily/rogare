@@ -63,14 +63,15 @@ class Rogare::Plugins::Wordcount
   end
 
   def set_username(m, param)
+    user = m.user.discordian? ? m.user.id : m.user.nick.downcase
     name = param.strip.split.join("_")
-    @@redis.set("nick:#{m.user.nick.downcase}:nanouser", name)
+    @@redis.set("nick:#{user}:nanouser", name)
     m.reply "Your username has been set to #{name}."
     own_count(m)
   end
 
   def set_goal(m, goal)
-    user = m.user.nick.downcase
+    user = m.user.discordian? ? m.user.id : m.user.nick.downcase
     name = @@redis.get("nick:#{user}:nanouser") || user
     goal.sub! /k$/, '000'
     @@redis.set("nano:#{name}:goal", goal.to_i)
