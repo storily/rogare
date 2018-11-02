@@ -36,6 +36,7 @@ class Rogare::Plugins::Wordwar
     timeat = Chronic.parse(time)
     timeat = Chronic.parse("in #{time}") if timeat.nil?
     timeat = Chronic.parse("in #{time} minutes") if timeat.nil?
+    timeat = Chronic.parse("#{time} minutes") if timeat.nil?
     if timeat.nil?
       m.reply "Can't parse time: #{time}"
       return
@@ -108,7 +109,7 @@ class Rogare::Plugins::Wordwar
         "with #{others.count} others"
       end,
 
-      unless war[:channels].count < 2 && war[:channels].include?(m.channel.to_s)
+      unless war[:channels].count <= 1 && war[:channels].include?(m.channel.to_s)
         "in #{war[:channels].join(', ')}"
       end
     ].compact.join(', ')
@@ -171,7 +172,7 @@ class Rogare::Plugins::Wordwar
     end
 
     @@redis.sadd rk(k, 'channels'), m.channel.to_s
-    @@redis.sadd rk(k, 'members'), m.user.nick
+    @@redis.sadd rk(k, 'members'), m.user.discordian? ? m.user.mid : m.user.nick
     m.reply "You're in!"
   end
 
@@ -183,7 +184,7 @@ class Rogare::Plugins::Wordwar
       return m.reply "No such wordwar"
     end
 
-    @@redis.srem rk(k, 'members'), m.user.nick
+    @@redis.srem rk(k, 'members'), m.user.discordian? ? m.user.mid : m.user.nick
     m.reply "You're out."
   end
 
@@ -204,7 +205,7 @@ class Rogare::Plugins::Wordwar
       Thread.new do
         reply = lambda do |msg|
           war_info(id)[:channels].each do |cname|
-            chan = Rogare.bot.channel_list.find cname
+            chan = Rogare.find_channel cname
 
             if chan.nil?
               logs "=====> Error: no such channel: #{cname}"
@@ -337,37 +338,12 @@ class Rogare::Plugins::Wordwar
       # War is in the past???
       return if ((time + duration) - Time.now).to_i < 0
 
-
-      ### Special reclaim
-      reclaim = [119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 32, 33].uniq
-
-      k = @@redis.get rk('count')
-      if k.to_i < 202
-        @@redis.keys('archive:' + rk('*')).each do |w|
-          w = w.split(':')[2].to_i
-          reclaim.delete(w) if reclaim.include?(w)
-        end
-
-        @@redis.keys(rk('*')).each do |w|
-          w = w.split(':')[1].to_i
-          reclaim.delete(w) if reclaim.include?(w)
-        end
-
-        k = if reclaim.empty?
-          @@redis.incr rk('count')
-        else
-          m.reply "This is a reclaim war! #{reclaim.count - 1} remaining until normal count resumes."
-          reclaim.sort.first
-        end
-      else
-      ### End reclaim code
-        k = @@redis.incr rk('count')
-      end
+      k = @@redis.incr rk('count')
 
       @@redis.multi do
         @@redis.sadd rk(k, 'channels'), m.channel.to_s
-        @@redis.set rk(k, 'owner'), m.user.nick
-        @@redis.sadd rk(k, 'members'), m.user.nick
+        @@redis.set rk(k, 'owner'), m.user.discordian? ? m.user.mid : m.user.nick
+        @@redis.sadd rk(k, 'members'), m.user.discordian? ? m.user.mid : m.user.nick
         @@redis.set rk(k, 'start'), "#{time}"
         @@redis.set rk(k, 'end'), "#{time + duration}"
       end
