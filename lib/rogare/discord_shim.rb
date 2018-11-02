@@ -55,7 +55,7 @@ class DiscordUserShim
   def nick
     n = nil
     n ||= @member.nick if @member.is_a? Discordrb::Member
-    n ||= @member.username if @member.is_a? Discordrb::User
+    n ||= @member.username
     n || '?'
   end
 end
