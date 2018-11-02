@@ -72,7 +72,15 @@ class Rogare::Plugins::Name
       end
     end.compact
 
-    joined = joined.uniq if args[:call] != :pierre
+    if args[:call] == :pierre
+      stone = rand < 0.4
+      stoned = stone ? 'It’s the Stone Age' : 'C’est l’Age de Pierre '
+      joined.map!{|n| n.gsub(/Pierre/, 'Stone')} if stone
+      joined[0] = "#{stoned}! #{joined[0]}"
+    else
+      joined = joined.uniq
+    end
+
     m.reply joined.first(args[:n]).join ', '
   end
 end
