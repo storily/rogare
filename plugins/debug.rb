@@ -10,6 +10,7 @@ class Rogare::Plugins::Debug
   match_command /my nano/, method: :my_nano
   match_command /chan name/, method: :chan_name
   match_command /chan find (.+)/, method: :chan_find
+  match_command /user ids/, method: :user_ids
   match_command /war chans (.+)/, method: :war_chans
   match_command /war mems (.+)/, method: :war_mems
 
@@ -44,6 +45,14 @@ class Rogare::Plugins::Debug
     chan = Rogare.find_channel param.strip
     return m.reply 'No such chan' unless chan
     m.reply chan.name
+  end
+
+  def user_ids(m)
+    list = []
+    Rogare.discord.users.each do |id, u|
+      list << "#{Rogare.nixnotif u.username} ##{u.discriminator}: #{id}"
+    end
+    m.reply list.join("\n")
   end
 
   def war_chans(m, param)
