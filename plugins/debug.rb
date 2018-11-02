@@ -9,6 +9,7 @@ class Rogare::Plugins::Debug
   match_command /my name/, method: :my_name
   match_command /my nano/, method: :my_nano
   match_command /chan name/, method: :chan_name
+  match_command /chan pretty name/, method: :chan_pretty_name
   match_command /chan find (.+)/, method: :chan_find
   match_command /user ids/, method: :user_ids
   match_command /war chans (.+)/, method: :war_chans
@@ -44,7 +45,16 @@ class Rogare::Plugins::Debug
   def chan_find(m, param)
     chan = Rogare.find_channel param.strip
     return m.reply 'No such chan' unless chan
-    m.reply chan.name
+
+    if chan.is_a? Array
+      m.reply 'Several chans found!'
+    else
+      chan = [chan]
+    end
+
+    chan.each do |c|
+      m.reply "#{c.server.name.gsub(' ', '~')}/#{c.name}"
+    end
   end
 
   def user_ids(m)

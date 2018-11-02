@@ -210,6 +210,10 @@ class Rogare::Plugins::Wordwar
             if chan.nil?
               logs "=====> Error: no such channel: #{cname}"
               next
+            elsif chan.is_a? Array
+              logs "=====> Error: multiple channels match: #{cname} -> #{chan.inspect}"
+              # Don't spam, don't send to all chans that match — assume error
+              next
             end
 
             chan.send msg

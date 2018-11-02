@@ -75,18 +75,21 @@ module Rogare
       nick.sub(/^(.)/, "\\1\u200B")
     end
 
-    def channel_list
+    def channel_list(opts = {})
+      opts[:irc] = true
+      opts[:discord] = true
+
       list = []
 
-      if irc
+      if irc && opts[:irc]
         irc.channel_list do |chan|
           list << chan
         end
       end
 
-      if discord
-        discord.servers.each do |srv|
-          srv.channels do |chan|
+      if discord && opts[:discord]
+        discord.servers.each do |id, srv|
+          srv.channels.each do |chan|
             list << DiscordChannelShim.new(chan)
           end
         end
@@ -95,6 +98,8 @@ module Rogare
       list
     end
 
+    # MAY RETURN AN ARRAY (if multiple chans match) so ALWAYS HANDLE THAT
+    # unless you're always passing slashed chan names
     def find_channel(name)
       if name.include? '/'
         return unless discord
@@ -107,8 +112,14 @@ module Rogare
         return unless chan
 
         DiscordChannelShim.new chan
-      else
-        return unless irc
+      elsif discord
+        chans = channel_list(irc: false).select {|c| c.name == name }
+        if chans.count == 1
+          chans.first
+        elsif chans.count > 1
+          chans
+        end
+      elsif irc
         irc.channel_list.find name
       end
     end
