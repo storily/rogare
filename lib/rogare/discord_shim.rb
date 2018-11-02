@@ -58,6 +58,10 @@ class DiscordUserShim
     n ||= @member.username
     n || '?'
   end
+
+  def send(message)
+    @member.pm message
+  end
 end
 
 class DiscordChannelShim
