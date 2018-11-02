@@ -144,6 +144,8 @@ class Rogare::Plugins::Wordcount
 
       nth = (timediff / day_secs).ceil
       goal = (opts[:goal] || @@redis.get("nano:#{name}:goal") || 50_000).to_f
+      goal = 50_000 if goal == 0.0
+
       diff = if opts[:live]
         ((goal / month_secs) * timediff).round
       else
