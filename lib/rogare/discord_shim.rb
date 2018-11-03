@@ -102,7 +102,11 @@ class DiscordChannelShim
   end
 
   def to_s
-    @chan.server.id.to_s + '/' + @chan.id.to_s
+    if @chan.server
+      @chan.server.id.to_s
+    else
+      'PM'
+    end + '/' + @chan.id.to_s
   end
 
   def server
