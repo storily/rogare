@@ -3,6 +3,31 @@ class Rogare::Plugins::Debug
   extend Rogare::Plugin
 
   command 'debug', hidden: true
+  usage [
+    'All commands except `!% uptime` are admin-restricted',
+    '`!% uptime` - Show uptime, boot time, host, and version info',
+
+    '`!% my id` - Show own discord id',
+    '`!% my name` - Show own name as per API',
+    '`!% my nano` - Show own nano user',
+
+    '`!% chan name` - Show this channel’s internal name',
+    '`!% chan find <name>` - Find a channel from name or internals',
+
+    '`!% user ids` - Display all known users and their IDs',
+
+    '`!% war chans <war id>` - Display channels the war is in',
+    '`!% war mems <war id>` - Display raw members the war has',
+
+    '`!% voice connect <channel>` - Connect the bot to the given voice channel',
+    '`!% voice on` - Turn speaking on for the current voice channel',
+    '`!% voice off` - Turn speaking off for the current voice channel',
+    '`!% voice bye` - Quit the current voice channel',
+
+    '`!% wc set user <discord user> <nano user>` - Set a user’s nano name for them',
+    '`!% wc set goal <discord user> <nano goal>` - Set a user’s nano goal for them',
+  ]
+  handle_help
 
   match_command /uptime/, method: :uptime
 
@@ -11,7 +36,6 @@ class Rogare::Plugins::Debug
   match_command /my nano/, method: :my_nano
 
   match_command /chan name/, method: :chan_name
-  match_command /chan pretty name/, method: :chan_pretty_name
   match_command /chan find (.+)/, method: :chan_find
   match_command /user ids/, method: :user_ids
 
@@ -28,7 +52,7 @@ class Rogare::Plugins::Debug
   match_command /wc set goal (.+) (.+)/, method: :wc_set_goal
 
   before_handler do |method, m|
-    next if [:uptime].include? method
+    next if [:uptime, :help_message].include? method
 
     is_admin = m.user.inner.roles.find {|r| (r.permissions.bits & 3) == 3 }
     unless is_admin
