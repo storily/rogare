@@ -51,7 +51,11 @@ module Rogare::Plugin
       end
 
       usage[0] = "Usage: #{usage[0]}"
-      usage.each {|l| m.reply(l) }
+      if m.user.discordian?
+        m.reply usage.join("\n")
+      else
+        usage.each {|l| m.reply(l) }
+      end
     end
   end
 
