@@ -6,6 +6,10 @@ class DiscordMessageShim
     @plug = plug
   end
 
+  def inner
+    @event
+  end
+
   def params
     msg = @event.message.content
     groups = msg.match(@pattern).captures
@@ -39,6 +43,10 @@ class DiscordUserShim
     @member = member
   end
 
+  def inner
+    @member
+  end
+
   def discordian?
     true
   end
@@ -67,6 +75,10 @@ end
 class DiscordChannelShim
   def initialize(chan)
     @chan = chan
+  end
+
+  def inner
+    @chan
   end
 
   def send(msg)
