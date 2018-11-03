@@ -8,17 +8,22 @@ class Rogare::Plugins::Say
 
   @@redis = Rogare.redis(4)
 
-  match_command /(#+\w+)\s+(.*)/
+  match_command /(\S+)\s+(.*)/
   match_empty :help_message
 
   def execute(m, chan, message)
-    channel = Rogare.bot.channel_list.find(chan.downcase.strip)
+    channel = Rogare.find_channel(chan.strip)
     if channel.nil?
       m.reply "No such channel"
       return
+    elsif channel.is_a? Array
+      m.reply "Multiple channels match this:\n" + channel.map do |chan|
+        "#{chan.server.name.gsub(' ', '~')}/#{chan.name}"
+      end.join("\n")
+      return
     end
 
-    k = "nick:#{m.user.nick}:sayquota"
+    k = "nick:#{(m.user.discordian? ? m.user.id : m.user.nick)}:sayquota"
     quota = @@redis.get(k).to_i
     @@redis.set(k, 0, ex: 60*60) if quota == 0
     @@redis.incr(k)

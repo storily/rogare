@@ -53,7 +53,7 @@ class Rogare::Plugins::Debug
     end
 
     chan.each do |c|
-      m.reply "#{c.server.name.gsub(' ', '~')}/#{c.name}"
+      m.reply "#{c.server.name.downcase.gsub(' ', '~')}/#{c.name}"
     end
   end
 

@@ -240,7 +240,7 @@ class Rogare::Plugins::Wordwar
             # If we're at least 35 seconds before the start, we have
             # time to send a reminder. Otherwise, skip sending it.
             sleep to_start - 30
-            starting.call('in 30 seconds') {'-- Be ready: tell us your starting wordcount.'}
+            starting.call('in 30 seconds') {'— Be ready: tell us your starting wordcount.'}
             sleep 30
           else
             # In any case, we sleep until the beginning

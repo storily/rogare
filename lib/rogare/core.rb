@@ -100,15 +100,17 @@ module Rogare
 
     # MAY RETURN AN ARRAY (if multiple chans match) so ALWAYS HANDLE THAT
     # unless you're always passing slashed chan names
+    # Note that non-ID slashed names can be collided.
     def find_channel(name)
       if name.include? '/'
         return unless discord
         sid, cid = name.split('/')
 
         server = discord.servers[sid.to_i]
+        server ||= (discord.servers.find {|i, s| s.name.downcase.gsub(' ', '~') == sid.downcase } || [])[1]
         return unless server
 
-        chan = server.channels.find {|c| c.id.to_s == cid }
+        chan = server.channels.find {|c| c.id.to_s == cid || c.name == cid }
         return unless chan
 
         DiscordChannelShim.new chan
