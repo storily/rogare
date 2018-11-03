@@ -14,7 +14,10 @@ class Rogare::Plugins::Debug
   match_command /user ids/, method: :user_ids
   match_command /war chans (.+)/, method: :war_chans
   match_command /war mems (.+)/, method: :war_mems
+  match_command /voice connect (.+)/, method: :voice_connect
+  match_command /voice on/, method: :voice_on
   match_command /voice off/, method: :voice_off
+  match_command /voice bye/, method: :voice_bye
 
   def uptime(m)
     version = ENV['HEROKU_SLUG_DESCRIPTION'] || `git log -n1 --abbrev-commit --pretty=oneline` || 'around'
@@ -81,7 +84,19 @@ class Rogare::Plugins::Debug
     m.reply "`#{mems.inspect}`"
   end
 
+  def voice_connect(m, chan)
+    Rogare.discord.voice_connect Rogare.find_channel(chan).inner
+  end
+
+  def voice_on(m)
+    Rogare.discord.voice(m.channel.server).speaking = true
+  end
+
   def voice_off(m)
+    Rogare.discord.voice(m.channel.server).speaking = false
+  end
+
+  def voice_bye(m)
     Rogare.discord.voice(m.channel.server).destroy
   end
 end
