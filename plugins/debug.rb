@@ -14,6 +14,7 @@ class Rogare::Plugins::Debug
   match_command /user ids/, method: :user_ids
   match_command /war chans (.+)/, method: :war_chans
   match_command /war mems (.+)/, method: :war_mems
+  match_command /voice off/, method: :voice_off
 
   def uptime(m)
     version = ENV['HEROKU_SLUG_DESCRIPTION'] || `git log -n1 --abbrev-commit --pretty=oneline` || 'around'
@@ -78,5 +79,9 @@ class Rogare::Plugins::Debug
     redis = Rogare.redis(3)
     mems = redis.smembers "wordwar:#{param.strip}:members"
     m.reply "`#{mems.inspect}`"
+  end
+
+  def voice_off(m)
+    Rogare.discord.voice(m.channel.server).destroy
   end
 end

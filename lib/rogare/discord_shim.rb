@@ -70,7 +70,8 @@ class DiscordChannelShim
   end
 
   def send(msg)
-    @chan.send msg, type == :voice
+    return if @chan.voice?
+    @chan.send msg
   end
 
   def users
