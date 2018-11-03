@@ -37,6 +37,10 @@ module Rogare::Plugin
     my[:usage] = [message].flatten.compact
   end
 
+  def before_handler(&block)
+    my[:before_handler] = block
+  end
+
   def handle_help
     match_command /((-|--)?(help|usage)|-?\?)\s*$/, method: :help_message
     h = my
@@ -74,10 +78,19 @@ module Rogare::Plugin
 
         pattern = my[:patterns].find {|pat| pat[0] =~ event.message.content}
         logs "---> Detected pattern: #{pattern[0]} (#{pattern[1]})"
-        plug = new nil, :discord
 
+        plug = new nil, :discord
         params = DiscordMessageShim.new(event, pattern, my).params
         meth = pattern[1][:method]
+
+        if my[:before_handler]
+          logs 'Running before_handler'
+          if my[:before_handler].call(meth, *params) == :stop
+            logs 'before_handler says to stop'
+            next
+          end
+        end
+
         arty = plug.method(meth).arity
         params = params.first(arty) if arty > 0
         plug.send meth, *params

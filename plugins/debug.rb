@@ -5,20 +5,34 @@ class Rogare::Plugins::Debug
   command 'debug', hidden: true
 
   match_command /uptime/, method: :uptime
+
   match_command /my id/, method: :my_id
   match_command /my name/, method: :my_name
   match_command /my nano/, method: :my_nano
+
   match_command /chan name/, method: :chan_name
   match_command /chan pretty name/, method: :chan_pretty_name
   match_command /chan find (.+)/, method: :chan_find
   match_command /user ids/, method: :user_ids
+
   match_command /war chans (.+)/, method: :war_chans
   match_command /war mems (.+)/, method: :war_mems
+
   match_command /voice connect (.+)/, method: :voice_connect
   match_command /voice on/, method: :voice_on
   match_command /voice play (.+)/, method: :voice_play
   match_command /voice off/, method: :voice_off
   match_command /voice bye/, method: :voice_bye
+
+  before_handler do |method, m|
+    next if [:uptime].include? method
+
+    is_admin = m.user.inner.roles.find {|r| (r.permissions.bits & 3) == 3 }
+    unless is_admin
+      m.reply('Not authorised')
+      next :stop
+    end
+  end
 
   def uptime(m)
     version = ENV['HEROKU_SLUG_DESCRIPTION'] || `git log -n1 --abbrev-commit --pretty=oneline` || 'around'
