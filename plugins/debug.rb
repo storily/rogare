@@ -24,6 +24,9 @@ class Rogare::Plugins::Debug
   match_command /voice off/, method: :voice_off
   match_command /voice bye/, method: :voice_bye
 
+  match_command /wc set user (.+) (.+)/, method: :wc_set_user
+  match_command /wc set goal (.+) (.+)/, method: :wc_set_goal
+
   before_handler do |method, m|
     next if [:uptime].include? method
 
@@ -145,5 +148,29 @@ class Rogare::Plugins::Debug
 
   def voice_bye(m)
     Rogare.discord.voice(m.channel.server).destroy
+  end
+
+  def wc_set_user(m, user, nano)
+    redis = Rogare.redis(2)
+
+    du = Rogare.from_discord_mid user
+    du ||= Rogare.discord.users.find {|i, u| u.name == user }[1]
+    return m.reply('No such user') unless du
+
+    redis.set("nick:#{du.id}:nanouser", nano)
+    m.reply "User `#{du.id}` nanouser set to `#{nano}`"
+  end
+
+  def wc_set_goal(m, user, goal)
+    redis = Rogare.redis(2)
+    goal.sub! /k$/, '000'
+
+    du = Rogare.from_discord_mid user
+    du ||= Rogare.discord.users.find {|i, u| u.name == user }[1]
+    return m.reply('No such user') unless du
+
+    nano = redis.get("nick:#{du.id}:nanouser")
+    redis.set("nano:#{nano}:goal", goal.to_i)
+    m.reply "User `#{du.id}` nanouser `#{nano}` goal set to `#{goal}`"
   end
 end
