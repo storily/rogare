@@ -79,7 +79,7 @@ class Rogare::Plugins::Wordcount
     goal.sub! /k$/, '000'
     @@redis.set("nano:#{name}:goal", goal.to_i)
     m.reply "Your goal has been set to #{goal}."
-    own_count(m)
+    own_count(m, goal.to_i)
   end
 
   def with_goal(m, goal, param)
