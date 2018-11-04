@@ -25,11 +25,11 @@ module Rogare
       c
     end
 
-    def redis(n)
+    def redis(dbno)
       if ENV['REDIS_URL']
         Redis.new
       else
-        Redis.new db: n
+        Redis.new db: dbno
       end
     end
 
@@ -79,7 +79,7 @@ module Rogare
         server ||= (discord.servers.find { |_i, s| s.name.downcase.tr(' ', '~') == sid.downcase } || [])[1]
         return unless server
 
-        chan = server.channels.find { |c| c.id.to_s == cid || c.name == cid }
+        chan = server.channels.find { |c| [c.id.to_s, c.name].include? cid }
         return unless chan
 
         DiscordChannelShim.new chan

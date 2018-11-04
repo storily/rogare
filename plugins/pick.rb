@@ -10,8 +10,8 @@ class Rogare::Plugins::Pick
   match_command /(\d+|[a-z])\s+(\d+|[a-z])/
   match_empty :help_message
 
-  def execute(m, n1, n2)
-    n1, n2 = [n1, n2].map { |c| c.strip.upcase }.sort
-    m.reply (n1..n2).to_a.sample
+  def execute(m, start, ending)
+    start, ending = [start, ending].map { |c| c.strip.upcase }.sort
+    m.reply((start..ending).to_a.sample)
   end
 end

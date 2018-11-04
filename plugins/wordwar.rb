@@ -82,20 +82,20 @@ class Rogare::Plugins::Wordwar
     self.class.set_war_timer(k, timeat, duration).join
   end
 
-  def rk(*args) 
-    self.class.rk(*args) 
+  def rk(*args)
+    self.class.rk(*args)
   end
 
-  def dur_display(*args) 
-    self.class.dur_display(*args) 
+  def dur_display(*args)
+    self.class.dur_display(*args)
   end
 
-  def all_wars(*args) 
-    self.class.all_wars(*args) 
+  def all_wars(*args)
+    self.class.all_wars(*args)
   end
 
-  def war_info(*args) 
-    self.class.war_info(*args) 
+  def war_info(*args)
+    self.class.war_info(*args)
   end
 
   def say_war_info(m, war)
@@ -117,11 +117,9 @@ class Rogare::Plugins::Wordwar
         "for #{dur_display(war[:end], war[:start]).first}"
       end,
 
-      "with #{others.count} others" unless others.empty?,
+      ("with #{others.count} others" unless others.empty?),
 
-      unless war[:channels].count <= 1 && war[:channels].include?(m.channel.to_s)
-        "in #{war[:channels].join(', ')}"
-      end
+      ("in #{war[:channels].join(', ')}" unless war[:channels].count <= 1 && war[:channels].include?(m.channel.to_s))
     ].compact.join(', ')
   end
 
@@ -140,38 +138,40 @@ class Rogare::Plugins::Wordwar
       say_war_info m, war
     end
 
-    m.reply "No current wordwars" if wars.empty?
+    m.reply 'No current wordwars' if wars.empty?
   end
 
   def ex_war_info(m, param)
     k = param.strip.to_i
-    return m.reply 'You need to specify the wordwar ID' if k == 0
+    return m.reply 'You need to specify the wordwar ID' if k.zero?
 
-    return m.reply "No such wordwar" unless @@redis.exists rk(k, 'start')
+    return m.reply 'No such wordwar' unless @@redis.exists rk(k, 'start')
 
     say_war_info m, war_info(k)
   end
 
   def ex_war_members(m, param)
     k = param.strip.to_i
-    return m.reply 'You need to specify the wordwar ID' if k == 0
+    return m.reply 'You need to specify the wordwar ID' if k.zero?
 
-    return m.reply "No such wordwar" unless @@redis.exists rk(k, 'start')
+    return m.reply 'No such wordwar' unless @@redis.exists rk(k, 'start')
 
     war = war_info(k)
     others = war[:members].reject { |u| u == war[:owner] }
-    m.reply "#{war[:id]}: #{Rogare.nixnotif war[:owner]}'s war, with: " + if others.empty?
-                                                                            'no one else :('
-                                                                          else
-                                                                            others.map { |u| Rogare.nixnotif u }.join(', ')
-    end
+    others = if others.empty?
+               'no one else :('
+             else
+               others.map { |u| Rogare.nixnotif u }.join(', ')
+             end
+
+    m.reply "#{war[:id]}: #{Rogare.nixnotif war[:owner]}'s war, with: #{others}"
   end
 
   def ex_join_war(m, param)
     k = param.strip.to_i
-    return m.reply 'You need to specify the wordwar ID' if k == 0
+    return m.reply 'You need to specify the wordwar ID' if k.zero?
 
-    return m.reply "No such wordwar" unless @@redis.exists rk(k, 'start')
+    return m.reply 'No such wordwar' unless @@redis.exists rk(k, 'start')
 
     @@redis.sadd rk(k, 'channels'), m.channel.to_s
     @@redis.sadd rk(k, 'members'), m.user.mid
@@ -180,9 +180,9 @@ class Rogare::Plugins::Wordwar
 
   def ex_leave_war(m, param)
     k = param.strip.to_i
-    return m.reply 'You need to specify the wordwar ID' if k == 0
+    return m.reply 'You need to specify the wordwar ID' if k.zero?
 
-    return m.reply "No such wordwar" unless @@redis.exists rk(k, 'start')
+    return m.reply 'No such wordwar' unless @@redis.exists rk(k, 'start')
 
     @@redis.srem rk(k, 'members'), m.user.mid
     m.reply "You're out."
@@ -190,9 +190,9 @@ class Rogare::Plugins::Wordwar
 
   def ex_cancel_war(m, param)
     k = param.strip.to_i
-    return m.reply 'You need to specify the wordwar ID' if k == 0
+    return m.reply 'You need to specify the wordwar ID' if k.zero?
 
-    return m.reply "No such wordwar" unless @@redis.exists rk(k, 'start')
+    return m.reply 'No such wordwar' unless @@redis.exists rk(k, 'start')
 
     self.class.erase_war k
     m.reply "Wordwar #{k} deleted."
@@ -210,7 +210,7 @@ class Rogare::Plugins::Wordwar
               next
             elsif chan.is_a? Array
               logs "=====> Error: multiple channels match: #{cname} -> #{chan.inspect}"
-              # Don't spam, don't send to all chans that match — assume error
+              # Don't spam, don't send to all chans that match - assume error
               next
             end
 
@@ -231,7 +231,7 @@ class Rogare::Plugins::Wordwar
         }
 
         to_start = start - Time.now
-        if to_start > 0
+        if to_start.positive?
           # We're before the start of the war
 
           if to_start > 35
@@ -255,7 +255,7 @@ class Rogare::Plugins::Wordwar
           # bot restarted while a war was running.
 
           to_end = (start + duration) - Time.now
-          if to_end < 0
+          if to_end.negative?
             # We're after the END of the war, but before Redis expired
             # the keys, and also the keys were not erased manually, so
             # it must be that the war ended as the bot was restarting!
@@ -295,7 +295,7 @@ class Rogare::Plugins::Wordwar
       secs = (minutes - minutes.to_i).abs * 60.0
 
       neg = false
-      if minutes < 0
+      if minutes.negative?
         minutes = minutes.abs
         neg = true
       end
@@ -306,7 +306,7 @@ class Rogare::Plugins::Wordwar
          "#{minutes.floor}m #{secs.round}s"
        else
          "#{secs.round}s"
-      end, neg]
+       end, neg]
     end
 
     def rk(war, sub = nil)
@@ -315,9 +315,7 @@ class Rogare::Plugins::Wordwar
 
     def all_wars
       @@redis.keys(rk('*', 'start')).map do |k|
-        k.gsub /(^wordwar:|:start$)/, ''
-      end.map do |k|
-        war_info k
+        war_info k.gsub(/(^wordwar:|:start$)/, '')
       end
     end
 
@@ -334,7 +332,7 @@ class Rogare::Plugins::Wordwar
 
     def store_war(m, time, duration)
       # War is in the past???
-      return if ((time + duration) - Time.now).to_i < 0
+      return if ((time + duration) - Time.now).to_i.negative?
 
       k = @@redis.incr rk('count')
 
@@ -342,8 +340,8 @@ class Rogare::Plugins::Wordwar
         @@redis.sadd rk(k, 'channels'), m.channel.to_s
         @@redis.set rk(k, 'owner'), m.user.mid
         @@redis.sadd rk(k, 'members'), m.user.mid
-        @@redis.set rk(k, 'start'), "#{time}"
-        @@redis.set rk(k, 'end'), "#{time + duration}"
+        @@redis.set rk(k, 'start'), time.to_s
+        @@redis.set rk(k, 'end'), (time + duration).to_s
       end
       k
     end

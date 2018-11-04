@@ -5,7 +5,7 @@ class Rogare::Plugins::Debug
 
   command 'debug', hidden: true
   usage [
-    'All commands except `!% uptime` are admin-restricted',
+    'All commands except `!% uptime` and `!% my` are admin-restricted',
     '`!% uptime` - Show uptime, boot time, host, and version info',
 
     '`!% my id` - Show own discord id',
@@ -14,16 +14,10 @@ class Rogare::Plugins::Debug
 
     '`!% chan name` - Show this channel’s internal name',
     '`!% chan find <name>` - Find a channel from name or internals',
-
     '`!% user ids` - Display all known users and their IDs',
 
     '`!% war chans <war id>` - Display channels the war is in',
     '`!% war mems <war id>` - Display raw members the war has',
-
-    '`!% voice connect <channel>` - Connect the bot to the given voice channel',
-    '`!% voice on` - Turn speaking on for the current voice channel',
-    '`!% voice off` - Turn speaking off for the current voice channel',
-    '`!% voice bye` - Quit the current voice channel',
 
     '`!% wc set user <discord user> <nano user>` - Set a user’s nano name for them',
     '`!% wc set goal <discord user> <nano goal>` - Set a user’s nano goal for them'
@@ -43,17 +37,11 @@ class Rogare::Plugins::Debug
   match_command /war chans (.+)/, method: :war_chans
   match_command /war mems (.+)/, method: :war_mems
 
-  match_command /voice connect (.+)/, method: :voice_connect
-  match_command /voice on/, method: :voice_on
-  match_command /voice play (.+)/, method: :voice_play
-  match_command /voice off/, method: :voice_off
-  match_command /voice bye/, method: :voice_bye
-
   match_command /wc set user (.+) (.+)/, method: :wc_set_user
   match_command /wc set goal (.+) (.+)/, method: :wc_set_goal
 
   before_handler do |method, m|
-    next if %i[uptime help_message].include? method
+    next if %i[uptime help_message my_id my_name my_nano].include? method
 
     is_admin = m.user.inner.roles.find { |r| (r.permissions.bits & 3) == 3 }
     unless is_admin
@@ -124,54 +112,6 @@ class Rogare::Plugins::Debug
     redis = Rogare.redis(3)
     mems = redis.smembers "wordwar:#{param.strip}:members"
     m.reply "`#{mems.inspect}`"
-  end
-
-  def voice_connect(_m, chan)
-    Rogare.discord.voice_connect Rogare.find_channel(chan).inner
-  end
-
-  def voice_on(m)
-    Rogare.discord.voice(m.channel.server).speaking = true
-  end
-
-  def voice_play(m, name)
-    return if name.include? '/'
-
-    file = Dir["./voice/#{name}.dca"].first
-    file ||= Dir["./voice/#{name}.mp3"].first
-    return m.reply 'No such file' unless file
-
-    voice = Rogare.discord.voice(m.channel.server)
-    voice.speaking = true
-
-    begin
-      m.reply 'Playing'
-      logs 'What'
-      if file.end_with? '.dca'
-        logs 'Dca'
-        voice.play_dca(file)
-      else
-        logs 'File'
-        logs file.inspect
-        voice.play_io(open(file))
-      end
-      logs 'What'
-      m.reply 'Played'
-    rescue StandardError => e
-      logs e.message
-      logs e.backtrace
-      m.reply "Error playing #{name}"
-    end
-
-    voice.speaking = false
-  end
-
-  def voice_off(m)
-    Rogare.discord.voice(m.channel.server).speaking = false
-  end
-
-  def voice_bye(m)
-    Rogare.discord.voice(m.channel.server).destroy
   end
 
   def wc_set_user(m, user, nano)

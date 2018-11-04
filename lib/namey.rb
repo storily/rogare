@@ -15,7 +15,7 @@ module Namey
       # See data/bucketise.rb for how this data is generated and organised.
       file = "#{__dir__}/../data/#{name}.json.gz"
       Zlib::GzipReader.open(file) do |gz|
-        return JSON.load gz.read
+        return JSON.parse gz.read
       end
     end
   end
@@ -62,15 +62,11 @@ module Namey
       end
 
       name = nil
-      while name.nil?
-        name = get_name(params[:type], params[:min_freq], params[:max_freq])
-      end
+      name = get_name(params[:type], params[:min_freq], params[:max_freq]) while name.nil?
 
       if params[:type] != :surname && params[:with_surname] == true
         surname = nil
-        while surname.nil?
-          surname = get_name(:surname, params[:min_freq], params[:max_freq])
-        end
+        surname = get_name(:surname, params[:min_freq], params[:max_freq]) while surname.nil?
 
         name = "#{name} #{surname}"
       end
@@ -79,20 +75,20 @@ module Namey
 
     protected
 
-    def frequency_values(f)
-      low = case f
+    def frequency_values(freq)
+      low = case freq
             when :common then 0
             when :rare then 40
             when :all then 0
             else 0
             end
 
-      high = case f
+      high = case freq
              when :common then 20
              when :rare then 99
              when :all then 99
              else 99
-            end
+             end
 
       [low, high]
     end

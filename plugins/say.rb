@@ -12,8 +12,8 @@ class Rogare::Plugins::Say
   match_command /(\S+)\s+(.*)/
   match_empty :help_message
 
-  def execute(m, chan, message)
-    channel = Rogare.find_channel(chan.strip)
+  def execute(m, channel, message)
+    channel = Rogare.find_channel(channel.strip)
     if channel.nil?
       m.reply 'No such channel'
       return
@@ -26,7 +26,7 @@ class Rogare::Plugins::Say
 
     k = "nick:#{m.user.id}:sayquota"
     quota = @@redis.get(k).to_i
-    @@redis.set(k, 0, ex: 60 * 60) if quota == 0
+    @@redis.set(k, 0, ex: 60 * 60) if quota.zero?
     @@redis.incr(k)
 
     max = 5
@@ -36,9 +36,7 @@ class Rogare::Plugins::Say
       return
     end
 
-    if quota >= (max * 0.8).floor
-      m.reply "You're approaching your quota of #{max} !say per hour!"
-    end
+    m.reply "You're approaching your quota of #{max} !say per hour!" if quota >= (max * 0.8).floor
 
     channel.send message
   end

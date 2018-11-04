@@ -109,7 +109,7 @@ class Rogare::Plugins::Wordcount
   end
 
   def get_counts(m, names, opts = {})
-    opts[:goal].sub! /k$/, '000' if opts[:goal]
+    opts[:goal]&.sub! /k$/, '000'
 
     names.map! do |c|
       rks = []
@@ -148,18 +148,20 @@ class Rogare::Plugins::Wordcount
       goal = (opts[:goal] || @@redis.get("nano:#{name}:goal") || 50_000).to_f
       goal = 50_000 if goal == 0.0
 
-      diff = if opts[:live]
-               ((goal / month_secs) * timediff).round
-             else
-               (goal / 30 * nth).round
-      end - count
+      goal_today =  if opts[:live]
+                      ((goal / month_secs) * timediff).round
+                    else
+                      (goal / 30 * nth).round
+                    end
+
+      diff = goal_today - count
 
       "#{Rogare.nixnotif(name.to_s)}: #{count} (#{[
         "#{(100.0 * count / goal).round(1)}%",
-        "today: #{today}" if today,
-        if diff == 0
+        ("today: #{today}" if today),
+        if diff.zero?
           'up to date'
-        elsif diff > 0
+        elsif diff.positive?
           "#{diff} behind"
         else
           "#{diff.abs} ahead"

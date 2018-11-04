@@ -26,7 +26,7 @@ class Rogare::Plugins::Plot
 
     return m.reply Dicere.random.to_s if param.empty?
 
-    if param.to_i > 0
+    if param.to_i.positive?
       item = Dicere.item(param)
       m.reply item.to_s
       m.reply item.to_href

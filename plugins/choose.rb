@@ -14,12 +14,11 @@ class Rogare::Plugins::Choose
     args = param.split.map { |x| x.casecmp('or').zero? ? x.downcase : x }.join(' ').split(' or ')
 
     s = Set.new args
-    if s.length > 1 && (args.length == s.length)
-      choice = args.sample
-      choice = choice[0..-2] if choice.end_with? '?'
+    return unless s.length > 1 && (args.length == s.length)
 
-      m.reply choice
-      return
-    end
+    choice = args.sample
+    choice = choice[0..-2] if choice.end_with? '?'
+
+    m.reply choice
   end
 end

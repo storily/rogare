@@ -22,14 +22,14 @@ module Rogare::Plugin
     @@mine[inspect.to_sym] = val
   end
 
-  def command(c, opts = {})
+  def command(comm, opts = {})
     opts[:hidden] || false
     my.merge!(opts)
-    my[:command] = c
+    my[:command] = comm
   end
 
-  def aliases(*a)
-    my[:aliases] = a
+  def aliases(*aliases)
+    my[:aliases] = aliases
   end
 
   def usage(message)
@@ -65,7 +65,7 @@ module Rogare::Plugin
     opts[:method] ||= :execute
 
     my[:patterns] << [/^\s*!#{pattern}/, opts]
-    my[:common_pattern] = Regexp.union my[:patterns].map { |pat| pat[0] }
+    my[:common_pattern] = Regexp.union(my[:patterns].map { |pat| pat[0] })
 
     Rogare.discord.remove_handler my[:discord_handler] if my[:discord_handler]
     my[:discord_handler] = Rogare.discord.message(contains: my[:common_pattern]) do |event|
@@ -88,7 +88,7 @@ module Rogare::Plugin
       end
 
       arty = plug.method(meth).arity
-      params = params.first(arty) if arty > 0
+      params = params.first(arty) if arty.positive?
       plug.send meth, *params
     end
   end

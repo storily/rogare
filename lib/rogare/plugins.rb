@@ -8,9 +8,9 @@ module Rogare::Plugins
     constants.map { |c| const_get c } + @@custom_plugins
   end
 
-  def self.config(c)
+  def self.config(conf)
     @@custom_configs.each do |fn|
-      fn.call(c)
+      fn.call(conf)
     end
   end
 

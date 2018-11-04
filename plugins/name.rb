@@ -24,44 +24,23 @@ class Rogare::Plugins::Name
 
     args[:n] = NumbersInWords.in_numbers(param.strip)
 
-    param.strip.split(' ').map do |p|
-      if p.to_i > 0
-        p.to_i
+    words = param.strip.split(' ')
+    words.map! do |word|
+      if word.to_i.positive?
+        word.to_i
       else
-        p.downcase.to_sym
+        word.downcase.to_sym
       end
-    end.each do |p|
-      if p.is_a? Integer
-        args[:n] = p
-      elsif /^(males?|m[ae]n|boys?)$/i.match?(p)
-        args[:call] = :male
-      elsif /^(females?|wom[ae]n|girls?)$/i.match?(p)
-        args[:call] = :female
-      elsif /^(enby|nb|enbie)s?$/i.match?(p)
-        args[:call] = :unisex
-      elsif /^(pierre|stone|rock|pebble)s?$/i.match?(p)
-        args[:call] = :pierre
-      elsif /^(common)$/i.match?(p)
-        args[:freq] = :common
-      elsif /^(rare|weird|funny|evil|bad)$/i.match?(p)
-        args[:freq] = :rare
-      elsif /^(all|both)$/i.match?(p)
-        args[:freq] = :all
-      elsif /^(first|given)$/i.match?(p)
-        args[:full] = false
-      elsif /^(last(name)?|family|surname)$/i.match?(p)
-        args[:full] = true
-        args[:last] = true
-      elsif /^(full)$/i.match?(p)
-        args[:full] = true
-        args[:last] = false
-      end
+    end
+
+    words.each do |word|
+      parse_word(args, word)
     end
 
     args[:n] = 100 if args[:n] > 100
     args[:n] = 1 if args[:n] < 1
 
-    joined = (args[:n] * 3).times.map do
+    joined = Array.new(args[:n] * 3) do
       next ENBYNAMES.sample(args[:full] ? 2 : 1).join(' ') if args[:call] == :unisex
       next %w[Pierre Pierre].sample(args[:full] ? 2 : 1).join(' ') if args[:call] == :pierre
 
@@ -83,5 +62,33 @@ class Rogare::Plugins::Name
     end
 
     m.reply joined.first(args[:n]).join ', '
+  end
+
+  def parse_word(args, word)
+    if word.is_a? Integer
+      args[:n] = word
+    elsif /^(males?|m[ae]n|boys?)$/i.match?(word)
+      args[:call] = :male
+    elsif /^(females?|wom[ae]n|girls?)$/i.match?(word)
+      args[:call] = :female
+    elsif /^(enby|nb|enbie)s?$/i.match?(word)
+      args[:call] = :unisex
+    elsif /^(pierre|stone|rock|pebble)s?$/i.match?(word)
+      args[:call] = :pierre
+    elsif /^(common)$/i.match?(word)
+      args[:freq] = :common
+    elsif /^(rare|weird|funny|evil|bad)$/i.match?(word)
+      args[:freq] = :rare
+    elsif /^(all|both)$/i.match?(word)
+      args[:freq] = :all
+    elsif /^(first|given)$/i.match?(word)
+      args[:full] = false
+    elsif /^(last(name)?|family|surname)$/i.match?(word)
+      args[:full] = true
+      args[:last] = true
+    elsif /^(full)$/i.match?(word)
+      args[:full] = true
+      args[:last] = false
+    end
   end
 end
