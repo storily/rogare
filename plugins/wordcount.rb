@@ -1,5 +1,4 @@
 class Rogare::Plugins::Wordcount
-  include Cinch::Plugin
   extend Rogare::Plugin
   extend Memoist
 
@@ -43,14 +42,14 @@ class Rogare::Plugins::Wordcount
   match_empty :own_count
 
   def own_count(m, goal = nil)
-    get_counts(m, [m.user.discordian? ? m.user.mid : m.user.nick], goal: goal)
+    get_counts(m, [m.user.mid], goal: goal)
   end
 
   def live_counts(m, param = nil)
     if param
       execute(m, param, live: true)
     else
-      get_counts(m, [m.user.nick], live: true)
+      get_counts(m, [m.user.mid], live: true)
     end
   end
 
@@ -63,7 +62,7 @@ class Rogare::Plugins::Wordcount
   end
 
   def set_username(m, param)
-    user = m.user.discordian? ? m.user.id : m.user.nick.downcase
+    user = m.user.id
     name = param.strip.split.join("_")
     @@redis.set("nick:#{user}:nanouser", name)
     m.reply "Your username has been set to #{name}."
@@ -71,7 +70,7 @@ class Rogare::Plugins::Wordcount
   end
 
   def set_goal(m, goal)
-    user = m.user.discordian? ? m.user.id : m.user.nick.downcase
+    user = m.user.id
     name = @@redis.get("nick:#{user}:nanouser") || user
     goal.sub! /k$/, '000'
     @@redis.set("nano:#{name}:goal", goal.to_i)
@@ -91,15 +90,15 @@ class Rogare::Plugins::Wordcount
       p = p.downcase.to_sym
       case p
       when /^(me|self|myself|i)$/i
-        names << (m.user.discordian? ? m.user.mid : m.user.nick)
+        names << m.user.mid
       when /^(random|rand|any)$/i
         random_user = true
-        names.push(*m.channel.users.keys.shuffle.map {|n| (n.discordian? ? n.mid : n.nick) })
+        names.push(*m.channel.users.shuffle.map {|u| u.mid })
       else
         names << p
       end
     end
-    names << (m.user.discordian? ? m.user.mid : m.user.nick) if names.empty?
+    names << m.user.mid if names.empty?
     names.uniq!
 
     opts[:random] = random_user
@@ -113,7 +112,7 @@ class Rogare::Plugins::Wordcount
 
     names.map! do |c|
       rks = []
-      if Rogare.discord && c =~ /^<@\d+>$/
+      if c =~ /^<@\d+>$/
         du = Rogare.from_discord_mid(c)
         if du
           rks << "nick:#{du.id}:nanouser"

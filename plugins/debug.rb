@@ -1,5 +1,4 @@
 class Rogare::Plugins::Debug
-  include Cinch::Plugin
   extend Rogare::Plugin
 
   command 'debug', hidden: true
@@ -76,11 +75,10 @@ class Rogare::Plugins::Debug
   end
 
   def my_nano(m)
-    uid = (m.user.discordian? ? m.user.id : nil) || m.user.nick
-    m.reply "nano map key: #{uid}"
+    m.reply "nano map key: #{m.user.id}"
 
     redis = Rogare.redis(2)
-    nano = redis.get("nick:#{uid}:nanouser")
+    nano = redis.get("nick:#{m.user.id}:nanouser")
     m.reply "nano map value: `#{nano.inspect}`"
   end
 

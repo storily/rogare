@@ -7,18 +7,6 @@ Bundler.require :default, (ENV['RACK_ENV'] || 'production').to_sym
 logs '=====> Loading framework'
 require './lib/rogare'
 
-if ENV['NICKSERV_USER'] && ENV['NICKSERV_PASS']
-  logs '=====> Loading identify plugin'
-  require 'cinch/plugins/identify'
-  Rogare::Plugins.add_plugin(Cinch::Plugins::Identify) do |c|
-    c.plugins.options[Cinch::Plugins::Identify] = {
-      username: ENV['NICKSERV_USER'],
-      password: ENV['NICKSERV_PASS'],
-      type: :nickserv,
-    }
-  end
-end
-
 logs '=====> Loading modules'
 Dir['./plugins/*.rb'].each do |p|
   require p
@@ -37,21 +25,13 @@ threads << Thread.new do
 end
 
 threads << Thread.new do
+  logs '=====> Preparing live debug port'
   binding.remote_pry
 end
 
-if ENV['IRC_SERVER'] && ENV['IRC_CHANNELS']
-  threads << Thread.new do
-    logs '=====> Starting IRC'
-    Rogare.irc.start
-  end
-end
-
-if ENV['DISCORD_TOKEN']
-  threads << Thread.new do
-    logs '=====> Starting Discord'
-    Rogare.discord.run
-  end
+threads << Thread.new do
+  logs '=====> Starting Discord'
+  Rogare.discord.run
 end
 
 ThreadsWait.all_waits(*threads)

@@ -1,5 +1,4 @@
 class Rogare::Plugins::Say
-  include Cinch::Plugin
   extend Rogare::Plugin
 
   command 'say'
@@ -23,7 +22,7 @@ class Rogare::Plugins::Say
       return
     end
 
-    k = "nick:#{(m.user.discordian? ? m.user.id : m.user.nick)}:sayquota"
+    k = "nick:#{m.user.id}:sayquota"
     quota = @@redis.get(k).to_i
     @@redis.set(k, 0, ex: 60*60) if quota == 0
     @@redis.incr(k)

@@ -1,5 +1,4 @@
 class Rogare::Plugins::Wordwar
-  include Cinch::Plugin
   extend Rogare::Plugin
 
   command 'wordwar'
@@ -172,7 +171,7 @@ class Rogare::Plugins::Wordwar
     end
 
     @@redis.sadd rk(k, 'channels'), m.channel.to_s
-    @@redis.sadd rk(k, 'members'), m.user.discordian? ? m.user.mid : m.user.nick
+    @@redis.sadd rk(k, 'members'), m.user.mid
     m.reply "You're in!"
   end
 
@@ -184,7 +183,7 @@ class Rogare::Plugins::Wordwar
       return m.reply "No such wordwar"
     end
 
-    @@redis.srem rk(k, 'members'), m.user.discordian? ? m.user.mid : m.user.nick
+    @@redis.srem rk(k, 'members'), m.user.mid
     m.reply "You're out."
   end
 
@@ -342,8 +341,8 @@ class Rogare::Plugins::Wordwar
 
       @@redis.multi do
         @@redis.sadd rk(k, 'channels'), m.channel.to_s
-        @@redis.set rk(k, 'owner'), m.user.discordian? ? m.user.mid : m.user.nick
-        @@redis.sadd rk(k, 'members'), m.user.discordian? ? m.user.mid : m.user.nick
+        @@redis.set rk(k, 'owner'), m.user.mid
+        @@redis.sadd rk(k, 'members'), m.user.mid
         @@redis.set rk(k, 'start'), "#{time}"
         @@redis.set rk(k, 'end'), "#{time + duration}"
       end

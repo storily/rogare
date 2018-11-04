@@ -1,5 +1,4 @@
 class Rogare::Plugins::Choose
-  include Cinch::Plugin
   extend Rogare::Plugin
 
   command 'choose'

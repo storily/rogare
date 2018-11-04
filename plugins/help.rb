@@ -1,5 +1,4 @@
 class Rogare::Plugins::Help
-  include Cinch::Plugin
   extend Rogare::Plugin
   extend Memoist
 

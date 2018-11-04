@@ -1,8 +1,5 @@
 class Rogare::Plugins::EightBall
-  include Cinch::Plugin
   extend Rogare::Plugin
-
-
 
   command '8ball'
   usage '!% <derp>'

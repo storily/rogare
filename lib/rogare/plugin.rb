@@ -3,9 +3,6 @@ module Rogare::Plugin
 
   def self.extended(base)
     logs "     > Loading #{base}"
-    base.define_method :initialize do |bot, type = :irc|
-      super bot if type == :irc
-    end
   end
 
   def self.allmine
@@ -51,54 +48,46 @@ module Rogare::Plugin
       end
 
       usage[0] = "Usage: #{usage[0]}"
-      if m.user.discordian?
-        m.reply usage.join("\n")
-      else
-        usage.each {|l| m.reply(l) }
-      end
+      m.reply usage.join("\n")
     end
   end
 
   def match_message(pattern, opts = {})
-    match(pattern, opts) if Rogare.irc
-
-    # We don't have the cinch framework to do work for us here, so to watch for
+    # We don't have the cinch framework to do work for us anymore, so to watch
     # multiple patterns there's two approaches. This one is to compile a single
     # pattern as they come in, and then re-match the event in priority order.
     # To compile the pattern, we remove the existing handler, add the new pattern
     # to the common pattern, re-add a handler. It's a bit messy but keeps from
     # adding boilerplate to the plugins / removing dynamism.
 
-    if Rogare.discord
-      opts[:method] ||= :execute
+    opts[:method] ||= :execute
 
-      my[:patterns] << [/^\s*!#{pattern}/, opts]
-      my[:common_pattern] = Regexp.union my[:patterns].map{|pat| pat[0]}
+    my[:patterns] << [/^\s*!#{pattern}/, opts]
+    my[:common_pattern] = Regexp.union my[:patterns].map{|pat| pat[0]}
 
-      Rogare.discord.remove_handler my[:discord_handler] if my[:discord_handler]
-      my[:discord_handler] = Rogare.discord.message(contains: my[:common_pattern]) do |event|
-        logs "---> Discord message: ‘#{event.message.content}’ from #{event.author.username} (#{event.author.id})"
-        logs "---> Handling by #{self}"
+    Rogare.discord.remove_handler my[:discord_handler] if my[:discord_handler]
+    my[:discord_handler] = Rogare.discord.message(contains: my[:common_pattern]) do |event|
+      logs "---> Discord message: ‘#{event.message.content}’ from #{event.author.username} (#{event.author.id})"
+      logs "---> Handling by #{self}"
 
-        pattern = my[:patterns].find {|pat| pat[0] =~ event.message.content}
-        logs "---> Detected pattern: #{pattern[0]} (#{pattern[1]})"
+      pattern = my[:patterns].find {|pat| pat[0] =~ event.message.content}
+      logs "---> Detected pattern: #{pattern[0]} (#{pattern[1]})"
 
-        plug = new nil, :discord
-        params = DiscordMessageShim.new(event, pattern, my).params
-        meth = pattern[1][:method]
+      plug = new
+      params = DiscordMessageShim.new(event, pattern, my).params
+      meth = pattern[1][:method]
 
-        if my[:before_handler]
-          logs 'Running before_handler'
-          if my[:before_handler].call(meth, *params) == :stop
-            logs 'before_handler says to stop'
-            next
-          end
+      if my[:before_handler]
+        logs 'Running before_handler'
+        if my[:before_handler].call(meth, *params) == :stop
+          logs 'before_handler says to stop'
+          next
         end
-
-        arty = plug.method(meth).arity
-        params = params.first(arty) if arty > 0
-        plug.send meth, *params
       end
+
+      arty = plug.method(meth).arity
+      params = params.first(arty) if arty > 0
+      plug.send meth, *params
     end
   end
 

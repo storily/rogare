@@ -47,10 +47,6 @@ class DiscordUserShim
     @member
   end
 
-  def discordian?
-    true
-  end
-
   def id
     @member.id
   end

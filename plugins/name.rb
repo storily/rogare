@@ -3,7 +3,6 @@ require_relative '../lib/nbnames'
 require 'numbers_in_words'
 
 class Rogare::Plugins::Name
-  include Cinch::Plugin
   extend Rogare::Plugin
   extend Memoist
 

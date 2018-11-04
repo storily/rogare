@@ -1,5 +1,4 @@
 class Rogare::Plugins::Calc
-  include Cinch::Plugin
   extend Rogare::Plugin
 
   command 'calc'
@@ -29,7 +28,7 @@ class Rogare::Plugins::Calc
 
     if pod1.lines.count > 2
       m.user.send "Calc results:\n#{pod0} =\n#{pod1}", true
-    elsif pod0.length > (m.user.discordian? ? 1000 : 400)
+    elsif pod0.length > 1000
       m.user.send "#{pod0} = #{pod1}", true
     else
       m.reply "#{pod0} = #{pod1}"

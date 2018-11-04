@@ -1,32 +1,24 @@
 # Rogare
 
-IRC bot for NaNoWriMo (NZ channel).
+Discord bot for NaNoWriMo (NZ channel).
 
 - Runs on Heroku with one dyno.
 - Queries [Cogitare](https://cogitare.nz) for the `!plot` command.
-- Has various built-in lists of names for the `!name` command.
+- Uses a Postgres database for all data.
+- Has a `!name` generator/picker based on real data.
 - Also provides `!wordcount`, `!choose`, and `!wordwar`.
 
 ## Configuration
 
-- `IRC_CHANNELS=` List of channels the bot should connect to.
-
-- `IRC_NICK=`
-
-- `IRC_PORT=`
-
-- `IRC_REALNAME=`
-
-- `IRC_SERVER=`
-
-- `IRC_SSL=` `0` for no encryption, `1` for SSL without verification,
-  `2` for verified SSL.
+- `DISCORD_TOKEN=` The discord bot token.
 
 - `RACK_ENV=` Currently only used for Bundler loading. Defaults to `production`.
 
 - `DICERE_URL=` Point to the Dicere API url.
 
-- `REDIS_URL=` Points to a redis server (defaults to a local server).
+- `DATABASE_URL=` Points to a Postgres server (defaults to a local server).
+
+- `DB_SCHEMA=` The database schema to use (for namespacing inside a single Postgres instance, defaults to `public`).
 
 - `WOLFRAM_KEY=` With a valid Wolfram|Alpha key for the `!calc` plugin.
 
@@ -41,3 +33,5 @@ To run locally:
 5. Start the bot: `bundle exec foreman start`.
 
 The bot needs to be restarted at every change.
+
+The bot was previously a Cinch IRC bot, so has peculiarities from that time.

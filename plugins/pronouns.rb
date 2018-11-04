@@ -1,5 +1,4 @@
 class Rogare::Plugins::Pronouns
-  include Cinch::Plugin
   extend Rogare::Plugin
 
   command 'pronouns', hidden: true

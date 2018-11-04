@@ -1,7 +1,6 @@
 require_relative '../lib/dicere'
 
 class Rogare::Plugins::Plot
-  include Cinch::Plugin
   extend Rogare::Plugin
 
   command 'plot', help_includes_command: true
