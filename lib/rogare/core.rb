@@ -13,9 +13,26 @@ module Rogare
       '!'
     end
 
+    def game; end
+
     def discord
       bot = Discordrb::Bot.new token: ENV['DISCORD_TOKEN']
       puts "This bot's discord invite URL is #{bot.invite_url}."
+
+      bot.ready do
+        bot.update_status('online', Rogare.game, nil)
+      end
+
+      Signal.trap('INT') do
+        bot.update_status('offline', nil, nil)
+        exit
+      end
+
+      Signal.trap('TERM') do
+        bot.update_status('offline', nil, nil)
+        exit
+      end
+
       bot
     end
 

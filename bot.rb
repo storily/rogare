@@ -10,22 +10,21 @@ logs '=====> Loading framework'
 require './lib/rogare'
 
 logs '=====> Loading modules'
-require './plugins/debug.rb'
-# Dir['./plugins/*.rb'].each do |p|
-#   require p
-# end
+Dir['./plugins/*.rb'].each do |p|
+  require p
+end
 
 logs '=====> Preparing threads'
 require 'thwait'
 threads = []
 
-# threads << Thread.new do
-#   sleep 3
-#   logs '=====> Loading wordwars from Redis'
-#   wars = Rogare::Plugins::Wordwar.load_existing_wars
-#   logs "=====> Loaded #{wars.count} wordwars, now waiting on timers"
-#   wars.each { |t| t.join }
-# end
+threads << Thread.new do
+  sleep 3
+  logs '=====> Loading wordwars from Redis'
+  wars = Rogare::Plugins::Wordwar.load_existing_wars
+  logs "=====> Loaded #{wars.count} wordwars, now waiting on timers"
+  wars.each(&:join)
+end
 
 threads << Thread.new do
   logs '=====> Preparing live debug port'

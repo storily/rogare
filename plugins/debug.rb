@@ -7,6 +7,7 @@ class Rogare::Plugins::Debug
   usage [
     'All commands except `!% uptime` and `!% my` are admin-restricted',
     '`!% uptime` - Show uptime, boot time, host, and version info',
+    '`!% status <status>` - Set bot’s status',
 
     '`!% my id` - Show own discord id',
     '`!% my name` - Show own name as per API',
@@ -25,6 +26,7 @@ class Rogare::Plugins::Debug
   handle_help
 
   match_command /uptime/, method: :uptime
+  match_command /status (.+)/, method: :status
 
   match_command /my id/, method: :my_id
   match_command /my name/, method: :my_name
@@ -54,6 +56,11 @@ class Rogare::Plugins::Debug
     version = ENV['HEROKU_SLUG_DESCRIPTION'] || `git log -n1 --abbrev-commit --pretty=oneline` || 'around'
     m.reply "My name is sassbot, #{Socket.gethostname} is my home, running #{version}"
     m.reply "I made my debut at #{Rogare.boot}, #{(Time.now - Rogare.boot).round} seconds ago"
+  end
+
+  def status(m, param)
+    Rogare.discord.update_status(param, Rogare.game, nil)
+    m.reply "Status set to `#{param}`"
   end
 
   def my_id(m)
