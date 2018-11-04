@@ -44,6 +44,7 @@ class Rogare::Plugins::Wordcount
   match_empty :own_count
 
   def own_count(m, goal = nil)
+    goal = nil if goal == ''
     get_counts(m, [m.user.mid], goal: goal)
   end
 
