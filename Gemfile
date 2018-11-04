@@ -15,7 +15,7 @@ gem 'pg', '~>1.1.3'
 gem 'pry-remote', '~>0.1.8'
 gem 'redis', '~>4.0.1'
 gem 'sequel', '~>5.10.0'
-gem 'sequel_pg', '~>1.11.0'
+# gem 'sequel_pg', '~>1.11.0'
 gem 'typhoeus', '~>0.6.9'
 
 group :development do
