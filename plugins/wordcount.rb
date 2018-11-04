@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Rogare::Plugins::Wordcount
   extend Rogare::Plugin
   extend Memoist
@@ -8,7 +10,7 @@ class Rogare::Plugins::Wordcount
     '!%, or: !% nanoname, or: !% nick (to see others\' counts)',
     'To register your nano name against your current nick: !% set nanoname',
     'To set your goal: !% goal <number> (do it after !% set)',
-    'To use a goal just for this call: !% @<number> [nick]',
+    'To use a goal just for this call: !% @<number> [nick]'
   ]
   handle_help
 
@@ -27,7 +29,7 @@ class Rogare::Plugins::Wordcount
     return unless res.code == 200
 
     doc = Nokogiri::XML(res.body)
-    return unless doc.css('error').length == 0
+    return unless doc.css('error').empty?
 
     doc.at_css('user_wordcount').content.to_i
   end
@@ -64,7 +66,7 @@ class Rogare::Plugins::Wordcount
 
   def set_username(m, param)
     user = m.user.id
-    name = param.strip.split.join("_")
+    name = param.strip.split.join('_')
     @@redis.set("nick:#{user}:nanouser", name)
     m.reply "Your username has been set to #{name}."
     own_count(m)
@@ -94,7 +96,7 @@ class Rogare::Plugins::Wordcount
         names << m.user.mid
       when /^(random|rand|any)$/i
         random_user = true
-        names.push(*m.channel.users.shuffle.map { |u| u.mid })
+        names.push(*m.channel.users.shuffle.map(&:mid))
       else
         names << p
       end
@@ -107,13 +109,11 @@ class Rogare::Plugins::Wordcount
   end
 
   def get_counts(m, names, opts = {})
-    if opts[:goal]
-      opts[:goal].sub! /k$/, '000'
-    end
+    opts[:goal].sub! /k$/, '000' if opts[:goal]
 
     names.map! do |c|
       rks = []
-      if c =~ /^<@\d+>$/
+      if /^<@\d+>$/.match?(c)
         du = Rogare.from_discord_mid(c)
         if du
           rks << "nick:#{du.id}:nanouser"
@@ -156,9 +156,9 @@ class Rogare::Plugins::Wordcount
 
       "#{Rogare.nixnotif(name.to_s)}: #{count} (#{[
         "#{(100.0 * count / goal).round(1)}%",
-        if today then "today: #{today}" end,
+        "today: #{today}" if today,
         if diff == 0
-          "up to date"
+          'up to date'
         elsif diff > 0
           "#{diff} behind"
         else
@@ -174,8 +174,8 @@ class Rogare::Plugins::Wordcount
       ].compact.join(', ')})"
     end
 
-    if opts[:random] && counts.compact.length == 0
-      m.reply "No users in this channel have novels!"
+    if opts[:random] && counts.compact.empty?
+      m.reply 'No users in this channel have novels!'
       return
     end
 

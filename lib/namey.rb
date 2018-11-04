@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Pulled from https://github.com/muffinista/namey
 # This file, including its modifications in this project, is MIT licensed.
 #
@@ -12,40 +14,40 @@ module Namey
     def load_data(name)
       # See data/bucketise.rb for how this data is generated and organised.
       file = "#{__dir__}/../data/#{name}.json.gz"
-      Zlib::GzipReader.open(file) { |gz|
+      Zlib::GzipReader.open(file) do |gz|
         return JSON.load gz.read
-      }
+      end
     end
   end
 
   class Generator
-    def initialize()
-      @db = [:male, :female, :surname].map do |name|
+    def initialize
+      @db = %i[male female surname].map do |name|
         [name, Namey.load_data(name)]
       end.to_h
     end
 
     def name(frequency = :common, surname = true)
-      generate(:frequency => frequency, :with_surname => surname)
+      generate(frequency: frequency, with_surname: surname)
     end
 
     def male(frequency = :common, surname = true)
-      generate(:type => :male, :frequency => frequency, :with_surname => surname)
+      generate(type: :male, frequency: frequency, with_surname: surname)
     end
 
     def female(frequency = :common, surname = true)
-      generate(:type => :female, :frequency => frequency, :with_surname => surname)
+      generate(type: :female, frequency: frequency, with_surname: surname)
     end
 
     def surname(frequency = :common)
-      generate(:type => :surname, :frequency => frequency)
+      generate(type: :surname, frequency: frequency)
     end
 
     def generate(params = {})
       params = {
-        :type => random_gender,
-        :frequency => :common,
-        :with_surname => true
+        type: random_gender,
+        frequency: :common,
+        with_surname: true
       }.merge(params)
 
       if !(params[:min_freq] || params[:max_freq])
@@ -60,13 +62,13 @@ module Namey
       end
 
       name = nil
-      while name == nil
+      while name.nil?
         name = get_name(params[:type], params[:min_freq], params[:max_freq])
       end
 
       if params[:type] != :surname && params[:with_surname] == true
         surname = nil
-        while surname == nil
+        while surname.nil?
           surname = get_name(:surname, params[:min_freq], params[:max_freq])
         end
 

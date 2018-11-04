@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Rogare::Plugins::EightBall
   extend Rogare::Plugin
 
@@ -8,7 +10,7 @@ class Rogare::Plugins::EightBall
   match_command /(.+)/
   match_empty :help_message
 
-  def execute(m, param)
+  def execute(m, _param)
     m.reply [
       'It is certain.',
       'It is decidedly so.',
@@ -29,7 +31,7 @@ class Rogare::Plugins::EightBall
       'My reply is no.',
       'My sources say no.',
       'Outlook not so good.',
-      'Very doubtful.',
+      'Very doubtful.'
     ].sample
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Rogare::Plugins::Pronouns
   extend Rogare::Plugin
 
@@ -7,6 +9,6 @@ class Rogare::Plugins::Pronouns
 
   match_empty :execute
   def execute(m)
-    m.reply "My pronouns are it/they/she, thanks for asking :)"
+    m.reply 'My pronouns are it/they/she, thanks for asking :)'
   end
 end

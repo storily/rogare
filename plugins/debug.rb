@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Rogare::Plugins::Debug
   extend Rogare::Plugin
 
@@ -24,7 +26,7 @@ class Rogare::Plugins::Debug
     '`!% voice bye` - Quit the current voice channel',
 
     '`!% wc set user <discord user> <nano user>` - Set a user’s nano name for them',
-    '`!% wc set goal <discord user> <nano goal>` - Set a user’s nano goal for them',
+    '`!% wc set goal <discord user> <nano goal>` - Set a user’s nano goal for them'
   ]
   handle_help
 
@@ -51,7 +53,7 @@ class Rogare::Plugins::Debug
   match_command /wc set goal (.+) (.+)/, method: :wc_set_goal
 
   before_handler do |method, m|
-    next if [:uptime, :help_message].include? method
+    next if %i[uptime help_message].include? method
 
     is_admin = m.user.inner.roles.find { |r| (r.permissions.bits & 3) == 3 }
     unless is_admin
@@ -97,7 +99,7 @@ class Rogare::Plugins::Debug
     end
 
     chan.each do |c|
-      m.reply "#{c.server.name.downcase.gsub(' ', '~')}/#{c.name}"
+      m.reply "#{c.server.name.downcase.tr(' ', '~')}/#{c.name}"
     end
   end
 
@@ -124,7 +126,7 @@ class Rogare::Plugins::Debug
     m.reply "`#{mems.inspect}`"
   end
 
-  def voice_connect(m, chan)
+  def voice_connect(_m, chan)
     Rogare.discord.voice_connect Rogare.find_channel(chan).inner
   end
 
@@ -176,7 +178,7 @@ class Rogare::Plugins::Debug
     redis = Rogare.redis(2)
 
     du = Rogare.from_discord_mid user
-    du ||= Rogare.discord.users.find { |i, u| u.name == user }[1]
+    du ||= Rogare.discord.users.find { |_i, u| u.name == user }[1]
     return m.reply('No such user') unless du
 
     redis.set("nick:#{du.id}:nanouser", nano)
@@ -188,7 +190,7 @@ class Rogare::Plugins::Debug
     goal.sub! /k$/, '000'
 
     du = Rogare.from_discord_mid user
-    du ||= Rogare.discord.users.find { |i, u| u.name == user }[1]
+    du ||= Rogare.discord.users.find { |_i, u| u.name == user }[1]
     return m.reply('No such user') unless du
 
     nano = redis.get("nick:#{du.id}:nanouser")

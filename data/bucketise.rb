@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 require 'csv'
 require 'json'
 require 'zlib'
 
 file = ARGV.first
 puts file.inspect
-buckets = Array.new(100_000) { |i| [] }
+buckets = Array.new(100_000) { |_i| [] }
 
 # The data was originally in a SQLite DB with a frequency column, precise to
 # 3 decimal places (but with duplicates that have the same freq). The idea here

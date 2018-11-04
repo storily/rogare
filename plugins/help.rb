@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Rogare::Plugins::Help
   extend Rogare::Plugin
   extend Memoist
@@ -33,16 +35,14 @@ class Rogare::Plugins::Help
       coms.map! { |c| "#{bot_prefix}#{c}" }
       [
         coms.shift,
-        unless coms.empty?
-          "(aliases: #{coms.join(', ')})"
-        end
+        "(aliases: #{coms.join(', ')})" unless coms.empty?
       ].compact.join ' '
     end.sort
   end
 
   def execute(m)
     m.reply "Commands: #{readable_commands.join(', ')}."
-    m.reply "Also use `!<command> help` to get help for any command."
+    m.reply 'Also use `!<command> help` to get help for any command.'
   end
 
   memoize :bot_prefix, :command_list, :readable_commands

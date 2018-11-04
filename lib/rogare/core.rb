@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Rogare
   class << self
     extend Memoist
@@ -20,7 +22,7 @@ module Rogare
     def config
       c = Hashie::Mash.new
       ENV.each { |k, v| c[k.downcase] = v }
-      return c
+      c
     end
 
     def redis(n)
@@ -41,7 +43,7 @@ module Rogare
 
     def nixnotif(nick)
       # If we get a mentionable discord ID, lookup the user and retrieve a nick:
-      if nick =~ /<@\d+>/
+      if /<@\d+>/.match?(nick)
         du = from_discord_mid(nick)
         nick = du.nick if du
       end
@@ -57,7 +59,7 @@ module Rogare
     def channel_list
       list = []
 
-      discord.servers.each do |id, srv|
+      discord.servers.each do |_id, srv|
         srv.channels.each do |chan|
           list << DiscordChannelShim.new(chan)
         end
@@ -74,7 +76,7 @@ module Rogare
         sid, cid = name.split('/')
 
         server = discord.servers[sid.to_i]
-        server ||= (discord.servers.find { |i, s| s.name.downcase.gsub(' ', '~') == sid.downcase } || [])[1]
+        server ||= (discord.servers.find { |_i, s| s.name.downcase.tr(' ', '~') == sid.downcase } || [])[1]
         return unless server
 
         chan = server.channels.find { |c| c.id.to_s == cid || c.name == cid }

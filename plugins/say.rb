@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Rogare::Plugins::Say
   extend Rogare::Plugin
 
@@ -13,11 +15,11 @@ class Rogare::Plugins::Say
   def execute(m, chan, message)
     channel = Rogare.find_channel(chan.strip)
     if channel.nil?
-      m.reply "No such channel"
+      m.reply 'No such channel'
       return
     elsif channel.is_a? Array
       m.reply "Multiple channels match this:\n" + channel.map do |chan|
-        "#{chan.server.name.gsub(' ', '~')}/#{chan.name}"
+        "#{chan.server.name.tr(' ', '~')}/#{chan.name}"
       end.join("\n")
       return
     end
@@ -30,7 +32,7 @@ class Rogare::Plugins::Say
     max = 5
 
     if quota >= max
-      m.reply "Sorry! Quota exceeded for this hour."
+      m.reply 'Sorry! Quota exceeded for this hour.'
       return
     end
 

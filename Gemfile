@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 ruby '~>2.5.1'
 
@@ -11,10 +13,10 @@ gem 'nokogiri', '~>1.8.2'
 gem 'numbers_in_words', '~>0.4.0'
 gem 'pg', '~>1.1.3'
 gem 'pry-remote', '~>0.1.8'
+gem 'redis', '~>4.0.1'
 gem 'sequel', '~>5.10.0'
 gem 'sequel_pg', '~>1.11.0'
 gem 'typhoeus', '~>0.6.9'
-gem 'redis', '~>4.0.1'
 
 group :development do
   gem 'foreman'

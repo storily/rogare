@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DiscordMessageShim
   def initialize(event, pattern, plug)
     @event = event

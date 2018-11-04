@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../lib/dicere'
 
 class Rogare::Plugins::Plot
@@ -14,17 +16,15 @@ class Rogare::Plugins::Plot
   def execute(m, cat, param = '')
     param = param.strip
 
-    if cat =~ /seed/i
+    if /seed/i.match?(cat)
       param += ' seed'
-    elsif cat =~ /event/i
+    elsif /event/i.match?(cat)
       param += ' event'
-    elsif cat =~ /prompt/i
+    elsif /prompt/i.match?(cat)
       param += ' prompt'
     end
 
-    if param.empty?
-      return m.reply Dicere.random.to_s
-    end
+    return m.reply Dicere.random.to_s if param.empty?
 
     if param.to_i > 0
       item = Dicere.item(param)
@@ -35,6 +35,6 @@ class Rogare::Plugins::Plot
 
     items = Dicere.search(param)
     items = [Dicere.random] if items.empty?
-    m.reply items.shuffle.first.to_s
+    m.reply items.sample.to_s
   end
 end

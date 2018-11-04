@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ENBYNAMES = %w[
   A'ala
   Aala
@@ -2851,4 +2853,4 @@ ENBYNAMES = %w[
   Zuma
   Zuriel
   Zwi
-]
+].freeze

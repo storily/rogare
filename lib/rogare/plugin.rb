@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Rogare::Plugin
   @@mine = {}
 
@@ -10,14 +12,14 @@ module Rogare::Plugin
   end
 
   def my
-    @@mine[self.inspect.to_sym] ||= {
+    @@mine[inspect.to_sym] ||= {
       aliases: [],
-      patterns: [],
+      patterns: []
     }
   end
 
   def my=(val)
-    @@mine[self.inspect.to_sym] = val
+    @@mine[inspect.to_sym] = val
   end
 
   def command(c, opts = {})
@@ -42,7 +44,7 @@ module Rogare::Plugin
     match_command /((-|--)?(help|usage)|-?\?)\s*$/, method: :help_message
     h = my
     define_method :help_message do |m|
-      m.reply "No help message :(" if h[:usage].empty?
+      m.reply 'No help message :(' if h[:usage].empty?
       usage = h[:usage].map do |line|
         line.gsub('!%', "!#{h[:command]}")
       end
@@ -93,7 +95,7 @@ module Rogare::Plugin
 
   def match_command(pattern = nil, opts = {})
     pattern = pattern.source if pattern.respond_to? :source
-    excl = if my[:help_includes_command] then '' else '?:' end
+    excl = my[:help_includes_command] ? '' : '?:'
     pat = "(#{excl}#{[my[:command], *my[:aliases]].map { |c| Regexp.escape(c) }.join('|')})"
     pat = "#{pat}\\s+#{pattern}" if pattern
     logs '       matching: ' + pat.inspect

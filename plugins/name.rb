@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../lib/namey'
 require_relative '../lib/nbnames'
 require 'numbers_in_words'
@@ -31,26 +33,26 @@ class Rogare::Plugins::Name
     end.each do |p|
       if p.is_a? Integer
         args[:n] = p
-      elsif p =~ /^(males?|m[ae]n|boys?)$/i
+      elsif /^(males?|m[ae]n|boys?)$/i.match?(p)
         args[:call] = :male
-      elsif p =~ /^(females?|wom[ae]n|girls?)$/i
+      elsif /^(females?|wom[ae]n|girls?)$/i.match?(p)
         args[:call] = :female
-      elsif p =~ /^(enby|nb|enbie)s?$/i
+      elsif /^(enby|nb|enbie)s?$/i.match?(p)
         args[:call] = :unisex
-      elsif p =~ /^(pierre|stone|rock|pebble)s?$/i
+      elsif /^(pierre|stone|rock|pebble)s?$/i.match?(p)
         args[:call] = :pierre
-      elsif p =~ /^(common)$/i
+      elsif /^(common)$/i.match?(p)
         args[:freq] = :common
-      elsif p =~ /^(rare|weird|funny|evil|bad)$/i
+      elsif /^(rare|weird|funny|evil|bad)$/i.match?(p)
         args[:freq] = :rare
-      elsif p =~ /^(all|both)$/i
+      elsif /^(all|both)$/i.match?(p)
         args[:freq] = :all
-      elsif p =~ /^(first|given)$/i
+      elsif /^(first|given)$/i.match?(p)
         args[:full] = false
-      elsif p =~ /^(last(name)?|family|surname)$/i
+      elsif /^(last(name)?|family|surname)$/i.match?(p)
         args[:full] = true
         args[:last] = true
-      elsif p =~ /^(full)$/i
+      elsif /^(full)$/i.match?(p)
         args[:full] = true
         args[:last] = false
       end
@@ -60,8 +62,8 @@ class Rogare::Plugins::Name
     args[:n] = 1 if args[:n] < 1
 
     joined = (args[:n] * 3).times.map do
-      next ENBYNAMES.sample(if args[:full] then 2 else 1 end).join(' ') if args[:call] == :unisex
-      next %w[Pierre Pierre].sample(if args[:full] then 2 else 1 end).join(' ') if args[:call] == :pierre
+      next ENBYNAMES.sample(args[:full] ? 2 : 1).join(' ') if args[:call] == :unisex
+      next %w[Pierre Pierre].sample(args[:full] ? 2 : 1).join(' ') if args[:call] == :pierre
 
       n = @@generator.send(args[:call], args[:freq], args[:full])
       if args[:last]
