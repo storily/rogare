@@ -58,6 +58,7 @@ class Rogare::Plugins::Wordcount
       @@redis.get(k).downcase
     end.compact.uniq
     return m.reply 'No names set' if names.empty?
+
     get_counts(m, names)
   end
 
@@ -93,7 +94,7 @@ class Rogare::Plugins::Wordcount
         names << m.user.mid
       when /^(random|rand|any)$/i
         random_user = true
-        names.push(*m.channel.users.shuffle.map {|u| u.mid })
+        names.push(*m.channel.users.shuffle.map { |u| u.mid })
       else
         names << p
       end
@@ -121,7 +122,7 @@ class Rogare::Plugins::Wordcount
       end
       rks << "nick:#{c.downcase}:nanouser"
 
-      rks.map {|r| @@redis.get(r) }.compact.first || c
+      rks.map { |r| @@redis.get(r) }.compact.first || c
     end
 
     # `random_found` exists so that we don't check every single user in the
@@ -135,11 +136,12 @@ class Rogare::Plugins::Wordcount
       count = get_count(name)
       next if opts[:random] && count.nil?
       next "#{name}: user does not exist or has no current novel" if count.nil?
+
       random_found = true
 
       today = get_today(name)
       timediff = Time.now - Chronic.parse('1st')
-      day_secs = 60*60*24
+      day_secs = 60 * 60 * 24
       month_secs = day_secs * 30
 
       nth = (timediff / day_secs).ceil
@@ -147,9 +149,9 @@ class Rogare::Plugins::Wordcount
       goal = 50_000 if goal == 0.0
 
       diff = if opts[:live]
-        ((goal / month_secs) * timediff).round
-      else
-        (goal / 30 * nth).round
+               ((goal / month_secs) * timediff).round
+             else
+               (goal / 30 * nth).round
       end - count
 
       "#{Rogare.nixnotif(name.to_s)}: #{count} (#{[

@@ -10,7 +10,7 @@ class Rogare::Plugins::Help
 
   def bot_prefix
     (self.class.prefix || Rogare.prefix).to_s
-      .gsub(/(
+                                        .gsub(/(
           ^\(
         | \)$
         | \^
@@ -23,13 +23,14 @@ class Rogare::Plugins::Help
       one = Rogare::Plugin.allmine[plugin.inspect.to_sym]
       next if one.nil?
       next if one[:hidden]
+
       [one[:command], one[:aliases]].flatten
     end.compact
   end
 
   def readable_commands
     command_list.map do |coms|
-      coms.map! {|c| "#{bot_prefix}#{c}" }
+      coms.map! { |c| "#{bot_prefix}#{c}" }
       [
         coms.shift,
         unless coms.empty?

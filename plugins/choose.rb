@@ -9,7 +9,7 @@ class Rogare::Plugins::Choose
   match_empty :help_message
 
   def execute(m, param)
-    args = param.split.map{|x| x.downcase == 'or' ? x.downcase : x}.join(' ').split(' or ')
+    args = param.split.map { |x| x.downcase == 'or' ? x.downcase : x }.join(' ').split(' or ')
 
     s = Set.new args
     if s.length > 1 && (args.length == s.length)

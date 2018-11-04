@@ -53,7 +53,7 @@ class Rogare::Plugins::Debug
   before_handler do |method, m|
     next if [:uptime, :help_message].include? method
 
-    is_admin = m.user.inner.roles.find {|r| (r.permissions.bits & 3) == 3 }
+    is_admin = m.user.inner.roles.find { |r| (r.permissions.bits & 3) == 3 }
     unless is_admin
       m.reply('Not authorised')
       next :stop
@@ -114,7 +114,7 @@ class Rogare::Plugins::Debug
     chans = redis.smembers "wordwar:#{param.strip}:channels"
     m.reply "`#{chans.inspect}`"
 
-    chans.map! {|c| Rogare.find_channel c }
+    chans.map! { |c| Rogare.find_channel c }
     m.reply "`#{chans.inspect}`"
   end
 
@@ -176,7 +176,7 @@ class Rogare::Plugins::Debug
     redis = Rogare.redis(2)
 
     du = Rogare.from_discord_mid user
-    du ||= Rogare.discord.users.find {|i, u| u.name == user }[1]
+    du ||= Rogare.discord.users.find { |i, u| u.name == user }[1]
     return m.reply('No such user') unless du
 
     redis.set("nick:#{du.id}:nanouser", nano)
@@ -188,7 +188,7 @@ class Rogare::Plugins::Debug
     goal.sub! /k$/, '000'
 
     du = Rogare.from_discord_mid user
-    du ||= Rogare.discord.users.find {|i, u| u.name == user }[1]
+    du ||= Rogare.discord.users.find { |i, u| u.name == user }[1]
     return m.reply('No such user') unless du
 
     nano = redis.get("nick:#{du.id}:nanouser")

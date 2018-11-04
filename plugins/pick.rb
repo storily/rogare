@@ -9,7 +9,7 @@ class Rogare::Plugins::Pick
   match_empty :help_message
 
   def execute(m, n1, n2)
-    n1, n2 = [n1, n2].map{|c| c.strip.upcase}.sort
+    n1, n2 = [n1, n2].map { |c| c.strip.upcase }.sort
     m.reply (n1..n2).to_a.sample
   end
 end

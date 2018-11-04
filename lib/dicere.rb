@@ -29,7 +29,7 @@ module Dicere
       }
     }
   ITEM
-  
+
   class << self
     def random
       its = Dicere::Client.query(Dicere::Random)

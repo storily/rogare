@@ -20,3 +20,5 @@ group :development do
   gem 'foreman'
   gem 'pry'
 end
+
+gem 'rubocop', '~> 0.60.0', require: false

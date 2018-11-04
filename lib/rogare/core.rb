@@ -19,7 +19,7 @@ module Rogare
 
     def config
       c = Hashie::Mash.new
-      ENV.each { |k,v| c[k.downcase] = v }
+      ENV.each { |k, v| c[k.downcase] = v }
       return c
     end
 
@@ -35,6 +35,7 @@ module Rogare
       id = mid.gsub(/[^\d]/, '').to_i
       du = discord.users[id]
       return unless du
+
       DiscordUserShim.new(du)
     end
 
@@ -73,15 +74,15 @@ module Rogare
         sid, cid = name.split('/')
 
         server = discord.servers[sid.to_i]
-        server ||= (discord.servers.find {|i, s| s.name.downcase.gsub(' ', '~') == sid.downcase } || [])[1]
+        server ||= (discord.servers.find { |i, s| s.name.downcase.gsub(' ', '~') == sid.downcase } || [])[1]
         return unless server
 
-        chan = server.channels.find {|c| c.id.to_s == cid || c.name == cid }
+        chan = server.channels.find { |c| c.id.to_s == cid || c.name == cid }
         return unless chan
 
         DiscordChannelShim.new chan
       else
-        chans = channel_list.select {|c| c.name == name }
+        chans = channel_list.select { |c| c.name == name }
         if chans.count == 1
           chans.first
         elsif chans.count > 1

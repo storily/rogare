@@ -12,7 +12,7 @@ module Namey
     def load_data(name)
       # See data/bucketise.rb for how this data is generated and organised.
       file = "#{__dir__}/../data/#{name}.json.gz"
-      Zlib::GzipReader.open(file) {|gz|
+      Zlib::GzipReader.open(file) { |gz|
         return JSON.load gz.read
       }
     end
@@ -26,7 +26,7 @@ module Namey
     end
 
     def name(frequency = :common, surname = true)
-      generate(:frequency => frequency, :with_surname =>surname)
+      generate(:frequency => frequency, :with_surname => surname)
     end
 
     def male(frequency = :common, surname = true)
@@ -48,7 +48,7 @@ module Namey
         :with_surname => true
       }.merge(params)
 
-      if ! ( params[:min_freq] || params[:max_freq] )
+      if !(params[:min_freq] || params[:max_freq])
         params[:min_freq], params[:max_freq] = frequency_values(params[:frequency])
       else
 
@@ -86,13 +86,13 @@ module Namey
             end
 
       high = case f
-            when :common then 20
-            when :rare then 99
-            when :all then 99
-            else 99
+             when :common then 20
+             when :rare then 99
+             when :all then 99
+             else 99
             end
 
-      [ low, high ]
+      [low, high]
     end
 
     def random_gender

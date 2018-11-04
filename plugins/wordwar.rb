@@ -4,12 +4,12 @@ class Rogare::Plugins::Wordwar
   command 'wordwar'
   aliases 'war', 'ww'
   usage [
-      '!% in [time before it starts (in minutes)] for [duration]',
-      'Or: !% at [wall time e.g. 12:35] for [duration]',
-      'Or even (defaulting to a 15 minute run): !% at/in [time]',
-      'And then everyone should: !% join [wordwar ID]',
-      'Also say !% alone to get a list of current/scheduled ones',
-      'To get some details about a war: !% info [ID] or !% members [ID].'
+    '!% in [time before it starts (in minutes)] for [duration]',
+    'Or: !% at [wall time e.g. 12:35] for [duration]',
+    'Or even (defaulting to a 15 minute run): !% at/in [time]',
+    'And then everyone should: !% join [wordwar ID]',
+    'Also say !% alone to get a list of current/scheduled ones',
+    'To get some details about a war: !% info [ID] or !% members [ID].'
   ]
   handle_help
 
@@ -25,7 +25,7 @@ class Rogare::Plugins::Wordwar
 
   def execute(m, param)
     param.sub!(/#.+$/, '')
-    time, durstr = param.strip.split(/for/i).map {|p| p.strip}
+    time, durstr = param.strip.split(/for/i).map { |p| p.strip }
 
     time = time.sub(/^at/i, '').strip if time.downcase.start_with? 'at'
     durstr = "15 minutes" if durstr.nil? || durstr.empty?
@@ -74,20 +74,23 @@ class Rogare::Plugins::Wordwar
     end
 
     m.reply "Got it! " +
-      "Your new wordwar will start in #{togo} and last #{dur}. " +
-      "Others can join it with: !wordwar join #{k}"
+            "Your new wordwar will start in #{togo} and last #{dur}. " +
+            "Others can join it with: !wordwar join #{k}"
 
     self.class.set_war_timer(k, timeat, duration).join
   end
 
   def rk(*args) self.class.rk(*args) end
+
   def dur_display(*args) self.class.dur_display(*args) end
+
   def all_wars(*args) self.class.all_wars(*args) end
+
   def war_info(*args) self.class.war_info(*args) end
 
   def say_war_info(m, war)
     togo, neg = dur_display war[:start]
-    others = war[:members].reject {|u| u == war[:owner]}
+    others = war[:members].reject { |u| u == war[:owner] }
 
     m.reply [
       "#{war[:id]}: #{Rogare.nixnotif war[:owner]}'s war",
@@ -116,13 +119,13 @@ class Rogare::Plugins::Wordwar
 
   def ex_list_wars(m)
     wars = all_wars
-      .reject {|w| w[:end] < Time.now}
-      .sort_by {|w| w[:start]}
+           .reject { |w| w[:end] < Time.now }
+           .sort_by { |w| w[:start] }
 
     if rand < 0.9 && (Time.now < Time.at(1541847600))
       # War 60 is a special long-running war. We want it to still be there,
       # but not to advertise its presence all the time, unless we're close!
-      wars.reject!{|w| w[:id].to_s == "60"}
+      wars.reject! { |w| w[:id].to_s == "60" }
     end
 
     wars.each do |war|
@@ -154,11 +157,11 @@ class Rogare::Plugins::Wordwar
     end
 
     war = war_info(k)
-    others = war[:members].reject {|u| u == war[:owner]}
+    others = war[:members].reject { |u| u == war[:owner] }
     m.reply "#{war[:id]}: #{Rogare.nixnotif war[:owner]}'s war, with: " + if others.empty?
-      "no one else :("
-    else
-      others.map{|u| Rogare.nixnotif u}.join(', ')
+                                                                            "no one else :("
+                                                                          else
+                                                                            others.map { |u| Rogare.nixnotif u }.join(', ')
     end
   end
 
@@ -219,7 +222,7 @@ class Rogare::Plugins::Wordwar
           end
         end
 
-        starting = lambda {|time, &block|
+        starting = lambda { |time, &block|
           war = war_info(id)
           members = war[:members].join(', ')
           extra = ' ' + block.call(war) unless block.nil?
@@ -239,14 +242,14 @@ class Rogare::Plugins::Wordwar
             # If we're at least 35 seconds before the start, we have
             # time to send a reminder. Otherwise, skip sending it.
             sleep to_start - 30
-            starting.call('in 30 seconds') {'— Be ready: tell us your starting wordcount.'}
+            starting.call('in 30 seconds') { '— Be ready: tell us your starting wordcount.' }
             sleep 30
           else
             # In any case, we sleep until the beginning
             sleep to_start
           end
 
-          starting.call('now') {|war| "(for #{dur_display(war[:end], war[:start]).first})" }
+          starting.call('now') { |war| "(for #{dur_display(war[:end], war[:start]).first})" }
           start_war id
           sleep duration
           ending.call
@@ -302,11 +305,11 @@ class Rogare::Plugins::Wordwar
       end
 
       [if minutes >= 5
-        "#{minutes.round}m"
-      elsif minutes >= 1
-        "#{minutes.floor}m #{secs.round}s"
-      else
-        "#{secs.round}s"
+         "#{minutes.round}m"
+       elsif minutes >= 1
+         "#{minutes.floor}m #{secs.round}s"
+       else
+         "#{secs.round}s"
       end, neg]
     end
 
@@ -350,7 +353,7 @@ class Rogare::Plugins::Wordwar
     end
 
     def load_existing_wars
-      all_wars.reject {|w| w[:end] < Time.now}.map do |war|
+      all_wars.reject { |w| w[:end] < Time.now }.map do |war|
         set_war_timer(war[:id], war[:start], war[:end] - war[:start])
       end
     end

@@ -79,13 +79,14 @@ class DiscordChannelShim
 
   def send(msg)
     return if @chan.voice?
+
     @chan.send msg
   end
 
   def users
     case type
     when :public
-      @chan.server.members.map {|u| DiscordUserShim.new u}
+      @chan.server.members.map { |u| DiscordUserShim.new u }
     else
       []
     end

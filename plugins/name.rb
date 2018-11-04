@@ -18,7 +18,7 @@ class Rogare::Plugins::Name
 
   def execute(m, param = nil)
     param ||= ''
-    args = {call: :name, full: true, last: false, freq: :all}
+    args = { call: :name, full: true, last: false, freq: :all }
 
     args[:n] = NumbersInWords.in_numbers(param.strip)
 
@@ -74,7 +74,7 @@ class Rogare::Plugins::Name
     if args[:call] == :pierre
       stone = rand < 0.4
       stoned = stone ? 'It’s the Stone Age' : 'C’est l’Age de Pierre '
-      joined.map!{|n| n.gsub(/Pierre/, 'Stone')} if stone
+      joined.map! { |n| n.gsub(/Pierre/, 'Stone') } if stone
       joined[0] = "#{stoned}! #{joined[0]}"
     else
       joined = joined.uniq

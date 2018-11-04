@@ -24,7 +24,7 @@ class Rogare::Plugins::Say
 
     k = "nick:#{m.user.id}:sayquota"
     quota = @@redis.get(k).to_i
-    @@redis.set(k, 0, ex: 60*60) if quota == 0
+    @@redis.set(k, 0, ex: 60 * 60) if quota == 0
     @@redis.incr(k)
 
     max = 5
@@ -34,7 +34,7 @@ class Rogare::Plugins::Say
       return
     end
 
-    if quota >= (max*0.8).floor
+    if quota >= (max * 0.8).floor
       m.reply "You're approaching your quota of #{max} !say per hour!"
     end
 
