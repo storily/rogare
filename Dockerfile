@@ -8,6 +8,7 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - &&\
     npm i -g npm &&\
     apt autoremove -y && apt clean -y && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
+ENV RACK_ENV=production
 
 # Build-only
 COPY Gemfile Gemfile.lock package.json package-lock.json ./
@@ -20,4 +21,3 @@ RUN apt update && chown -R rogare:rogare . &&\
 # Source
 USER rogare
 COPY . .
-CMD ["ruby", "bot.rb"]
