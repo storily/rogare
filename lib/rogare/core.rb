@@ -13,7 +13,15 @@ module Rogare
       '!'
     end
 
-    def game; end
+    def game
+      [
+        'with fire',
+        'at life — and winning',
+        'Plotting in the Dark',
+        'Killing Characters IV',
+        'Taking names and kicking ass'
+      ].sample
+    end
 
     def discord
       bot = Discordrb::Bot.new token: ENV['DISCORD_TOKEN']
