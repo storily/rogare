@@ -1,3 +1,4 @@
 .env
 .*.sw*
 .examples
+node_modules
