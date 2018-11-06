@@ -60,16 +60,6 @@ module Rogare
         Rogare::Data.user_seen(event.author)
       end
 
-      Signal.trap('INT') do
-        bot.update_status('offline', nil, nil)
-        exit
-      end
-
-      Signal.trap('TERM') do
-        bot.update_status('offline', nil, nil)
-        exit
-      end
-
       bot
     end
 
