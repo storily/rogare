@@ -56,6 +56,10 @@ module Rogare
         bot.update_status('online', Rogare.game, nil)
       end
 
+      bot.message do |event|
+        Rogare::Data.user_seen(event.author)
+      end
+
       Signal.trap('INT') do
         bot.update_status('offline', nil, nil)
         exit
@@ -81,6 +85,12 @@ module Rogare
       else
         Redis.new db: dbno
       end
+    end
+
+    def sql
+      db = Sequel.connect ENV['DATABASE_URL'], search_path: [ENV['DB_SCHEMA'] || 'public']
+      db.logger = Logger.new($stdout) unless ENV['RACK_ENV'] == 'production'
+      db
     end
 
     def from_discord_mid(mid)
@@ -143,6 +153,6 @@ module Rogare
       end
     end
 
-    memoize :discord, :config, :nixnotif, :redis
+    memoize :discord, :config, :nixnotif, :redis, :sql
   end
 end

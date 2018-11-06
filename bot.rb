@@ -9,6 +9,9 @@ Bundler.require :default, (ENV['RACK_ENV'] || 'production').to_sym
 logs '=====> Loading framework'
 require './lib/rogare'
 
+logs '=====> Connecting to database'
+Rogare.sql
+
 logs '=====> Loading modules'
 Dir['./plugins/*.rb'].each do |p|
   require p
