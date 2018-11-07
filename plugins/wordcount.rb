@@ -110,10 +110,10 @@ class Rogare::Plugins::Wordcount
     opts[:goal]&.sub! /k$/, '000'
 
     names.map! do |name|
-      # Exact match from @mention
+      # Exact match from @mention / mid
       if /^<@\d+>$/.match?(name)
         du = Rogare.from_discord_mid(name)
-        next Rogare::Data.get_nano_user(du) if du
+        next Rogare::Data.get_nano_user(du.inner) if du
       end
 
       # Case-insensitive match from nick
@@ -144,12 +144,13 @@ class Rogare::Plugins::Wordcount
       month_secs = day_secs * 30
 
       nth = (timediff / day_secs).ceil
-      goal = opts[:goal].to_i
+      goal = opts[:goal]
       unless goal
-        user = Rogare::Data.users.where(nano_user: name).first
+        user = Rogare::Data.users.where(nano_user: name.to_s).first
         goal = Rogare::Data.current_novels(user).first[:goal] if user
       end
       goal = 50_000 if goal.nil? || goal == 0.0
+      goal = goal.to_f
 
       goal_today =  if opts[:live]
                       ((goal / month_secs) * timediff).round
