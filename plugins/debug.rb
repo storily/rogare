@@ -11,7 +11,8 @@ class Rogare::Plugins::Debug
 
     '`!% my id` - Show own discord id',
     '`!% my name` - Show own name as per API',
-    '`!% my nano` - Show own nano user',
+    '`!% my user` - Show own db user',
+    '`!% user info <@user or ID or nick>` - Show user’s db info',
 
     '`!% chan name` - Show this channel’s internal name',
     '`!% chan find <name>` - Find a channel from name or internals',
@@ -30,7 +31,8 @@ class Rogare::Plugins::Debug
 
   match_command /my id/, method: :my_id
   match_command /my name/, method: :my_name
-  match_command /my nano/, method: :my_nano
+  match_command /my user/, method: :my_user
+  match_command /user info (.+)/, method: :user_info
 
   match_command /chan name/, method: :chan_name
   match_command /chan find (.+)/, method: :chan_find
@@ -71,12 +73,20 @@ class Rogare::Plugins::Debug
     m.reply m.user.nick
   end
 
-  def my_nano(m)
-    m.reply "nano map key: #{m.user.id}"
+  def my_user(m)
+    user = Rogare::Data.user_from_discord m.user
+    m.reply "`#{user.inspect}`"
+  end
 
-    redis = Rogare.redis(2)
-    nano = redis.get("nick:#{m.user.id}:nanouser")
-    m.reply "nano map value: `#{nano.inspect}`"
+  def user_info(m, mid)
+    discu = Rogare.from_discord_mid mid
+    discu ||= Rogare::Data.users.where(nick: mid).first
+    return m.reply "No such user: `#{mid}`" unless discu
+
+    user = Rogare::Data.user_from_discord discu
+    return m.reply "Not in db: `discord::#{discu.id}`" unless user
+
+    m.reply "`#{user.inspect}`"
   end
 
   def chan_name(m)
