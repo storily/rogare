@@ -14,8 +14,6 @@ class Rogare::Plugins::Wordcount
   ]
   handle_help
 
-  @@redis = Rogare.redis(2)
-
   def get_today(name)
     res = Typhoeus.get "https://nanowrimo.org/participants/#{name}/stats"
     return unless res.code == 200
@@ -57,30 +55,26 @@ class Rogare::Plugins::Wordcount
   end
 
   def all_counts(m)
-    names = @@redis.keys('nick:*:nanouser').map do |k|
-      @@redis.get(k).downcase
-    end.compact.uniq
+    names = Rogare::Data.all_nano_users
     return m.reply 'No names set' if names.empty?
 
     get_counts(m, names)
   end
 
   def set_username(m, param)
-    user = m.user.id
     name = param.strip.split.join('-')
 
-    @@redis.set("nick:#{user}:nanouser", name)
     Rogare::Data.set_nano_user(m.user, name)
-
     m.reply "Your username has been set to #{name}."
     own_count(m)
   end
 
   def set_goal(m, goal)
-    user = m.user.id
-    name = @@redis.get("nick:#{user}:nanouser") || user
     goal.sub! /k$/, '000'
-    @@redis.set("nano:#{name}:goal", goal.to_i)
+
+    novel = Rogare::Data.current_novels(Rogare::Data.user_from_discord m.user).first
+    Rogare::Data.novels.where(id: novel[:id]).update(goal: goal.to_i)
+
     m.reply "Your goal has been set to #{goal}."
     own_count(m, goal.to_i)
   end
@@ -115,18 +109,19 @@ class Rogare::Plugins::Wordcount
   def get_counts(m, names, opts = {})
     opts[:goal]&.sub! /k$/, '000'
 
-    names.map! do |c|
-      rks = []
-      if /^<@\d+>$/.match?(c)
-        du = Rogare.from_discord_mid(c)
-        if du
-          rks << "nick:#{du.id}:nanouser"
-          c = du.nick
-        end
+    names.map! do |name|
+      # Exact match from @mention
+      if /^<@\d+>$/.match?(name)
+        du = Rogare.from_discord_mid(name)
+        next Rogare::Data.get_nano_user(du) if du
       end
-      rks << "nick:#{c.downcase}:nanouser"
 
-      rks.map { |r| @@redis.get(r) }.compact.first || c
+      # Case-insensitive match from nick
+      from_nick = Rogare::Data.users.where { nick =~ /^#{name}$/i }.first
+      next from_nick[:nano_user] if from_nick && from_nick[:nano_user]
+
+      # Otherwise just assume nano name == given name
+      name
     end
 
     # `random_found` exists so that we don't check every single user in the
@@ -149,8 +144,12 @@ class Rogare::Plugins::Wordcount
       month_secs = day_secs * 30
 
       nth = (timediff / day_secs).ceil
-      goal = (opts[:goal] || @@redis.get("nano:#{name}:goal") || 50_000).to_f
-      goal = 50_000 if goal == 0.0
+      goal = opts[:goal].to_i
+      unless goal
+        user = Rogare::Data.users.where(nano_user: name).first
+        goal = Rogare::Data.current_novels(user).first[:goal] if user
+      end
+      goal = 50_000 if goal.nil? || goal == 0.0
 
       goal_today =  if opts[:live]
                       ((goal / month_secs) * timediff).round

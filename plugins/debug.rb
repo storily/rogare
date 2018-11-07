@@ -128,9 +128,7 @@ class Rogare::Plugins::Debug
     du ||= Rogare.discord.users.find { |_i, u| u.name == user }[1]
     return m.reply('No such user') unless du
 
-    redis.set("nick:#{du.id}:nanouser", nano)
     Rogare::Data.set_nano_user(du, nano)
-
     m.reply "User `#{du.id}` nanouser set to `#{nano}`"
   end
 
@@ -142,8 +140,10 @@ class Rogare::Plugins::Debug
     du ||= Rogare.discord.users.find { |_i, u| u.name == user }[1]
     return m.reply('No such user') unless du
 
-    nano = redis.get("nick:#{du.id}:nanouser")
-    redis.set("nano:#{nano}:goal", goal.to_i)
-    m.reply "User `#{du.id}` nanouser `#{nano}` goal set to `#{goal}`"
+    u = Rogare::Data.user_from_discord du
+    novel = Rogare::Data.current_novels(u).first
+    Rogare::Data.novels.where(id: novel[:id]).update(goal: goal.to_i)
+
+    m.reply "User `#{du.id}` (DB:#{u[:id]}) nanouser `#{u[:nano_user] || u[:nick]}` goal set to `#{goal}`"
   end
 end
