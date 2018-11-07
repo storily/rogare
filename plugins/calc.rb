@@ -13,6 +13,18 @@ class Rogare::Plugins::Calc
 
   def execute(m, param)
     param.strip!
+
+    # By far the most common calcs are simple sub/add (after wordwars)
+    wordcalc = /^(\d+)\s*(-+)\s*(\d+)$/.match(param)
+    if wordcalc
+      a = wordcalc[1].to_i
+      op = wordcalc[2]
+      b = wordcalc[3].to_i
+      res = a - b if op == '-'
+      res = a + b if op == '+'
+      return m.reply "#{a} #{op} #{b} = #{res}"
+    end
+
     res = Typhoeus.get 'https://api.wolframalpha.com/v2/query', params: {
       input: param,
       appid: ENV['WOLFRAM_KEY'],
