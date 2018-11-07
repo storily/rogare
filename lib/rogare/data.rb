@@ -19,13 +19,24 @@ module Rogare::Data
       )
     end
 
-    def new_user(user)
-      users.insert(
+    def new_user(user, extra = {})
+      defaults = {
         discord_id: user.id,
         nick: user.nick || user.username,
         first_seen: Sequel.function(:now),
         last_seen: Sequel.function(:now)
-      )
+      }
+
+      users.insert(defaults.merge(extra))
+    end
+
+    def set_nano_user(discu, name)
+      user = users.where(discord_id: discu.id)
+      if user
+        users.where(discord_id: discu.id).update(nano_user: name)
+      else
+        new_user(discu, nano_user: name)
+      end
     end
   end
 end

@@ -129,6 +129,8 @@ class Rogare::Plugins::Debug
     return m.reply('No such user') unless du
 
     redis.set("nick:#{du.id}:nanouser", nano)
+    Rogare::Data.set_nano_user(du, nano)
+
     m.reply "User `#{du.id}` nanouser set to `#{nano}`"
   end
 
