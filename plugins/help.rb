@@ -11,8 +11,10 @@ class Rogare::Plugins::Help
   match_empty :execute
 
   def bot_prefix
-    (self.class.prefix || Rogare.prefix).to_s
-                                        .gsub(/(
+    Rogare
+      .prefix
+      .to_s
+      .gsub(/(
           ^\(
         | \)$
         | \^
