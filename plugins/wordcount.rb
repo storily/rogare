@@ -67,7 +67,7 @@ class Rogare::Plugins::Wordcount
 
   def set_username(m, param)
     user = m.user.id
-    name = param.strip.split.join('_')
+    name = param.strip.split.join('-')
     @@redis.set("nick:#{user}:nanouser", name)
     m.reply "Your username has been set to #{name}."
     own_count(m)
