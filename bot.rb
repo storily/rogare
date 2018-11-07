@@ -29,9 +29,11 @@ threads << Thread.new do
   wars.each(&:join)
 end
 
-threads << Thread.new do
-  logs '=====> Preparing live debug port'
-  binding.remote_pry
+if ENV['RACK_ENV'] == 'production'
+  threads << Thread.new do
+    logs '=====> Preparing live debug port'
+    binding.remote_pry
+  end
 end
 
 threads << Thread.new do
