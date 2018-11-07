@@ -72,7 +72,7 @@ class Rogare::Plugins::Wordcount
   def set_goal(m, goal)
     goal.sub! /k$/, '000'
 
-    novel = Rogare::Data.current_novels(Rogare::Data.user_from_discord m.user).first
+    novel = Rogare::Data.current_novels(Rogare::Data.user_from_discord(m.user)).first
     Rogare::Data.novels.where(id: novel[:id]).update(goal: goal.to_i)
 
     m.reply "Your goal has been set to #{goal}."
@@ -152,11 +152,11 @@ class Rogare::Plugins::Wordcount
       goal = 50_000 if goal.nil? || goal == 0.0
       goal = goal.to_f
 
-      goal_today =  if opts[:live]
-                      ((goal / month_secs) * timediff).round
-                    else
-                      (goal / 30 * nth).round
-                    end
+      goal_today = if opts[:live]
+                     ((goal / month_secs) * timediff).round
+                   else
+                     (goal / 30 * nth).round
+                   end
 
       diff = goal_today - count
 

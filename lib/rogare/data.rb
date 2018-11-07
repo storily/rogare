@@ -14,7 +14,8 @@ module Rogare::Data
       users.where(discord_id: discu.id).first
     end
 
-    def user_seen(discu) # returns date user was last previously seen
+    # returns date user was last previously seen
+    def user_seen(discu)
       nick = discu.nick || discu.username
       discordian = user_from_discord(discu)
 
@@ -65,11 +66,11 @@ module Rogare::Data
 
     def current_novels(user)
       novels
-        .where {
+        .where do
           (user_id =~ user[:id]) &
-          (started <= Sequel.function(:now)) &
-          (finished =~ false)
-        }
+            (started <= Sequel.function(:now)) &
+            (finished =~ false)
+        end
         .reverse(:started)
     end
 
@@ -93,7 +94,7 @@ module Rogare::Data
           novels.insert(
             user_id: user[:id],
             started: first_of(11),
-            type: 'nano',
+            type: 'nano'
           )
         end
       elsif latest_novel.nil?

@@ -8,7 +8,7 @@ Lint/Debugger:
   Enabled: false
 
 Metrics/AbcSize:
-  Max: 70
+  Max: 80
 
 Metrics/BlockLength:
   Max: 55
@@ -17,7 +17,7 @@ Metrics/ClassLength:
   Max: 300
 
 Metrics/CyclomaticComplexity:
-  Max: 20
+  Max: 30
 
 Metrics/LineLength:
   Max: 120
@@ -42,6 +42,11 @@ Style/ClassAndModuleChildren:
 
 Style/ClassVars:
   Enabled: false
+
+Style/DateTime:
+  Enabled: false
+  # If I can't achieve the same thing with Time, what's
+  # the point of telling me not to use DateTime???
 
 Style/Documentation:
   Enabled: false

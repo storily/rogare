@@ -132,8 +132,6 @@ class Rogare::Plugins::Debug
   end
 
   def wc_set_user(m, user, nano)
-    redis = Rogare.redis(2)
-
     du = Rogare.from_discord_mid user
     du ||= Rogare.discord.users.find { |_i, u| u.name == user }[1]
     return m.reply('No such user') unless du
@@ -143,7 +141,6 @@ class Rogare::Plugins::Debug
   end
 
   def wc_set_goal(m, user, goal)
-    redis = Rogare.redis(2)
     goal.sub! /k$/, '000'
 
     du = Rogare.from_discord_mid user
