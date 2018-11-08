@@ -87,7 +87,7 @@ module Rogare
     end
 
     def from_discord_mid(mid)
-      id = mid.gsub(/[^\d]/, '').to_i
+      id = mid.to_s.gsub(/[^\d]/, '').to_i
       du = discord.users[id]
       return unless du
 
