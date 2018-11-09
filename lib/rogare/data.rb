@@ -91,16 +91,21 @@ module Rogare::Data
       if this_is_november
         if latest_novel.nil? || latest_novel[:started] < first_of(11)
           # This is nano, start a new novel!
-          novels.insert(
+          id = novels.insert(
             user_id: user[:id],
             started: first_of(11),
             type: 'nano'
           )
+
+          return novels.where(id: id).first
         end
       elsif latest_novel.nil?
         # No unfinished novels, start one now
-        novels.insert(user_id: user[:id])
+        id = novels.insert(user_id: user[:id])
+        return novels.where(id: id).first
       end
+
+      latest_novel
     end
   end
 end

@@ -147,7 +147,7 @@ class Rogare::Plugins::Wordcount
       goal = opts[:goal]
       unless goal
         user = Rogare::Data.users.where(nano_user: name.to_s).first
-        goal = Rogare::Data.current_novels(user).first[:goal] if user
+        goal = Rogare::Data.ensure_novel(user[:discord_id])[:goal] if user
       end
       goal = 50_000 if goal.nil? || goal == 0.0
       goal = goal.to_f
