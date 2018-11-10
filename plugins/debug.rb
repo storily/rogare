@@ -101,7 +101,7 @@ class Rogare::Plugins::Debug
   def name_info(m, name)
     m.debugly(
       Rogare::Data.names.where(name: name.downcase).first,
-      *Rogare.sql[:names].where(name: name.downcase).select(:name, :kinds, :source).distinct.all
+      *Rogare.sql[:names].where(name: name.downcase).select(:name, :kinds, :source, :surname).distinct.all
     )
   end
 
