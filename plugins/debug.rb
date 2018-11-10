@@ -5,14 +5,16 @@ class Rogare::Plugins::Debug
 
   command 'debug', hidden: true
   usage [
-    'All commands except `!% uptime` and `!% my` are admin-restricted',
+    'All commands except `!% uptime`, `!% my *`, and `!% * info` are admin-restricted',
     '`!% uptime` - Show uptime, boot time, host, and version info',
     '`!% status <status>` - Set bot’s status',
 
     '`!% my id` - Show own discord id',
     '`!% my name` - Show own name as per API',
     '`!% my user` - Show own db user',
+
     '`!% user info <@user or ID or nick>` - Show user’s db info',
+    '`!% name info <name>` - Show !name name db info',
 
     '`!% chan name` - Show this channel’s internal name',
     '`!% chan find <name>` - Find a channel from name or internals',
@@ -32,7 +34,9 @@ class Rogare::Plugins::Debug
   match_command /my id/, method: :my_id
   match_command /my name/, method: :my_name
   match_command /my user/, method: :my_user
+
   match_command /user info (.+)/, method: :user_info
+  match_command /name info (.+)/, method: :name_info
 
   match_command /chan name/, method: :chan_name
   match_command /chan find (.+)/, method: :chan_find
@@ -45,7 +49,12 @@ class Rogare::Plugins::Debug
   match_command /wc set goal (.+) (.+)/, method: :wc_set_goal
 
   before_handler do |method, m|
-    next if %i[uptime help_message my_id my_name my_nano].include? method
+    unless m.channel.name == 'bot-testing'
+      m.reply('Debug in bot-testing only thanks')
+      next :stop
+    end
+
+    next if %i[uptime help_message my_id my_name my_nano user_info name_info].include? method
 
     is_admin = m.user.inner.roles.find { |r| (r.permissions.bits & 3) == 3 }
     unless is_admin
@@ -86,7 +95,14 @@ class Rogare::Plugins::Debug
     user = Rogare::Data.user_from_discord discu
     return m.reply "Not in db: `discord::#{discu.id}`" unless user
 
-    m.reply "`#{user.inspect}`"
+    m.debugly user
+  end
+
+  def name_info(m, name)
+    m.debugly(
+      Rogare::Data.names.where(name: name.downcase).first,
+      *Rogare.sql[:names].where(name: name.downcase).select(:name, :kinds, :source).distinct.all
+    )
   end
 
   def chan_name(m)
