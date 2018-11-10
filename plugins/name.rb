@@ -74,6 +74,14 @@ class Rogare::Plugins::Name
     elsif /^(last(name)?|family|surname)$/i.match?(word)
       args[:full] = false
       args[:kinds] << 'last'
+    elsif /^(afram)$/i.match?(word)
+      args[:kinds] << 'afram'
+    elsif /^(english)$/i.match?(word)
+      args[:kinds] << 'english'
+    elsif /^(indian)$/i.match?(word)
+      args[:kinds] << 'indian'
+    elsif /^(latin)$/i.match?(word)
+      args[:kinds] << 'latin'
     elsif /^(full)$/i.match?(word)
       args[:full] = true
     else
