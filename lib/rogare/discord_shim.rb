@@ -31,6 +31,10 @@ class DiscordMessageShim
     @event.respond message
   end
 
+  def debugly(*things)
+    @event.respond things.map { |thing| "`#{thing.inspect}`" }.join("\n")
+  end
+
   def user
     DiscordUserShim.new @event.message.author
   end

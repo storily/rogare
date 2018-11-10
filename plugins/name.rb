@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../lib/namey'
-require_relative '../lib/nbnames'
 require 'numbers_in_words'
 
 class Rogare::Plugins::Name
@@ -16,20 +14,18 @@ class Rogare::Plugins::Name
   match_command /(.*)/
   match_empty :execute
 
-  @@generator = Namey::Generator.new
-
   def execute(m, param = nil)
     param ||= ''
-    args = { call: :name, full: true, last: false, freq: :all }
+    args = { kinds: [], full: true, freq: [nil, nil], also: [] }
 
     args[:n] = NumbersInWords.in_numbers(param.strip)
 
     words = param.strip.split(' ')
     words.map! do |word|
-      if word.to_i.positive?
+      if word.to_i.to_s == word
         word.to_i
       else
-        word.downcase.to_sym
+        word.downcase
       end
     end
 
@@ -40,55 +36,48 @@ class Rogare::Plugins::Name
     args[:n] = 100 if args[:n] > 100
     args[:n] = 1 if args[:n] < 1
 
-    joined = Array.new(args[:n] * 3) do
-      next ENBYNAMES.sample(args[:full] ? 2 : 1).join(' ') if args[:call] == :unisex
-      next %w[Pierre Pierre].sample(args[:full] ? 2 : 1).join(' ') if args[:call] == :pierre
-
-      n = @@generator.send(args[:call], args[:freq], args[:full])
-      if args[:last]
-        n.split.last
-      else
-        n
-      end
-    end.compact
-
-    if args[:call] == :pierre
-      stone = rand < 0.4
-      stoned = stone ? 'It’s the Stone Age' : 'C’est l’Age de Pierre '
-      joined.map! { |n| n.gsub(/Pierre/, 'Stone') } if stone
-      joined[0] = "#{stoned}! #{joined[0]}"
+    if args[:full]
+      fargs = args.clone
+      largs = args.clone
+      fargs[:kinds] = args[:kinds] + ['first'] - ['last']
+      largs[:kinds] = args[:kinds] - ['first'] + ['last']
+      firsts = Rogare::Data.name_search(fargs)
+      lasts = Rogare::Data.name_search(largs)
+      names = firsts.zip(lasts).map { |fl| "#{fl[0]} #{fl[1]}" }
     else
-      joined = joined.uniq
+      names = Rogare::Data.name_search(args)
     end
 
-    m.reply joined.first(args[:n]).join ', '
+    m.reply names.join ', '
   end
 
   def parse_word(args, word)
     if word.is_a? Integer
       args[:n] = word
-    elsif /^(males?|m[ae]n|boys?)$/i.match?(word)
-      args[:call] = :male
-    elsif /^(females?|wom[ae]n|girls?)$/i.match?(word)
-      args[:call] = :female
+    elsif /^\d+%$/.match?(word)
+      args[:freq] = [word.to_i, nil]
+    elsif /^(males?|m[ae]n|boys?|lads?|guys?)$/i.match?(word)
+      args[:kinds] << 'male'
+    elsif /^(females?|wom[ae]n|girls?|lass(i?es)?|gals?)$/i.match?(word)
+      args[:kinds] << 'female'
     elsif /^(enby|nb|enbie)s?$/i.match?(word)
-      args[:call] = :unisex
-    elsif /^(pierre|stone|rock|pebble)s?$/i.match?(word)
-      args[:call] = :pierre
+      args[:kinds] << 'enby'
     elsif /^(common)$/i.match?(word)
-      args[:freq] = :common
+      args[:freq] = [50, nil]
     elsif /^(rare|weird|funny|evil|bad)$/i.match?(word)
-      args[:freq] = :rare
+      args[:freq] = [nil, 20]
     elsif /^(all|both)$/i.match?(word)
-      args[:freq] = :all
+      args[:freq] = [nil, nil]
     elsif /^(first|given)$/i.match?(word)
       args[:full] = false
+      args[:kinds] << 'first'
     elsif /^(last(name)?|family|surname)$/i.match?(word)
-      args[:full] = true
-      args[:last] = true
+      args[:full] = false
+      args[:kinds] << 'last'
     elsif /^(full)$/i.match?(word)
       args[:full] = true
-      args[:last] = false
+    else
+      args[:also] << word
     end
   end
 end

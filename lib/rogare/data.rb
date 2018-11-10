@@ -10,6 +10,10 @@ module Rogare::Data
       Rogare.sql[:novels]
     end
 
+    def names
+      Rogare.sql[:names_scored]
+    end
+
     def user_from_discord(discu)
       users.where(discord_id: discu.id).first
     end
@@ -106,6 +110,33 @@ module Rogare::Data
       end
 
       latest_novel
+    end
+
+    def name_query(args)
+      query = names.select(:name).order { random.function }.limit(args[:n])
+      query = query.where { score >= args[:freq][0] } if args[:freq][0]
+      query = query.where { score <= args[:freq][1] } if args[:freq][1]
+      unless args[:kinds].empty?
+        query = query.where(
+          Sequel[:kinds]
+            .pg_array
+          .contains(Sequel.pg_array(args[:kinds].uniq.map { |k| Sequel[k].cast(:name_kind) }))
+        )
+      end
+
+      # TODO: use args[:also] to do further filtering with fallback to non-also if there's too little results
+
+      query
+    end
+
+    def name_search(args)
+      name_query(args).all.map { |name| ucname name[:name] }
+    end
+
+    def ucname(name)
+      name.split(/(?<![[:alnum:]])/)
+          .map { |part| part[0..-2].capitalize + part[-1] }
+          .join
     end
   end
 end
