@@ -15,12 +15,12 @@ module Rogare
 
     def game
       [
-        #'with fire',
+        # 'with fire',
         'at life — and winning',
         'Plotting in the Dark',
-        #'Killing Characters',
-        #'Taking names and kicking ass',
-        #'Breaking quills',
+        # 'Killing Characters',
+        # 'Taking names and kicking ass',
+        # 'Breaking quills',
         'Pulling out the full stops',
         'with cute animals',
         'Destiny… of your MC',
@@ -32,7 +32,7 @@ module Rogare
         'Age of Myth',
         'League of Writers',
         'the fool',
-        #'and drinking',
+        # 'and drinking',
         'Really old scrolls VI',
         'you',
         'Grand Write Into',
@@ -41,7 +41,7 @@ module Rogare
         'Two Fortnites (and this will be over)',
         'Red Pen Redemption',
         'Finally Fantasy',
-        #'CoD: Blank Page',
+        # 'CoD: Blank Page',
         'Dots 2',
         'Half-Novel²',
         'Poketome Go'

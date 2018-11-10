@@ -113,7 +113,10 @@ module Rogare::Data
     end
 
     def name_query(args)
-      query = names.select(:name).order { random.function }.limit(args[:n])
+      last = args[:kinds].include? 'last'
+      args[:kinds] -= ['last']
+
+      query = names.select(:name).order { random.function }.where(surname: last).limit(args[:n])
       query = query.where { score >= args[:freq][0] } if args[:freq][0]
       query = query.where { score <= args[:freq][1] } if args[:freq][1]
       unless args[:kinds].empty?
