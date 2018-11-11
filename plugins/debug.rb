@@ -17,6 +17,7 @@ class Rogare::Plugins::Debug
     '`!% user info <@user or ID or nick>` - Show user’s db info',
     '`!% name info <name>` - Show !name name db info (quite verbose)',
     '`!% kind info` - Show !name kind list',
+    '`!% name adjust <name> <+/-kind>` - File an adjustment for a name to be (+) or not be (-) a particular kind.',
 
     '`!% chan name` - Show this channel’s internal name',
     '`!% chan find <name>` - Find a channel from name or internals',
@@ -40,6 +41,7 @@ class Rogare::Plugins::Debug
   match_command /user info (.+)/, method: :user_info
   match_command /name info ([[:alnum:]]+)/, method: :name_info
   match_command /kind info/, method: :kind_info
+  match_command /name adjust ([[:alnum:]]+) ([+\-]\w+)/, method: :name_adjust
 
   match_command /chan name/, method: :chan_name
   match_command /chan find (.+)/, method: :chan_find
@@ -119,6 +121,27 @@ class Rogare::Plugins::Debug
       ) enum WHERE left(kind::text, 1) != \'-\'']
 
     m.reply(kinds.map { |k| k[:kind] }.join ', ')
+  end
+
+  def name_adjust(m, name, adjustment)
+    adjustment.sub!(/^\+/, '')
+
+    origs = Rogare::Data.names.where(name: name.downcase).all
+    return m.reply "No such name in db: `#{name}`" if origs.empty?
+
+    surname = origs.any? { |n| n[:surname] }
+
+    info = {
+      name: name,
+      kinds: Sequel.pg_array([Sequel[adjustment].cast(:name_kind)]),
+      source: m.user.nick
+    }
+
+    Rogare.sql[:names].insert(info)
+    Rogare.sql[:names].insert(info.merge(surname: true)) if surname
+
+    m.reply "Adjustment to `#{name}` added. Ask an admin to regenerate indexes." \
+            '(Admins, do that with: `!debug name regen`.)'
   end
 
   def chan_name(m)

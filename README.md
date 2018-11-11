@@ -52,19 +52,39 @@ CREATE AGGREGATE array_cat_agg(anyarray) (
   STYPE=anyarray
 );
 
-DROP MATERIALISED VIEW names_scored_raw CASCADE;
+CREATE OR REPLACE FUNCTION namekind_adjustment(name_kind[]) RETURNS name_kind[]
+AS $$
+DECLARE
+  intermediate name_kind[] := $1;
+  kind name_kind;
+BEGIN
+  FOREACH kind IN ARRAY $1
+  LOOP
+    IF kind::text LIKE '-%' THEN
+      intermediate := array_remove(intermediate, substring(kind::text from 2)::name_kind);
+      intermediate := array_remove(intermediate, kind);
+    END IF;
+  END LOOP;
+  RETURN intermediate;
+END; $$ LANGUAGE plpgsql
+RETURNS NULL ON NULL INPUT
+PARALLEL SAFE
+IMMUTABLE
+COST 10;
 
-CREATE MATERIALISED VIEW names_scored_raw AS (
+DROP MATERIALIZED VIEW names_scored_raw CASCADE;
+
+CREATE MATERIALIZED VIEW names_scored_raw AS (
   SELECT
     name,
     anyarray_uniq(array_agg(source)) AS sources,
-    anyarray_uniq(array_cat_agg(kinds)) AS kinds,
+    namekind_adjustment(anyarray_uniq(array_cat_agg(kinds))) AS kinds,
     (count(*)::double precision / (SELECT count(*) FROM names)) AS score
   FROM names
   GROUP BY name
 );
 
-CREATE MATERIALISED VIEW names_scored AS (
+CREATE MATERIALIZED VIEW names_scored AS (
   SELECT
     name,
     sources,
