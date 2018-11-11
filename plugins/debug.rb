@@ -18,6 +18,7 @@ class Rogare::Plugins::Debug
     '`!% name info <name>` - Show !name name db info (quite verbose)',
     '`!% kind info` - Show !name kind list',
     '`!% name adjust <name> <+/-kind>` - File an adjustment for a name to be (+) or not be (-) a particular kind.',
+    '`!% name regen` - Regenerate the !name index.',
 
     '`!% chan name` - Show this channel’s internal name',
     '`!% chan find <name>` - Find a channel from name or internals',
@@ -42,6 +43,7 @@ class Rogare::Plugins::Debug
   match_command /name info ([[:alnum:]]+)/, method: :name_info
   match_command /kind info/, method: :kind_info
   match_command /name adjust ([[:alnum:]]+) ([+\-]\w+)/, method: :name_adjust
+  match_command /name regen/, method: :name_regen
 
   match_command /chan name/, method: :chan_name
   match_command /chan find (.+)/, method: :chan_find
@@ -142,6 +144,14 @@ class Rogare::Plugins::Debug
 
     m.reply "Adjustment to `#{name}` added. Ask an admin to regenerate indexes." \
             '(Admins, do that with: `!debug name regen`.)'
+  end
+
+  def name_regen(m)
+    m.reply 'Refreshing name scores'
+    Rogare.sql['REFRESH MATERIALIZED VIEW names_scored_raw;'].all
+    m.reply 'Refreshing name index'
+    Rogare.sql['REFRESH MATERIALIZED VIEW names_scored;'].all
+    m.reply 'Refreshing done'
   end
 
   def chan_name(m)
