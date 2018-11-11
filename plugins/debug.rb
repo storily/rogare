@@ -14,7 +14,7 @@ class Rogare::Plugins::Debug
     '`!% my user` - Show own db user',
 
     '`!% user info <@user or ID or nick>` - Show user’s db info',
-    '`!% name info <name>` - Show !name name db info',
+    '`!% name info <name>` - Show !name name db info (quite verbose)',
 
     '`!% chan name` - Show this channel’s internal name',
     '`!% chan find <name>` - Find a channel from name or internals',
@@ -36,7 +36,7 @@ class Rogare::Plugins::Debug
   match_command /my user/, method: :my_user
 
   match_command /user info (.+)/, method: :user_info
-  match_command /name info (.+)/, method: :name_info
+  match_command /name info ([[:alnum:]]+)/, method: :name_info
 
   match_command /chan name/, method: :chan_name
   match_command /chan find (.+)/, method: :chan_find
@@ -50,11 +50,15 @@ class Rogare::Plugins::Debug
 
   before_handler do |method, m|
     unless m.channel.name == 'bot-testing'
-      m.reply('Debug in bot-testing only thanks')
+      m.reply('Debug in bot-testing only please')
       next :stop
     end
 
-    next if %i[uptime help_message my_id my_name my_nano user_info name_info].include? method
+    next if %i[
+      uptime help_message
+      my_id my_name my_nano
+      user_info name_info name_adjust
+    ].include? method
 
     is_admin = m.user.inner.roles.find { |r| (r.permissions.bits & 3) == 3 }
     unless is_admin

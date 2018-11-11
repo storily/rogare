@@ -119,15 +119,13 @@ module Rogare::Data
       query = names.select(:name).order { random.function }.where(surname: last).limit(args[:n])
       query = query.where { score >= args[:freq][0] } if args[:freq][0]
       query = query.where { score <= args[:freq][1] } if args[:freq][1]
+
       unless args[:kinds].empty?
-        query = query.where(
-          Sequel[:kinds]
-            .pg_array
-          .contains(Sequel.pg_array(args[:kinds].uniq.map { |k| Sequel[k].cast(:name_kind) }))
-        )
+        castkinds = Sequel.pg_array(args[:kinds].uniq.map { |k| Sequel[k].cast(:name_kind) })
+        query = query.where(Sequel[:kinds].pg_array.contains(castkinds))
       end
 
-      # TODO: use args[:also] to do further filtering with fallback to non-also if there's too little results
+      # TODO: use args[:also] to do further filtering with fallback to non-also if there's too few results
 
       query
     end
