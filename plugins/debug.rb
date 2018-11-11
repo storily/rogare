@@ -5,7 +5,7 @@ class Rogare::Plugins::Debug
 
   command 'debug', hidden: true
   usage [
-    'All commands are restricted to #bot-testing,' \
+    'All commands are restricted to #bot-testing, ' \
     'and only `!% uptime`, `!% my *`, `!% * info`, and `!% name adjust` are public.',
     '`!% uptime` - Show uptime, boot time, host, and version info',
     '`!% status <status>` - Set bot’s status',
@@ -142,7 +142,7 @@ class Rogare::Plugins::Debug
     Rogare.sql[:names].insert(info)
     Rogare.sql[:names].insert(info.merge(surname: true)) if surname
 
-    m.reply "Adjustment to `#{name}` added. Ask an admin to regenerate indexes." \
+    m.reply "Adjustment to `#{name}` added. Ask an admin to regenerate indexes. " \
             '(Admins, do that with: `!debug name regen`.)'
   end
 
