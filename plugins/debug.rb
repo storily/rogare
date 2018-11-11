@@ -122,7 +122,7 @@ class Rogare::Plugins::Debug
         SELECT unnest(enum_range(null::name_kind)) AS kind
       ) enum WHERE left(kind::text, 1) != \'-\'']
 
-    m.reply(kinds.map { |k| k[:kind] }.join ', ')
+    m.reply(kinds.map { |k| k[:kind] }.join(', '))
   end
 
   def name_adjust(m, name, adjustment)
