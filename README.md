@@ -76,17 +76,18 @@ DROP MATERIALIZED VIEW names_scored_raw CASCADE;
 
 CREATE MATERIALIZED VIEW names_scored_raw AS (
   SELECT
-    name,
+    name, surname,
     anyarray_uniq(array_agg(source)) AS sources,
     namekind_adjustment(anyarray_uniq(array_cat_agg(kinds))) AS kinds,
     (count(*)::double precision / (SELECT count(*) FROM names)) AS score
   FROM names
-  GROUP BY name
+  GROUP BY name, surname
 );
 
 CREATE MATERIALIZED VIEW names_scored AS (
   SELECT
     name,
+    surname,
     sources,
     kinds,
     ln(score * 1000000) * 100 / (
