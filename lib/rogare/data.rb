@@ -135,9 +135,12 @@ module Rogare::Data
     end
 
     def ucname(name)
-      name.split(/(?<![[:alnum:]])/)
-          .map { |part| part[0..-2].capitalize + part[-1] }
-          .join
+      name.split(/(?<![[:alnum:]])/).map do |part|
+        (part[0..-2].capitalize + part[-1])
+          .gsub!(/^(Ma?c|V[ao]n)(\w+)/) { |_s| "#{Regexp.last_match(1)}#{Regexp.last_match(2).capitalize}" }
+          .gsub!(/^O([bcdfghklmnrst]\w+)/) { |_s| "O’#{Regexp.last_match(1).capitalize}" }
+          .gsub!(/^O’Mac(\w+)/) { |_s| "O’Mac#{Regexp.last_match(1).capitalize}" }
+      end.join
     end
   end
 end
