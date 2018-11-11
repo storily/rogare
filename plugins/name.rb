@@ -82,20 +82,20 @@ class Rogare::Plugins::Name
       args[:kinds] << 'indian'
     elsif /^(latin|spanish|portuguese|mexican|hispanic)$/i.match?(word)
       args[:kinds] << 'latin'
-    elsif /^(french|français)$/i
+    elsif /^(french|français)$/i.match?(word)
       args[:kinds] << 'french'
-    elsif /^(m[aā]ori|(te)?-?reo)$/i
+    elsif /^(m[aā]ori|(te)?-?reo)$/i.match?(word)
       args[:kinds] << 'maori'
-    elsif /^(maghreb|algerian|morroccan|tunis|north-african)$/i
+    elsif /^(maghreb|algerian|morroccan|tunis|north-african)$/i.match?(word)
       args[:kinds] << 'maghreb'
-    elsif /^(mideast|arabic|hebrew|egyptian|middle-east)$/i
+    elsif /^(mideast|arabic|hebrew|egyptian|middle-east)$/i.match?(word)
       args[:kinds] << 'mideast'
-    elsif /^(easteuro|russian?|eastern|east(ern)?-europe|siberi(an|e)|east)$/i
+    elsif /^(easteuro|russian?|eastern|east(ern)?-europe|siberi(an|e)|east)$/i.match?(word)
       args[:kinds] << 'easteuro'
-    elsif /^(pacific)$/i
+    elsif /^(pacific)$/i.match?(word)
       args[:kinds] << 'pacific'
       args[:also] << 'maori'
-    elsif /^((poly|mela|micro)(nesian?)?|hawaii|samoa)$/i
+    elsif /^((poly|mela|micro)(nesian?)?|hawaii|samoa)$/i.match?(word)
       args[:kinds] << 'pacific'
     elsif /^(full)$/i.match?(word)
       args[:full] = true
