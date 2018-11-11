@@ -5,7 +5,8 @@ class Rogare::Plugins::Debug
 
   command 'debug', hidden: true
   usage [
-    'All commands except `!% uptime`, `!% my *`, and `!% * info` are admin-restricted',
+    'All commands are restricted to #bot-testing,' \
+    'and only `!% uptime`, `!% my *`, `!% * info`, and `!% name adjust` are public.',
     '`!% uptime` - Show uptime, boot time, host, and version info',
     '`!% status <status>` - Set bot’s status',
 
@@ -15,6 +16,7 @@ class Rogare::Plugins::Debug
 
     '`!% user info <@user or ID or nick>` - Show user’s db info',
     '`!% name info <name>` - Show !name name db info (quite verbose)',
+    '`!% kind info` - Show !name kind list',
 
     '`!% chan name` - Show this channel’s internal name',
     '`!% chan find <name>` - Find a channel from name or internals',
@@ -37,6 +39,7 @@ class Rogare::Plugins::Debug
 
   match_command /user info (.+)/, method: :user_info
   match_command /name info ([[:alnum:]]+)/, method: :name_info
+  match_command /kind info/, method: :kind_info
 
   match_command /chan name/, method: :chan_name
   match_command /chan find (.+)/, method: :chan_find
@@ -57,7 +60,7 @@ class Rogare::Plugins::Debug
     next if %i[
       uptime help_message
       my_id my_name my_nano
-      user_info name_info name_adjust
+      user_info kind_info name_info name_adjust
     ].include? method
 
     is_admin = m.user.inner.roles.find { |r| (r.permissions.bits & 3) == 3 }
@@ -108,6 +111,14 @@ class Rogare::Plugins::Debug
       '------------------------------------------------',
       *Rogare.sql[:names].where(name: name.downcase).select(:name, :kinds, :source, :surname).distinct.all
     )
+  end
+
+  def kind_info(m)
+    kinds = Rogare.sql['SELECT * FROM (
+        SELECT unnest(enum_range(null::name_kind)) AS kind
+      ) enum WHERE left(kind::text, 1) != \'-\'']
+
+    m.reply(kinds.map { |k| k[:kind] }.join ', ')
   end
 
   def chan_name(m)
