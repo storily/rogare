@@ -4,7 +4,7 @@ class Rogare::Plugins::Voice
   extend Rogare::Plugin
 
   command 'voice', hidden: true
-  aliases 'v'
+  aliases 'v' unless ENV['RACK_ENV'] == 'production'
   usage [
     'All commands are admin-restricted',
     '`!% connect <channel>` - Start the player and connect to the given voice channel',
