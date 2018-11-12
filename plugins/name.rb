@@ -44,8 +44,10 @@ class Rogare::Plugins::Name
       firsts = Rogare::Data.name_search(fargs)
       lasts = Rogare::Data.name_search(largs)
       if lasts.length < firsts.length
-        diff = first.length - lasts.length
-        Rogare::Data.name_search(n: diff, kinds: ['last'], also: args[:kinds] - ['first'], full: false)
+        diff = firsts.length - lasts.length
+        Rogare::Data.name_search(
+          n: diff, kinds: ['last'], also: args[:kinds] - ['first'], full: false, freq: args[:freq]
+        )
                     .each { |n| lasts << n }
       end
       names = firsts.zip(lasts).map { |fl| "#{fl[0]} #{fl[1]}" }
@@ -53,6 +55,7 @@ class Rogare::Plugins::Name
       names = Rogare::Data.name_search(args)
     end
 
+    names = ['No matching names yet :('] if names.empty?
     m.reply names.join ', '
   end
 
