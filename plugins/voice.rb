@@ -10,8 +10,6 @@ class Rogare::Plugins::Voice
     '`!% connect <channel>` - Start the player and connect to the given voice channel',
     '`!% kill` - Kill the player',
     '`!% bye` - Quit gracefully',
-    '`!% on` - Turn speaking on',
-    '`!% off` - Turn speaking off',
     '`!% play <name>` - Play a named sound',
   ]
   handle_help
@@ -19,9 +17,7 @@ class Rogare::Plugins::Voice
   match_command /connect()/, method: :voice_connect
   match_command /connect (.+)/, method: :voice_connect
   match_command /kill/, method: :voice_kill
-  match_command /on/, method: :voice_on
   match_command /play (.+)/, method: :voice_play
-  match_command /off/, method: :voice_off
   match_command /bye/, method: :voice_bye
 
   @@player = nil
@@ -43,8 +39,11 @@ class Rogare::Plugins::Voice
     rchan = Rogare.find_channel(chan)
     return m.reply "No such channel: `#{chan}`" unless rchan
 
-    pin, pout, perr, pthr = Open3.popen3('node', 'voice/player.js', err: :out)
-    @@player = [pin, pout, perr, pthr]
+    pin, pout, perr, pthr = Open3.popen3('node', 'voice/player.js')
+    perrt = Thread.new do
+      perr.each_line { |line| STDERR.puts line }
+    end
+    @@player = [pin, pout, perrt, pthr]
     m.reply "Started player (#{pthr.pid})"
 
     return unless wait_for(m) { |line| line == "READY\n" }
@@ -91,13 +90,10 @@ class Rogare::Plugins::Voice
   def voice_kill(m)
     return m.reply 'Already dead' unless @@player
 
-    pin, pout, perr, pthr = @@player
+    pin, pout, perrt, pthr = @@player
     m.reply "Closing streams"
     pin.close
     pout.close
-    perr.close
-
-    return m.reply 'Looks like it’s already dead' unless check_pid pthr.pid
 
     begin
       m.reply "Sending TERM to #{pthr.pid}"
@@ -112,6 +108,7 @@ class Rogare::Plugins::Voice
       m.reply 'Looks like it was already dead'
     ensure
       @@player = nil
+      perrt.kill
     end
   end
 
@@ -124,47 +121,22 @@ class Rogare::Plugins::Voice
     end
   end
 
-  def voice_on(m)
-    Rogare.discord.voice(m.channel.server).speaking = true
-  end
-
   def voice_play(m, name)
     return if name.include? '/'
+    pin = @@player[0]
 
-    file = Dir["./voice/#{name}.dca"].first
-    file ||= Dir["./voice/#{name}.mp3"].first
-    return m.reply 'No such file' unless file
-
-    voice = Rogare.discord.voice(m.channel.server)
-    voice.speaking = true
-
-    begin
-      m.reply 'Playing'
-      logs 'What'
-      if file.end_with? '.dca'
-        logs 'Dca'
-        voice.play_dca(file)
-      else
-        logs 'File'
-        logs file.inspect
-        voice.play_file(file)
-      end
-      logs 'What'
-      m.reply 'Played'
-    rescue StandardError => e
-      logs e.message
-      logs e.backtrace
-      m.reply "Error playing #{name}"
-    end
-
-    voice.speaking = false
-  end
-
-  def voice_off(m)
-    Rogare.discord.voice(m.channel.server).speaking = false
+    pin.write "PLAY #{name}\n"
+    return unless wait_for(m) { |line| line == "PLAYING\n" }
+    m.reply "Playing"
   end
 
   def voice_bye(m)
-    Rogare.discord.voice(m.channel.server).destroy
+    pin = @@player[0]
+
+    pin.write "DISCONNECT\n"
+    return unless wait_for(m) { |line| line == "DISCONNECTED\n" }
+    m.reply "Player disconnected"
+
+    voice_kill(m)
   end
 end
