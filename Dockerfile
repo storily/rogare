@@ -3,7 +3,7 @@ FROM heroku/heroku:18
 # Permanent
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - &&\
     apt install -y nodejs ruby-bundler ruby-dev libopus-dev libpq-dev \
-        libsodium-dev zlib1g-dev sudo &&\
+        libsodium-dev zlib1g-dev sudo ffmpeg &&\
     useradd -mU rogare && mkdir /app &&\
     npm i -g npm &&\
     apt autoremove -y && apt clean -y && rm -rf /var/lib/apt/lists/*
