@@ -128,12 +128,6 @@ class Rogare::Plugins::Wordwar
            .reject { |w| w[:end] < Time.now }
            .sort_by { |w| w[:start] }
 
-    if rand < 0.9 && (Time.now < Time.at(1_541_847_600))
-      # War 60 is a special long-running war. We want it to still be there,
-      # but not to advertise its presence all the time, unless we're close!
-      wars.reject! { |w| w[:id].to_s == '60' }
-    end
-
     wars.each do |war|
       say_war_info m, war
     end
