@@ -37,19 +37,10 @@ class Rogare::Plugins::Name
     args[:n] = 1 if args[:n] < 1
 
     if args[:full]
-      fargs = args.clone
-      largs = args.clone
-      fargs[:kinds] = args[:kinds] + ['first'] - ['last']
-      largs[:kinds] = args[:kinds] - ['first'] + ['last']
-      firsts = Rogare::Data.name_search(fargs)
-      lasts = Rogare::Data.name_search(largs)
-      if lasts.length < firsts.length
-        diff = firsts.length - lasts.length
-        Rogare::Data.name_search(
-          n: diff, kinds: ['last'], also: args[:kinds] - ['first'], full: false, freq: args[:freq]
-        )
-                    .each { |n| lasts << n }
-      end
+      firsts = Rogare::Data.name_search(args_first_name args)
+      lasts = Rogare::Data.name_search(args_last_name args)
+      diff = firsts.length - lasts.length
+      get_more_lasts(args, diff).each { |n| lasts << n } if diff.positive?
       names = firsts.zip(lasts).map { |fl| "#{fl[0]} #{fl[1]}" }
     else
       names = Rogare::Data.name_search(args)
@@ -57,6 +48,30 @@ class Rogare::Plugins::Name
 
     names = ['No matching names yet :('] if names.empty?
     m.reply names.join ', '
+  end
+
+  def amend_args(args, plus, minus)
+    new_args = args.clone
+    new_args[:kinds] = args[:kinds] - [minus] + [plus]
+    new_args
+  end
+
+  def args_first_name(args)
+    amend_args(args, 'first', 'last')
+  end
+
+  def args_last_name(args)
+    amend_args(args, 'last', 'first')
+  end
+
+  def get_more_lasts(args, amount)
+    Rogare::Data.name_search(
+      n: amount,
+      kinds: ['last'],
+      full: false,
+      freq: args[:freq],
+      also: args[:kinds] - ['first'],
+    )
   end
 
   def parse_word(args, word)
