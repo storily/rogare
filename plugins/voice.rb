@@ -10,7 +10,7 @@ class Rogare::Plugins::Voice
     '`!% connect <channel>` - Start the player and connect to the given voice channel',
     '`!% kill` - Kill the player',
     '`!% bye` - Quit gracefully',
-    '`!% play <name>` - Play a named sound',
+    '`!% play <name>` - Play a named sound'
   ]
   handle_help
 
@@ -34,6 +34,7 @@ class Rogare::Plugins::Voice
 
   def voice_connect(m, chan)
     return m.reply 'Already connected' if @@player
+
     chan = 'General' if chan == ''
 
     rchan = Rogare.find_channel(chan)
@@ -47,17 +48,19 @@ class Rogare::Plugins::Voice
     m.reply "Started player (#{pthr.pid})"
 
     return unless wait_for(m) { |line| line == "READY\n" }
-    m.reply "Player started and well"
+
+    m.reply 'Player started and well'
 
     pin.write "CONNECT #{rchan}\n"
     return unless wait_for(m) { |line| line == "CONNECTED\n" }
-    m.reply "Player connected"
+
+    m.reply 'Player connected'
   end
 
   def wait(secs)
     pout = @@player[1]
 
-    buf = ""
+    buf = ''
     secs.times do
       able = pout.read_nonblock 1, exception: false
       next sleep(1) if able.nil? || able == :wait_readable
@@ -91,7 +94,7 @@ class Rogare::Plugins::Voice
     return m.reply 'Already dead' unless @@player
 
     pin, pout, perrt, pthr = @@player
-    m.reply "Closing streams"
+    m.reply 'Closing streams'
     pin.close
     pout.close
 
@@ -104,7 +107,7 @@ class Rogare::Plugins::Voice
       end
       m.reply "Sending KILL to #{pthr.pid}"
       Process.kill('KILL', pthr.pid)
-    rescue
+    rescue StandardError
       m.reply 'Looks like it was already dead'
     ensure
       @@player = nil
@@ -113,21 +116,21 @@ class Rogare::Plugins::Voice
   end
 
   def check_pid(pid)
-    begin
-      Process.getpgid pid
-      true
-    rescue
-      false
-    end
+    Process.getpgid pid
+    true
+  rescue StandardError
+    false
   end
 
   def voice_play(m, name)
     return if name.include? '/'
+
     pin = @@player[0]
 
     pin.write "PLAY #{name}\n"
     return unless wait_for(m) { |line| line == "PLAYING\n" }
-    m.reply "Playing"
+
+    m.reply 'Playing'
   end
 
   def voice_bye(m)
@@ -135,7 +138,8 @@ class Rogare::Plugins::Voice
 
     pin.write "DISCONNECT\n"
     return unless wait_for(m) { |line| line == "DISCONNECTED\n" }
-    m.reply "Player disconnected"
+
+    m.reply 'Player disconnected'
 
     voice_kill(m)
   end
