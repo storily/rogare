@@ -64,6 +64,7 @@ module Rogare::Plugin
 
     opts[:method] ||= :execute
 
+    logs '       matching: ' + pattern.inspect
     my[:patterns] << [/^\s*!#{pattern}/, opts]
     my[:common_pattern] = Regexp.union(my[:patterns].map { |pat| pat[0] })
 
@@ -98,7 +99,6 @@ module Rogare::Plugin
     excl = my[:help_includes_command] ? '' : '?:'
     pat = "(#{excl}#{[my[:command], *my[:aliases]].map { |c| Regexp.escape(c) }.join('|')})"
     pat = "#{pat}\\s+#{pattern}" if pattern
-    logs '       matching: ' + pat.inspect
     match_message Regexp.new(pat, Regexp::IGNORECASE), opts
   end
 
