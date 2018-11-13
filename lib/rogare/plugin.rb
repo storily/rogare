@@ -42,10 +42,11 @@ module Rogare::Plugin
 
   def handle_help
     match_command /((-|--)?(help|usage)|-?\?)\s*$/, method: :help_message
+    h = my # Not useless! Will break if you remove
     define_method :help_message do |m|
-      m.reply 'No help message :(' if my[:usage].empty?
-      usage = my[:usage].map do |line|
-        line.gsub('!%', "!#{my[:command]}")
+      m.reply 'No help message :(' if h[:usage].empty?
+      usage = h[:usage].map do |line|
+        line.gsub('!%', "!#{h[:command]}")
       end
 
       usage[0] = "Usage: #{usage[0]}"
