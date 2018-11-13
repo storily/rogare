@@ -9,13 +9,14 @@ class Rogare::Plugins::Calc
   handle_help
 
   match_command /(.+)/
+  match_message /(?:\d+\s*[\-+]\s*\d+)/
   match_empty :help_message
 
   def execute(m, param)
     param.strip!
 
     # By far the most common calcs are simple sub/add (after wordwars)
-    wordcalc = /^(\d+)\s*(-+)\s*(\d+)$/.match(param)
+    wordcalc = /^!?(\d+)\s*([\-+])\s*(\d+)$/.match(param)
     if wordcalc
       a = wordcalc[1].to_i
       op = wordcalc[2]
