@@ -5,10 +5,9 @@ class Rogare::Plugins::Debug
 
   command 'debug', hidden: true
   usage [
-    'All commands are restricted to #bot-testing, ' \
-    'and only `!% uptime`, `!% my *`, `!% * info`, and `!% name adjust` are public.',
+    'All commands are restricted to #bot-testing, and some are admin-restricted.',
+    '**Public commands:**',
     '`!% uptime` - Show uptime, boot time, host, and version info',
-    '`!% status <status>` - Set bot’s status',
 
     '`!% my id` - Show own discord id',
     '`!% my name` - Show own name as per API',
@@ -17,7 +16,12 @@ class Rogare::Plugins::Debug
     '`!% user info <@user or ID or nick>` - Show user’s db info',
     '`!% name info <name>` - Show !name name db info (quite verbose)',
     '`!% kind info` - Show !name kind list',
+    '`!% kind map` - Show !name kind map',
     '`!% name adjust <name> <+/-kind>` - File an adjustment for a name to be (+) or not be (-) a particular kind.',
+
+    "\n**Admin commands:**",
+    '`!% status <status>` - Set bot’s status',
+
     '`!% name regen` - Regenerate the !name index.',
 
     '`!% chan name` - Show this channel’s internal name',
@@ -42,6 +46,7 @@ class Rogare::Plugins::Debug
   match_command /user info (.+)/, method: :user_info
   match_command /name info ([[:alnum:]]+)/, method: :name_info
   match_command /kind info/, method: :kind_info
+  match_command /kind map/, method: :kind_map
   match_command /name adjust ([[:alnum:]]+) ([+\-]\w+)/, method: :name_adjust
   match_command /name regen/, method: :name_regen
 
@@ -64,7 +69,8 @@ class Rogare::Plugins::Debug
     next if %i[
       uptime help_message
       my_id my_name my_nano
-      user_info kind_info name_info name_adjust
+      user_info name_info name_adjust
+      kind_info kind_map
     ].include? method
 
     is_admin = m.user.inner.roles.find { |r| (r.permissions.bits & 3) == 3 }
@@ -123,6 +129,10 @@ class Rogare::Plugins::Debug
       ) enum WHERE left(kind::text, 1) != \'-\'']
 
     m.reply(kinds.map { |k| k[:kind] }.join(', '))
+  end
+
+  def kind_map(m)
+    m.reply 'https://nominare.cogitare.nz/kinds.png'
   end
 
   def name_adjust(m, name, adjustment)
