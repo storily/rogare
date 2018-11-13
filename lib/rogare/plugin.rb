@@ -99,7 +99,6 @@ module Rogare::Plugin
     pat = "(#{excl}#{[my[:command], *my[:aliases]].map { |c| Regexp.escape(c) }.join('|')})"
     pat = "#{pat}\\s+#{pattern}" if pattern
     logs '       matching: ' + pat.inspect
-    opts[:group] ||= :commands
     match_message Regexp.new(pat, Regexp::IGNORECASE), opts
   end
 
