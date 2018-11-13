@@ -8,28 +8,28 @@ Lint/Debugger:
   Enabled: false
 
 Metrics/AbcSize:
-  Max: 80
+  Enabled: false
 
 Metrics/BlockLength:
-  Max: 55
+  Enabled: false
 
 Metrics/ClassLength:
-  Max: 300
+  Enabled: false
 
 Metrics/CyclomaticComplexity:
-  Max: 30
+  Enabled: false
 
 Metrics/LineLength:
   Max: 120
 
 Metrics/MethodLength:
-  Max: 60
+  Enabled: false
 
 Metrics/ModuleLength:
-  Max: 200
+  Enabled: false
 
 Metrics/PerceivedComplexity:
-  Max: 25
+  Enabled: false
 
 Naming/UncommunicativeMethodParamName:
   AllowedNames:
