@@ -149,6 +149,8 @@ class Rogare::Plugins::Name
       args[:kinds] << 'pacific'
     elsif /^(amerindian|american-?indian|native-?american|cherokee|navajo|sioux|apache)$/i.match?(word)
       args[:kinds] << 'amerindian'
+    elsif /^(aborigin(al|e)?|native-?australian)$/i.match?(word)
+      args[:kinds] << 'aboriginal'
     elsif /^(full)$/i.match?(word)
       args[:full] = true
     else
