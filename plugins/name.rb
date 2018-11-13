@@ -124,7 +124,7 @@ class Rogare::Plugins::Name
     elsif /^(last(name)?|family|surname)$/i.match?(word)
       args[:full] = false
       args[:kinds] << 'last'
-    elsif /^(afram|african-american)$/i.match?(word)
+    elsif /^(afram|african-?american)$/i.match?(word)
       args[:kinds] << 'afram'
     elsif /^(english|western|occidental)$/i.match?(word)
       args[:kinds] << 'english'
@@ -136,18 +136,18 @@ class Rogare::Plugins::Name
       args[:kinds] << 'french'
     elsif /^(m[aā]ori|(te)?-?reo)$/i.match?(word)
       args[:kinds] << 'maori'
-    elsif /^(maghreb|algerian|morroccan|tunis|north-african)$/i.match?(word)
+    elsif /^(maghreb|algerian|morroccan|tunis|north-?african)$/i.match?(word)
       args[:kinds] << 'maghreb'
-    elsif /^(mideast|arabic|hebrew|egyptian|middle-east)$/i.match?(word)
+    elsif /^(mideast|arabic|hebrew|egyptian|middle-?east)$/i.match?(word)
       args[:kinds] << 'mideast'
-    elsif /^(easteuro|russian?|eastern|east(ern)?-europe|siberi(an|e)|east)$/i.match?(word)
+    elsif /^(easteuro|russian?|eastern|east(ern)?-?europe|siberi(an|e)|east)$/i.match?(word)
       args[:kinds] << 'easteuro'
     elsif /^(pacific)$/i.match?(word)
       args[:kinds] << 'pacific'
       args[:also] << 'maori'
     elsif /^((poly|mela|micro)(nesian?)?|hawaii|samoa)$/i.match?(word)
       args[:kinds] << 'pacific'
-    elsif /^(amerindian|american-indian|native-american|cherokee|navajo|sioux|apache)$/i.match?(word)
+    elsif /^(amerindian|american-?indian|native-?american|cherokee|navajo|sioux|apache)$/i.match?(word)
       args[:kinds] << 'amerindian'
     elsif /^(full)$/i.match?(word)
       args[:full] = true
