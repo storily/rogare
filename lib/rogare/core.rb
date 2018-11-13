@@ -25,8 +25,8 @@ module Rogare
         'with cute animals',
         'Destiny… of your MC',
         'the role of Fate',
-        'Shadow puppets',
-        'with your wordcount',
+        # 'Shadow puppets',
+        # 'with your wordcount',
         'World of Wordcraft',
         'Plot Hole Hunters',
         'Age of Myth',
@@ -38,13 +38,13 @@ module Rogare
         'Grand Write Into',
         'Legend of Making Count',
         'Writer’s DOOM',
-        'Two Fortnites (and this will be over)',
+        # 'Two Fortnites (and this will be over)',
         'Red Pen Redemption',
         'Finally Fantasy',
         # 'CoD: Blank Page',
-        'Dots 2',
+        # 'Dots 2',
         'Half-Novel²',
-        'Poketome Go'
+        # 'Poketome Go'
       ].sample
     end
 
