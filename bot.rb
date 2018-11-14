@@ -41,4 +41,10 @@ threads << Thread.new do
   Rogare.discord.run
 end
 
+threads << Thread.new do
+  logs '=====> Starting Nominare'
+  require './lib/nominare'
+  Nominare.run!
+end
+
 ThreadsWait.all_waits(*threads)
