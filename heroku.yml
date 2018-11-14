@@ -1,6 +1,5 @@
 build:
   docker:
-    bot: Dockerfile
+    web: Dockerfile
 run:
-  bot: ruby bot.rb
-
+  web: ruby app.rb
