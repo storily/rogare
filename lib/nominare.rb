@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'rack/protection'
 
 class Nominare < Sinatra::Application
-  use Rack::Protection, except: [:session_hijacking, :remote_token]
+  use Rack::Protection, except: %i[session_hijacking remote_token]
 
   get '/' do
     'Hello world!'
