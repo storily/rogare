@@ -1,0 +1,12 @@
+autoconf
+automake
+build-essential
+ffmpeg
+libopus-dev
+libpq-dev
+libsodium-dev
+libtool
+nodejs
+ruby-bundler
+ruby-dev
+zlib1g-dev
