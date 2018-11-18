@@ -2,11 +2,6 @@
 
 require 'rack/protection'
 
-if ENV['RACK_ENV'] == 'production'
-  require 'barnes'
-  before_fork { Barnes.start }
-end
-
 class Nominare < Sinatra::Application
   use Rack::Protection, except: %i[session_hijacking remote_token]
 
