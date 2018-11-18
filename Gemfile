@@ -25,4 +25,8 @@ group :development do
   gem 'pry'
 end
 
+group :production do
+  gem 'barnes', require: false # Heroku metrics
+end
+
 gem 'rubocop', '~> 0.60.0', require: false
