@@ -10,7 +10,7 @@ class Rogare::Plugins::W
     if defined? Rogare::Plugins::Wordcount
       wc = Rogare::Plugins::Wordcount.new
       usual = wc.get_counts(m, [m.user.mid], return: true).first
-      live = wc.get_counts(m, [m.user.mid], return: true).first
+      live = wc.get_counts(m, [m.user.mid], live: true, return: true).first
 
       if usual && live
         usual[:live] = live[:diff]
