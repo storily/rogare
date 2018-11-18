@@ -3,7 +3,7 @@
 class Rogare::Plugins::W
   extend Rogare::Plugin
 
-  command 'w', hidden: true
+  command '!', hidden: true
   match_empty :execute
 
   def execute(m, _param)
