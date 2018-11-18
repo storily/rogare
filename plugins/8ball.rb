@@ -4,7 +4,7 @@ class Rogare::Plugins::EightBall
   extend Rogare::Plugin
 
   command '8ball'
-  usage '!% <derp>'
+  usage '`!% <derp>`'
   handle_help
 
   match_command /(.+)/

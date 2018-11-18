@@ -4,7 +4,7 @@ class Rogare::Plugins::Choose
   extend Rogare::Plugin
 
   command 'choose'
-  usage '!% <first thing> or <second thing> [or <third thing> and so on]'
+  usage '`!% <first thing> or <second thing> [or <third thing> and so on]`'
   handle_help
 
   match_command /(.+)/

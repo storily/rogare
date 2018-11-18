@@ -7,7 +7,7 @@ class Rogare::Plugins::Plot
 
   command 'plot', help_includes_command: true
   aliases 'prompt', 'seed', 'event'
-  usage '!% [optional filter keywords]'
+  usage '`!% [optional filter keywords]`'
   handle_help
 
   match_command /(.*)/

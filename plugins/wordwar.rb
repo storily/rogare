@@ -6,12 +6,12 @@ class Rogare::Plugins::Wordwar
   command 'wordwar'
   aliases 'war', 'ww'
   usage [
-    '!% in [time before it starts (in minutes)] for [duration]',
-    'Or: !% at [wall time e.g. 12:35] for [duration]',
-    'Or even (defaulting to a 15 minute run): !% at/in [time]',
-    'And then everyone should: !% join [wordwar ID]',
-    'Also say !% alone to get a list of current/scheduled ones',
-    'To get some details about a war: !% info [ID] or !% members [ID].'
+    '`!% in [time before it starts (in minutes)] for [duration]`',
+    'Or: `!% at [wall time e.g. 12:35] for [duration]`',
+    'Or even (defaulting to a 15 minute run): `!% at/in [time]`',
+    'And then everyone should: `!% join [wordwar ID]`',
+    'Also say `!%` alone to get a list of current/scheduled ones',
+    'To get some details about a war: `!% info [ID]` or `!% members [ID]`.'
   ]
   handle_help
 
@@ -86,7 +86,7 @@ class Rogare::Plugins::Wordwar
 
     m.reply 'Got it! ' \
             "Your new wordwar will start in #{togo} and last #{dur}. " \
-            "Others can join it with: !wordwar join #{k}"
+            "Others can join it with: `!ww join #{k}`"
 
     self.class.set_war_timer(k, timeat, duration).join
   end

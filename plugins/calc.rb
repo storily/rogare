@@ -5,7 +5,7 @@ class Rogare::Plugins::Calc
 
   command 'calc'
   aliases '='
-  usage '!% <a calculation>'
+  usage '`!% <a calculation>`'
   handle_help
 
   match_command /(.+)/

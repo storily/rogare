@@ -4,7 +4,7 @@ class Rogare::Plugins::Say
   extend Rogare::Plugin
 
   command 'say'
-  usage '!% <channel> <message>'
+  usage '`!% <channel> <message>` - Say something as the bot in an arbitrary channel'
   handle_help
 
   @@redis = Rogare.redis(4)

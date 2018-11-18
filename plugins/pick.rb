@@ -4,7 +4,7 @@ class Rogare::Plugins::Pick
   extend Rogare::Plugin
 
   command 'pick'
-  usage '!% <start> <end> - Picks a number/letter between start and end'
+  usage '`!% <start> <end>` - Picks a number/letter between start and end'
   handle_help
 
   match_command /(\d+|[a-z])\s+(\d+|[a-z])/

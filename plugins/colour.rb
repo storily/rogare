@@ -134,7 +134,7 @@ class Rogare::Plugins::Colour
 
   command 'colour'
   aliases 'color'
-  usage '!% [amount]'
+  usage '`!% [amount]`'
   handle_help
 
   match_command /(\d+)/

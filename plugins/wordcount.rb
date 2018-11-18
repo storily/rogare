@@ -7,10 +7,10 @@ class Rogare::Plugins::Wordcount
   command 'wc'
   aliases 'count'
   usage [
-    '!%, or: !% nanoname, or: !% nick (to see others\' counts)',
-    'To register your nano name against your current nick: !% set nanoname',
-    'To set your goal: !% goal <number> (do it after !% set)',
-    'To use a goal just for this call: !% @<number> [nick]'
+    '`!%`, or: `!% <nanoname>`, or: `!% <@nick>` (to see others’ counts)',
+    'To register your nano name against your current nick: `!% set <nanoname>`',
+    'To set your goal: `!% goal <number>` (do it after `!% set`)',
+    'To use a goal just for this call: `!% @<number> [nick]`'
   ]
   handle_help
 
