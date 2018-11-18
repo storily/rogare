@@ -7,7 +7,17 @@ class Rogare::Plugins::W
   match_empty :execute
 
   def execute(m, _param)
-    Rogare::Plugins::Wordcount.new.own_count(m) if defined? Rogare::Plugins::Wordcount
+    if defined? Rogare::Plugins::Wordcount
+      wc = Rogare::Plugins::Wordcount.new
+      usual = wc.get_counts(m, [m.user.mid], return: true).first
+      live = wc.get_counts(m, [m.user.mid], return: true).first
+
+      if usual && live
+        usual[:live] = live[:diff]
+        m.reply wc.format usual
+      end
+    end
+
     Rogare::Plugins::Wordwar.new.ex_list_wars(m) if defined? Rogare::Plugins::Wordwar
   end
 end

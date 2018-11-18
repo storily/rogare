@@ -160,31 +160,59 @@ class Rogare::Plugins::Wordcount
 
       diff = goal_today - count
 
-      "#{Rogare.nixnotif(name.to_s)}: #{count} (#{[
-        "#{(100.0 * count / goal).round(1)}%",
-        ("today: #{today}" if today),
-        if diff.zero?
-          'up to date'
-        elsif diff.positive?
-          "#{diff} behind"
-        else
-          "#{diff.abs} ahead"
-        end,
-        if goal != 50_000
-          if goal < 10_000
-            "#{(goal / 1_000).round(1)}k goal"
-          else
-            "#{(goal / 1_000).round}k goal"
-          end
-        end
-      ].compact.join(', ')})"
-    end
+      data = {
+        name: name.to_s,
+        count: count,
+        percent: (100.0 * count / goal).round(1),
+        today: today,
+        diff: diff,
+        goal: goal
+      }
 
-    if opts[:random] && counts.compact.empty?
+      if opts[:return]
+        data
+      else
+        format data
+      end
+    end.compact
+
+    return counts if opts[:return]
+
+    if opts[:random] && counts.empty?
       m.reply 'No users in this channel have novels!'
       return
     end
 
-    m.reply counts.compact.join(', ')
+    m.reply counts.join(', ')
+  end
+
+  def format(data)
+    "#{Rogare.nixnotif(data[:name])}: #{data[:count]} (#{[
+      "#{data[:percent]}%",
+      ("today: #{data[:today]}" if data[:today]),
+      if data[:diff].zero?
+        'up to date'
+      elsif data[:diff].positive?
+        "#{data[:diff]} behind"
+      else
+        "#{data[:diff].abs} ahead"
+      end,
+      if data[:live].nil?
+        nil
+      elsif data[:live].zero?
+        'up to live'
+      elsif data[:live].positive?
+        "#{data[:live]} behind live"
+      else
+        "#{data[:live].abs} ahead live"
+      end,
+      if data[:goal] != 50_000
+        if data[:goal] < 10_000
+          "#{(data[:goal] / 1_000).round(1)}k goal"
+        else
+          "#{(data[:goal] / 1_000).round}k goal"
+        end
+      end
+    ].compact.join(', ')})"
   end
 end
