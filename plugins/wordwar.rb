@@ -23,6 +23,13 @@ class Rogare::Plugins::Wordwar
   match_command /info(.*)/, method: :ex_war_info
   match_command /members(.*)/, method: :ex_war_members
 
+  # Often people type it the other way
+  match_command /(\d+)\s+join/, method: :ex_join_war
+  match_command /(\d+)\s+leave/, method: :ex_leave_war
+  match_command /(\d+)\s+cancel/, method: :ex_cancel_war
+  match_command /(\d+)\s+info/, method: :ex_war_info
+  match_command /(\d+)\s+members/, method: :ex_war_members
+
   match_command /((?:\d+:\d+|in|at).+)/
   match_command /.+/, method: :ex_list_wars
   match_empty :ex_list_wars
