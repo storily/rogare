@@ -124,11 +124,7 @@ class Rogare::Plugins::Debug
   end
 
   def kind_info(m)
-    kinds = Rogare.sql['SELECT * FROM (
-        SELECT unnest(enum_range(null::name_kind)) AS kind
-      ) enum WHERE left(kind::text, 1) != \'-\'']
-
-    m.reply(kinds.map { |k| k[:kind] }.join(', '))
+    m.reply Rogare::Data.all_kinds.join(', ')
   end
 
   def kind_map(m)

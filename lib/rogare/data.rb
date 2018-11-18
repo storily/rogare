@@ -14,6 +14,22 @@ module Rogare::Data
       Rogare.sql[:names_scored]
     end
 
+    def pga(*things)
+      Sequel.pg_array(things)
+    end
+
+    def kinds(*ks)
+      Sequel[pga(*ks)].cast(:'name_kind[]')
+    end
+
+    def all_kinds
+      Rogare.sql['SELECT * FROM (
+          SELECT unnest(enum_range(null::name_kind)) AS kind
+        ) enum WHERE left(kind::text, 1) != \'-\'']
+            .map { |k| k[:kind] }
+      - ['first', 'last']
+    end
+
     def user_from_discord(discu)
       users.where(discord_id: discu.id).first
     end
@@ -121,7 +137,7 @@ module Rogare::Data
       query = query.where { score <= args[:freq][1] } if args[:freq][1]
 
       unless args[:kinds].empty?
-        castkinds = Sequel.pg_array(args[:kinds].uniq.map { |k| Sequel[k].cast(:name_kind) })
+        castkinds = kinds(*args[:kinds].uniq)
         query = query.where(Sequel[:kinds].pg_array.contains(castkinds))
       end
 

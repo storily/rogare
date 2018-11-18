@@ -13,8 +13,7 @@ class Rogare::Plugins::Choose
   def execute(m, param)
     if rand < 0.01
       return m.reply [
-        'yes', 'both', 'all of the above', 'not super sure, actually', 'Gryffindor!',
-        'I’m sorry, the die I threw flew off the table, ask me again once I’ve retrieved it.'
+        'yes', 'both', 'all of the above', 'not super sure, actually', 'Gryffindor!'
       ].sample
     end
 
