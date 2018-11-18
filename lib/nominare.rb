@@ -10,10 +10,12 @@ class Nominare < Sinatra::Application
   end
 
   get '/' do
-    ({ endpoints: {
-      '/kinds.png' => 'Map of rough regions described by the kinds values. Hand-made and may not reflect current availability.',
-      '/stats' => 'Totals and subtotals about the *scored* dataset (stats from the raw data not available).',
-    } }).to_json
+    { endpoints: {
+      '/kinds.png' => 'Map of rough regions described by the kinds values. ' \
+        'Hand-made and may not reflect current availability.',
+      '/stats' => 'Totals and subtotals about the *scored* dataset ' \
+        '(stats from the raw data not available).'
+    } }.to_json
   end
 
   get '/kinds.png' do
@@ -37,11 +39,11 @@ class Nominare < Sinatra::Application
     firsts = stats.delete :firsts
     lasts = stats.delete :lasts
 
-    ({
+    {
       total: total,
       firsts: firsts,
       lasts: lasts,
-      kinds: stats,
-    }).to_json
+      kinds: stats
+    }.to_json
   end
 end

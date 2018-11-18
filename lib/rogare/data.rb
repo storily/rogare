@@ -2,6 +2,8 @@
 
 module Rogare::Data
   class << self
+    extend Memoist
+
     def users
       Rogare.sql[:users]
     end
@@ -18,16 +20,26 @@ module Rogare::Data
       Sequel.pg_array(things)
     end
 
-    def kinds(*ks)
-      Sequel[pga(*ks)].cast(:'name_kind[]')
+    def kinds(*knds)
+      Sequel[pga(*knds)].cast(:'name_kind[]')
+    end
+
+    def enum_values(type)
+      Rogare.sql.select do
+        unnest.function(
+          enum_range.function(Sequel[nil].cast(type))
+        ).cast(:text).as(:value)
+      end
     end
 
     def all_kinds
-      Rogare.sql['SELECT * FROM (
-          SELECT unnest(enum_range(null::name_kind)) AS kind
-        ) enum WHERE left(kind::text, 1) != \'-\'']
-            .map { |k| k[:kind] }
-      - ['first', 'last']
+      Rogare.sql[:enum]
+            .with(:enum, enum_values(:name_kind))
+            .where do
+              (Sequel.function(:left, value, 1) !~ '-') &
+                (value !~ %w[first last])
+            end
+            .select_map(:value)
     end
 
     def user_from_discord(discu)
@@ -158,5 +170,7 @@ module Rogare::Data
           .gsub(/^O’Mac(\w+)/) { |_s| "O’Mac#{Regexp.last_match(1).capitalize}" }
       end.join
     end
+
+    memoize :all_kinds
   end
 end
