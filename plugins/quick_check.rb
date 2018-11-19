@@ -24,6 +24,17 @@ class Rogare::Plugins::QuickCheck
       end
     end
 
-    Rogare::Plugins::Wordwar.new.ex_list_wars(m) if defined? Rogare::Plugins::Wordwar
+    if defined? Rogare::Plugins::Wordwar
+      ww = Rogare::Plugins::Wordwar.new
+
+      ww.all_wars
+        .reject { |w| w[:end] < Time.now }
+        .sort_by { |w| w[:start] }
+        .each do |war|
+        ww.say_war_info m, war
+      end
+    end
+
+    m.reply 'You’re doing great!' if rand > 0.95
   end
 end
