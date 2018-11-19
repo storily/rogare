@@ -14,6 +14,12 @@ class Rogare::Plugins::QuickCheck
 
       if usual && live
         usual[:live] = live[:diff]
+
+        if usual[:count] > 100_000 && rand > 0.8
+          m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Awely].sample} Wordcount"
+          sleep 1
+        end
+
         m.reply wc.format usual
       end
     end
