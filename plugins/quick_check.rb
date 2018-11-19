@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::W
+class Rogare::Plugins::QuickCheck
   extend Rogare::Plugin
 
   command '!', hidden: true
