@@ -19,6 +19,7 @@ gem 'sequel', '~>5.10.0'
 gem 'sequel_pg', '~>1.11.0', require: 'sequel'
 gem 'sinatra', '~>2.0.4', require: 'sinatra/base'
 gem 'typhoeus', '~>0.6.9'
+gem 'tzinfo', '~>1.2.5'
 
 group :development do
   gem 'foreman'

@@ -138,17 +138,20 @@ class Rogare::Plugins::Wordcount
 
       random_found = true
 
-      today = get_today(name)
-      timediff = Time.now - Chronic.parse('1st')
+      user = Rogare::Data.users.where(nano_user: name.to_s).first
+      tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
+      now = tz.now
+
+      ENV['TZ'] = tz.canonical_identifier if tz != TZInfo::Timezone.get(Rogare.tz)
+      timediff = now - Chronic.parse('1st')
+      ENV['TZ'] = Rogare.tz if tz != TZInfo::Timezone.get(Rogare.tz)
+
       day_secs = 60 * 60 * 24
       month_secs = day_secs * 30
 
       nth = (timediff / day_secs).ceil
       goal = opts[:goal]
-      unless goal
-        user = Rogare::Data.users.where(nano_user: name.to_s).first
-        goal = Rogare::Data.ensure_novel(user[:discord_id])[:goal] if user
-      end
+      goal = Rogare::Data.ensure_novel(user[:discord_id])[:goal] if user && !goal
       goal = 50_000 if goal.nil? || goal == 0.0
       goal = goal.to_f
 
@@ -164,7 +167,7 @@ class Rogare::Plugins::Wordcount
         name: name.to_s,
         count: count,
         percent: (100.0 * count / goal).round(1),
-        today: today,
+        today: get_today(name),
         diff: diff,
         goal: goal
       }

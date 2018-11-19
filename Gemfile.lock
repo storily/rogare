@@ -144,6 +144,7 @@ DEPENDENCIES
   sequel_pg (~> 1.11.0)
   sinatra (~> 2.0.4)
   typhoeus (~> 0.6.9)
+  tzinfo (~> 1.2.5)
 
 RUBY VERSION
    ruby 2.5.1p57

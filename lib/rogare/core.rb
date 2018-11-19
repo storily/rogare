@@ -13,6 +13,10 @@ module Rogare
       '!'
     end
 
+    def tz
+      ENV['TZ'] || 'Pacific/Auckland'
+    end
+
     def game
       [
         # 'with fire',
@@ -148,6 +152,6 @@ module Rogare
       end
     end
 
-    memoize :discord, :config, :nixnotif, :redis, :sql
+    memoize :discord, :config, :nixnotif, :redis, :sql, :tz
   end
 end

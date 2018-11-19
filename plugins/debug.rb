@@ -12,6 +12,7 @@ class Rogare::Plugins::Debug
     '`!% my id` - Show own discord id',
     '`!% my name` - Show own name as per API',
     '`!% my user` - Show own db user',
+    '`!% my time` - Show current time as per user timezone',
 
     '`!% user info <@user or ID or nick>` - Show user’s db info',
     '`!% name info <name>` - Show !name name db info (quite verbose)',
@@ -42,6 +43,7 @@ class Rogare::Plugins::Debug
   match_command /my id/, method: :my_id
   match_command /my name/, method: :my_name
   match_command /my user/, method: :my_user
+  match_command /my time/, method: :my_time
 
   match_command /user info (.+)/, method: :user_info
   match_command /name info ([[:alnum:]]+)/, method: :name_info
@@ -68,7 +70,7 @@ class Rogare::Plugins::Debug
 
     next if %i[
       uptime help_message
-      my_id my_name my_nano
+      my_id my_name my_nano my_time
       user_info name_info name_adjust
       kind_info kind_map
     ].include? method
@@ -102,6 +104,12 @@ class Rogare::Plugins::Debug
   def my_user(m)
     user = Rogare::Data.user_from_discord m.user
     m.reply "`#{user.inspect}`"
+  end
+
+  def my_time(m)
+    user = Rogare::Data.user_from_discord m.user
+    tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
+    m.reply "`#{tz}`: `#{tz.now}`"
   end
 
   def user_info(m, mid)
