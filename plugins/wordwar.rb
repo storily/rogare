@@ -93,10 +93,6 @@ class Rogare::Plugins::Wordwar
     self.class.dur_display(*args)
   end
 
-  def all_wars(*args)
-    self.class.all_wars(*args)
-  end
-
   def war_info(*args)
     self.class.war_info(*args)
   end

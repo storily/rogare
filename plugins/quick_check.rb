@@ -27,11 +27,8 @@ class Rogare::Plugins::QuickCheck
     if defined? Rogare::Plugins::Wordwar
       ww = Rogare::Plugins::Wordwar.new
 
-      ww.all_wars
-        .reject { |w| w[:end] < Time.now }
-        .sort_by { |w| w[:start] }
-        .each do |war|
-        ww.say_war_info m, war
+      Rogare::Data.current_wars.each do |war|
+        ww.say_war_info m, ww.war_info(war)
       end
     end
 
