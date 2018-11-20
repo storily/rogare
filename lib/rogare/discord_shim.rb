@@ -124,6 +124,10 @@ class DiscordChannelShim
     end + '/' + @chan.id.to_s
   end
 
+  def pretty
+    "#{server.name.downcase.tr(' ', '~')}/#{name}"
+  end
+
   def server
     @chan.server
   end

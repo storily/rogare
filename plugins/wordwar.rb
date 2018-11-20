@@ -84,7 +84,7 @@ class Rogare::Plugins::Wordwar
 
     m.reply 'Got it! ' \
             "Your new wordwar will start in #{togo} and last #{dur}. " \
-            "Others can join it with: `!ww join #{k}`"
+            "Others can join it with: `#{Rogare.prefix}ww join #{k}`"
 
     self.class.set_war_timer(k, timeat, duration).join
   end
@@ -104,9 +104,10 @@ class Rogare::Plugins::Wordwar
   def say_war_info(m, war)
     togo, neg = dur_display war[:start]
     others = Rogare::Data.war_members(war[:id]).count
+    chans = war[:channels].map { |c| Rogare.find_channel(c).pretty }.join(', ')
 
     m.reply [
-      "#{war[:id]}: #{Rogare.nixnotif war[:nick]}'s war",
+      "#{war[:id]}: #{Rogare.nixnotif war[:creator_nick]}'s war",
 
       if neg
         "started #{togo} ago"
@@ -122,12 +123,12 @@ class Rogare::Plugins::Wordwar
 
       ("with #{others} others" unless others.zero?),
 
-      ("in #{war[:channels].join(', ')}" unless war[:channels].count <= 1 && war[:channels].include?(m.channel.to_s))
+      ("in #{chans}" unless war[:channels].count <= 1 && war[:channels].include?(m.channel.to_s))
     ].compact.join(', ')
   end
 
   def ex_list_wars(m)
-    Rogare::Data.current_wars.each do |war|
+    wars = Rogare::Data.current_wars.map do |war|
       war[:end] = war[:start] + war[:seconds]
       say_war_info m, war
     end
@@ -158,7 +159,7 @@ class Rogare::Plugins::Wordwar
                others.map { |u| Rogare.nixnotif u[:nick] }.join(', ')
              end
 
-    m.reply "#{war[:id]}: #{Rogare.nixnotif war[:nick]}'s war, with: #{others}"
+    m.reply "#{war[:id]}: #{Rogare.nixnotif war[:creator_nick]}'s war, with: #{others}"
   end
 
   def ex_join_war(m, param)
@@ -208,7 +209,7 @@ class Rogare::Plugins::Wordwar
     def set_war_timer(id, start, duration)
       Thread.new do
         reply = lambda do |msg|
-          war_info(id)[:channels].each do |cname|
+          war_info(id, true)[:channels].each do |cname|
             chan = Rogare.find_channel cname
 
             if chan.nil?
@@ -226,13 +227,17 @@ class Rogare::Plugins::Wordwar
 
         starting = lambda { |time, &block|
           war = war_info(id)
-          members = Rogare::Data.war_members(id).map { |u| u[:mid] }.join(', ')
+          next unless war
+
+          members = Rogare::Data.war_members(id, true).map { |u| u[:mid] }.join(', ')
           extra = ' ' + block.call(war) unless block.nil?
           reply.call "Wordwar #{id} is starting #{time}! #{members}#{extra}"
         }
 
         ending = lambda {
-          members = Rogare::Data.war_members(id).map { |u| u[:mid] }.join(', ')
+          next unless Rogare::Data.war_exists? id
+
+          members = Rogare::Data.war_members(id, true).map { |u| u[:mid] }.join(', ')
           reply.call "Wordwar #{id} has ended! #{members}"
         }
 
@@ -262,6 +267,8 @@ class Rogare::Plugins::Wordwar
 
           to_end = (start + duration) - Time.now
           info = war_info id, true
+          next if info[:cancelled]
+
           if to_end.negative? && !info[:ended]
             # We're after the END of the war, but the war is not marked
             # as ended, so it must be that the war ended as the bot was
@@ -320,6 +327,8 @@ class Rogare::Plugins::Wordwar
               Rogare::Data.current_war(id).first
             end
 
+      return unless war
+
       war[:end] = war[:start] + war[:seconds]
       war
     end
@@ -342,7 +351,7 @@ class Rogare::Plugins::Wordwar
     end
 
     def load_existing_wars
-      Rogare::Data.current_wars.each do |war|
+      Rogare::Data.existing_wars.map do |war|
         set_war_timer(war[:id], war[:start], war[:seconds])
       end
     end

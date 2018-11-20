@@ -179,23 +179,34 @@ module Rogare::Data
       end.join
     end
 
-    def current_wars
-      wars.select(Sequel[:wars]['*']).join(:users, id: :creator).where do
-        (ended =~ false) & (cancelled =~ nil) &
-          (start + concat(seconds, ' secs').cast(:interval) > now.function)
-      end.order_by(Sequel[:wars][:created])
+    def existing_wars
+      wars.select_all(:wars).select_append(Sequel[:users][:nick].as(:creator_nick))
+          .join(:users, id: :creator).where do
+            (Sequel[:wars][:id] < 200) &
+              (ended =~ false) & (cancelled =~ nil)
+          end.order_by(Sequel[:wars][:created])
     end
 
-    def war_members(id)
-      users.join(:users_wars, user_id: :id).join(:wars, id: :war_id).where do
-        (Sequel[:users_wars][:war_id] =~ id) &
-          (Sequel[:wars][:creator] !~ Sequel[:users][:id])
-      end.select(Sequel[:users]['*'], Sequel.function(
-        :concat,
-        '<@',
-        Sequel[:users][:discord_id],
-        '>'
-      ).as(:mid))
+    def current_wars
+      existing_wars.where do
+        (start + concat(seconds, ' secs').cast(:interval) > now.function)
+      end
+    end
+
+    def war_members(id, include_creator = false)
+      q = users
+          .select_all(:users).select_append(Sequel.function(
+            :concat,
+            '<@',
+            Sequel[:users][:discord_id],
+            '>'
+          ).as(:mid))
+          .join(:users_wars, user_id: :id)
+          .join(:wars, id: :war_id)
+          .where(Sequel[:users_wars][:war_id] => id)
+
+      q = q.exclude(Sequel[:wars][:creator] => Sequel[:users][:id]) unless include_creator
+      q
     end
 
     def current_war(id)
