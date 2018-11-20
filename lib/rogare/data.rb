@@ -180,7 +180,7 @@ module Rogare::Data
     end
 
     def current_wars
-      wars.join(:users, id: :creator).where do
+      wars.select(Sequel[:wars]['*']).join(:users, id: :creator).where do
         (ended =~ false) & (cancelled =~ nil) &
           (start + concat(seconds, ' secs').cast(:interval) > now.function)
       end.order_by(Sequel[:wars][:created])
