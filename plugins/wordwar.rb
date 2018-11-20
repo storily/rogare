@@ -231,7 +231,7 @@ class Rogare::Plugins::Wordwar
         }
 
         ending = lambda {
-          next unless Rogare::Data.war_exists? id
+          next unless war_info(id, true)
 
           members = Rogare::Data.war_members(id, true).map { |u| u[:mid] }.join(', ')
           reply.call "Wordwar #{id} has ended! #{members}"
