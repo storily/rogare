@@ -199,7 +199,7 @@ module Rogare::Data
     end
 
     def current_war(id)
-      current_wars.where(id: id)
+      current_wars.where(Sequel[:wars][:id] => id)
     end
 
     def war_exists?(id)
