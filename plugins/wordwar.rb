@@ -179,6 +179,16 @@ class Rogare::Plugins::Wordwar
     @@redis.sadd rk(k, 'channels'), m.channel.to_s
     @@redis.sadd rk(k, 'members'), m.user.mid
     m.reply "You're in!"
+
+    user = Rogare::Data.user_from_discord m.user
+    Rogare::Data.warmembers.insert_conflict.insert(user_id: user[:id], war_id: k)
+    Rogare::Data.wars.where(id: k).update(channels: Sequel.function(
+      :anyarray_uniq, Sequel.function(
+                        :array_cat,
+                        Sequel[:channels],
+                        Rogare::Data.pga(m.channel.to_s)
+                      )
+    ))
   end
 
   def ex_leave_war(m, param)
@@ -189,6 +199,9 @@ class Rogare::Plugins::Wordwar
 
     @@redis.srem rk(k, 'members'), m.user.mid
     m.reply "You're out."
+
+    user = Rogare::Data.user_from_discord m.user
+    Rogare::Data.warmembers.where(user_id: user[:id], war_id: k).delete
   end
 
   def ex_cancel_war(m, param)
@@ -199,6 +212,9 @@ class Rogare::Plugins::Wordwar
 
     self.class.erase_war k
     m.reply "Wordwar #{k} deleted."
+
+    user = Rogare::Data.user_from_discord m.user
+    Rogare::Data.wars.where(id: k).update(cancelled: true, canceller: user[:id])
   end
 
   class << self
@@ -290,6 +306,8 @@ class Rogare::Plugins::Wordwar
       @@redis.keys(rk(id, '*')).each do |k|
         @@redis.rename k, "archive:#{k}"
       end
+
+      Rogare::Data.wars.where(id: id).update(ended: true)
     end
 
     def dur_display(time, now = Time.now)
@@ -346,6 +364,18 @@ class Rogare::Plugins::Wordwar
         @@redis.set rk(k, 'start'), time.to_s
         @@redis.set rk(k, 'end'), (time + duration).to_s
       end
+
+      user = Rogare::Data.user_from_discord m.user
+      wid = Rogare::Data.wars.insert(
+        id: k,
+        start: time,
+        seconds: duration,
+        creator: user[:id],
+        channels: Rogare::Data.pga(m.channel.to_s)
+      )
+
+      Rogare::Data.warmembers.insert(user_id: user[:id], war_id: wid)
+
       k
     end
 

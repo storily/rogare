@@ -16,6 +16,14 @@ module Rogare::Data
       Rogare.sql[:names_scored]
     end
 
+    def wars
+      Rogare.sql[:wars]
+    end
+
+    def warmembers
+      Rogare.sql[:users_wars]
+    end
+
     def pga(*things)
       Sequel.pg_array(things)
     end
