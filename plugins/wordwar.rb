@@ -128,6 +128,7 @@ class Rogare::Plugins::Wordwar
 
   def ex_list_wars(m)
     Rogare::Data.current_wars.each do |war|
+      war[:end] = war[:start] + war[:seconds]
       say_war_info m, war
     end
 
@@ -225,13 +226,13 @@ class Rogare::Plugins::Wordwar
 
         starting = lambda { |time, &block|
           war = war_info(id)
-          members = Rogare::Data.war_members(id).select_map(:mid).join(', ')
+          members = Rogare::Data.war_members(id).map{|u|u[:mid]}.join(', ')
           extra = ' ' + block.call(war) unless block.nil?
           reply.call "Wordwar #{id} is starting #{time}! #{members}#{extra}"
         }
 
         ending = lambda {
-          members = Rogare::Data.war_members(id).select_map(:mid).join(', ')
+          members = Rogare::Data.war_members(id).map{|u|u[:mid]}.join(', ')
           reply.call "Wordwar #{id} has ended! #{members}"
         }
 
