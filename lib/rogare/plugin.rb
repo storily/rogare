@@ -46,7 +46,7 @@ module Rogare::Plugin
     define_method :help_message do |m|
       m.reply 'No help message :(' if h[:usage].empty?
       usage = h[:usage].map do |line|
-        line.gsub('!%', "!#{h[:command]}")
+        line.gsub('!%', "#{Rogare.prefix}#{h[:command]}")
       end
 
       usage[0] = "Usage: #{usage[0]}"
@@ -65,7 +65,7 @@ module Rogare::Plugin
     opts[:method] ||= :execute
 
     logs '       matching: ' + pattern.inspect
-    my[:patterns] << [/^\s*!#{pattern}/, opts]
+    my[:patterns] << [/^\s*#{Rogare.prefix}#{pattern}/, opts]
     my[:common_pattern] = Regexp.union(my[:patterns].map { |pat| pat[0] })
 
     Rogare.discord.remove_handler my[:discord_handler] if my[:discord_handler]
