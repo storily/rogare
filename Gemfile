@@ -14,7 +14,6 @@ gem 'numbers_in_words', '~>0.4.0'
 gem 'pg', '~>1.1.3'
 gem 'pry-remote', '~>0.1.8'
 gem 'puma', '~>3.12.0', require: false
-gem 'redis', '~>4.0.1'
 gem 'sequel', '~>5.10.0'
 gem 'sequel_pg', '~>1.11.0', require: 'sequel'
 gem 'sinatra', '~>2.0.4', require: 'sinatra/base'

@@ -29,9 +29,6 @@ class Rogare::Plugins::Debug
     '`!% chan find <name>` - Find a channel from name or internals',
     '`!% user ids` - Display all known users and their IDs',
 
-    '`!% war chans <war id>` - Display channels the war is in',
-    '`!% war mems <war id>` - Display raw members the war has',
-
     '`!% wc set user <discord user> <nano user>` - Set a user’s nano name for them',
     '`!% wc set goal <discord user> <nano goal>` - Set a user’s nano goal for them'
   ]
@@ -55,9 +52,6 @@ class Rogare::Plugins::Debug
   match_command /chan name/, method: :chan_name
   match_command /chan find (.+)/, method: :chan_find
   match_command /user ids/, method: :user_ids
-
-  match_command /war chans (.+)/, method: :war_chans
-  match_command /war mems (.+)/, method: :war_mems
 
   match_command /wc set user (.+) (.+)/, method: :wc_set_user
   match_command /wc set goal (.+) (.+)/, method: :wc_set_goal
@@ -193,21 +187,6 @@ class Rogare::Plugins::Debug
       list << "#{Rogare.nixnotif u.username} ##{u.discriminator}: #{id}"
     end
     m.reply list.join("\n")
-  end
-
-  def war_chans(m, param)
-    redis = Rogare.redis(3)
-    chans = redis.smembers "wordwar:#{param.strip}:channels"
-    m.reply "`#{chans.inspect}`"
-
-    chans.map! { |c| Rogare.find_channel c }
-    m.reply "`#{chans.inspect}`"
-  end
-
-  def war_mems(m, param)
-    redis = Rogare.redis(3)
-    mems = redis.smembers "wordwar:#{param.strip}:members"
-    m.reply "`#{mems.inspect}`"
   end
 
   def wc_set_user(m, user, nano)

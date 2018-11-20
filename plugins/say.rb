@@ -7,8 +7,6 @@ class Rogare::Plugins::Say
   usage '`!% <channel> <message>` - Say something as the bot in an arbitrary channel'
   handle_help
 
-  @@redis = Rogare.redis(4)
-
   match_command /(\S+)\s+(.*)/
   match_empty :help_message
 
@@ -24,19 +22,19 @@ class Rogare::Plugins::Say
       return
     end
 
-    k = "nick:#{m.user.id}:sayquota"
-    quota = @@redis.get(k).to_i
-    @@redis.set(k, 0, ex: 60 * 60) if quota.zero?
-    @@redis.incr(k)
-
-    max = 5
-
-    if quota >= max
-      m.reply 'Sorry! Quota exceeded for this hour.'
-      return
-    end
-
-    m.reply "You're approaching your quota of #{max} !say per hour!" if quota >= (max * 0.8).floor
+    # k = "nick:#{m.user.id}:sayquota"
+    # quota = @@redis.get(k).to_i
+    # @@redis.set(k, 0, ex: 60 * 60) if quota.zero?
+    # @@redis.incr(k)
+    #
+    # max = 5
+    #
+    # if quota >= max
+    #   m.reply 'Sorry! Quota exceeded for this hour.'
+    #   return
+    # end
+    #
+    # m.reply "You're approaching your quota of #{max} !say per hour!" if quota >= (max * 0.8).floor
 
     channel.send message
   end

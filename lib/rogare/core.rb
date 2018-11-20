@@ -80,14 +80,6 @@ module Rogare
       c
     end
 
-    def redis(dbno)
-      if ENV['REDIS_URL']
-        Redis.new
-      else
-        Redis.new db: dbno
-      end
-    end
-
     def sql
       db = Sequel.connect ENV['DATABASE_URL'], search_path: [ENV['DB_SCHEMA'] || 'public']
       db.extension :pg_array
@@ -156,6 +148,6 @@ module Rogare
       end
     end
 
-    memoize :discord, :config, :nixnotif, :redis, :sql, :tz
+    memoize :discord, :config, :nixnotif, :sql, :tz
   end
 end
