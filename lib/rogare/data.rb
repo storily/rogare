@@ -180,11 +180,11 @@ module Rogare::Data
     end
 
     def existing_wars
-      wars.select_all(:wars).select_append(Sequel[:users][:nick].as(:creator_nick))
-          .join(:users, id: :creator).where do
-            (Sequel[:wars][:id] < 200) &
-              (ended =~ false) & (cancelled =~ nil)
-          end.order_by(Sequel[:wars][:created])
+      wars.select_all(:wars)
+          .select_append(Sequel[:users][:nick].as(:creator_nick))
+          .join(:users, id: :creator)
+          .where { (ended =~ false) & (cancelled =~ nil) }
+          .order_by(Sequel[:wars][:created])
     end
 
     def current_wars
