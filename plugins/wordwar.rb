@@ -226,13 +226,13 @@ class Rogare::Plugins::Wordwar
 
         starting = lambda { |time, &block|
           war = war_info(id)
-          members = Rogare::Data.war_members(id).map{|u|u[:mid]}.join(', ')
+          members = Rogare::Data.war_members(id).map { |u| u[:mid] }.join(', ')
           extra = ' ' + block.call(war) unless block.nil?
           reply.call "Wordwar #{id} is starting #{time}! #{members}#{extra}"
         }
 
         ending = lambda {
-          members = Rogare::Data.war_members(id).map{|u|u[:mid]}.join(', ')
+          members = Rogare::Data.war_members(id).map { |u| u[:mid] }.join(', ')
           reply.call "Wordwar #{id} has ended! #{members}"
         }
 
@@ -261,7 +261,7 @@ class Rogare::Plugins::Wordwar
           # bot restarted while a war was running.
 
           to_end = (start + duration) - Time.now
-          info = war_info id
+          info = war_info id, true
           if to_end.negative? && !info[:ended]
             # We're after the END of the war, but the war is not marked
             # as ended, so it must be that the war ended as the bot was
@@ -313,8 +313,13 @@ class Rogare::Plugins::Wordwar
        end, neg]
     end
 
-    def war_info(id)
-      war = Rogare::Data.current_war(id).first
+    def war_info(id, all = false)
+      war = if all
+              Rogare::Data.wars.where(id: id).first
+            else
+              Rogare::Data.current_war(id).first
+            end
+
       war[:end] = war[:start] + war[:seconds]
       war
     end
