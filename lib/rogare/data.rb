@@ -179,6 +179,33 @@ module Rogare::Data
       end.join
     end
 
+    def current_wars
+      wars.join(:users, id: :creator).where do
+        (ended =~ false) & (cancelled =~ nil) &
+          (start + concat(seconds, ' secs').cast(:interval) > now.function)
+      end.order_by(Sequel[:wars][:created])
+    end
+
+    def war_members(id)
+      users.join(:users_wars, user_id: :id).join(:wars, id: :war_id).where do
+        (Sequel[:users_wars][:war_id] =~ id) &
+          (Sequel[:wars][:creator] !~ Sequel[:users][:id])
+      end.select(Sequel[:users]['*'], Sequel.function(
+        :concat,
+        '<@',
+        Sequel[:users][:discord_id],
+        '>'
+      ).as(:mid))
+    end
+
+    def current_war(id)
+      current_wars.where(id: id)
+    end
+
+    def war_exists?(id)
+      current_war(id).count.positive?
+    end
+
     memoize :all_kinds
   end
 end

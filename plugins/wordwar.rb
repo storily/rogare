@@ -15,8 +15,6 @@ class Rogare::Plugins::Wordwar
   ]
   handle_help
 
-  @@redis = Rogare.redis(3)
-
   match_command /join(.*)/, method: :ex_join_war
   match_command /leave(.*)/, method: :ex_leave_war
   match_command /cancel(.*)/, method: :ex_cancel_war
@@ -91,10 +89,6 @@ class Rogare::Plugins::Wordwar
     self.class.set_war_timer(k, timeat, duration).join
   end
 
-  def rk(*args)
-    self.class.rk(*args)
-  end
-
   def dur_display(*args)
     self.class.dur_display(*args)
   end
@@ -109,10 +103,10 @@ class Rogare::Plugins::Wordwar
 
   def say_war_info(m, war)
     togo, neg = dur_display war[:start]
-    others = war[:members].reject { |u| u == war[:owner] }
+    others = Rogare::Data.war_members(war[:id]).count
 
     m.reply [
-      "#{war[:id]}: #{Rogare.nixnotif war[:owner]}'s war",
+      "#{war[:id]}: #{Rogare.nixnotif war[:nick]}'s war",
 
       if neg
         "started #{togo} ago"
@@ -126,18 +120,14 @@ class Rogare::Plugins::Wordwar
         "for #{dur_display(war[:end], war[:start]).first}"
       end,
 
-      ("with #{others.count} others" unless others.empty?),
+      ("with #{others} others" unless others.zero?),
 
       ("in #{war[:channels].join(', ')}" unless war[:channels].count <= 1 && war[:channels].include?(m.channel.to_s))
     ].compact.join(', ')
   end
 
   def ex_list_wars(m)
-    wars = all_wars
-           .reject { |w| w[:end] < Time.now }
-           .sort_by { |w| w[:start] }
-
-    wars.each do |war|
+    Rogare::Data.current_wars.each do |war|
       say_war_info m, war
     end
 
@@ -148,7 +138,7 @@ class Rogare::Plugins::Wordwar
     k = param.strip.to_i
     return m.reply 'You need to specify the wordwar ID' if k.zero?
 
-    return m.reply 'No such wordwar' unless @@redis.exists rk(k, 'start')
+    return m.reply 'No such wordwar' unless Rogare::Data.war_exists? k
 
     say_war_info m, war_info(k)
   end
@@ -157,28 +147,24 @@ class Rogare::Plugins::Wordwar
     k = param.strip.to_i
     return m.reply 'You need to specify the wordwar ID' if k.zero?
 
-    return m.reply 'No such wordwar' unless @@redis.exists rk(k, 'start')
+    return m.reply 'No such wordwar' unless Rogare::Data.war_exists? k
 
     war = war_info(k)
-    others = war[:members].reject { |u| u == war[:owner] }
+    others = Rogare::Data.war_members(k).all
     others = if others.empty?
                'no one else :('
              else
-               others.map { |u| Rogare.nixnotif u }.join(', ')
+               others.map { |u| Rogare.nixnotif u[:nick] }.join(', ')
              end
 
-    m.reply "#{war[:id]}: #{Rogare.nixnotif war[:owner]}'s war, with: #{others}"
+    m.reply "#{war[:id]}: #{Rogare.nixnotif war[:nick]}'s war, with: #{others}"
   end
 
   def ex_join_war(m, param)
     k = param.strip.to_i
     return m.reply 'You need to specify the wordwar ID' if k.zero?
 
-    return m.reply 'No such wordwar' unless @@redis.exists rk(k, 'start')
-
-    @@redis.sadd rk(k, 'channels'), m.channel.to_s
-    @@redis.sadd rk(k, 'members'), m.user.mid
-    m.reply "You're in!"
+    return m.reply 'No such wordwar' unless Rogare::Data.war_exists? k
 
     user = Rogare::Data.user_from_discord m.user
     Rogare::Data.warmembers.insert_conflict.insert(user_id: user[:id], war_id: k)
@@ -189,32 +175,32 @@ class Rogare::Plugins::Wordwar
                         Rogare::Data.pga(m.channel.to_s)
                       )
     ))
+
+    m.reply "You're in!"
   end
 
   def ex_leave_war(m, param)
     k = param.strip.to_i
     return m.reply 'You need to specify the wordwar ID' if k.zero?
 
-    return m.reply 'No such wordwar' unless @@redis.exists rk(k, 'start')
-
-    @@redis.srem rk(k, 'members'), m.user.mid
-    m.reply "You're out."
+    return m.reply 'No such wordwar' unless Rogare::Data.war_exists? k
 
     user = Rogare::Data.user_from_discord m.user
     Rogare::Data.warmembers.where(user_id: user[:id], war_id: k).delete
+
+    m.reply "You're out."
   end
 
   def ex_cancel_war(m, param)
     k = param.strip.to_i
     return m.reply 'You need to specify the wordwar ID' if k.zero?
 
-    return m.reply 'No such wordwar' unless @@redis.exists rk(k, 'start')
-
-    self.class.erase_war k
-    m.reply "Wordwar #{k} deleted."
+    return m.reply 'No such wordwar' unless Rogare::Data.war_exists? k
 
     user = Rogare::Data.user_from_discord m.user
     Rogare::Data.wars.where(id: k).update(cancelled: Time.now, canceller: user[:id])
+
+    m.reply "Wordwar #{k} cancelled."
   end
 
   class << self
@@ -239,13 +225,13 @@ class Rogare::Plugins::Wordwar
 
         starting = lambda { |time, &block|
           war = war_info(id)
-          members = war[:members].join(', ')
+          members = Rogare::Data.war_members(id).select_map(:mid).join(', ')
           extra = ' ' + block.call(war) unless block.nil?
           reply.call "Wordwar #{id} is starting #{time}! #{members}#{extra}"
         }
 
         ending = lambda {
-          members = war_info(id)[:members].join(', ')
+          members = Rogare::Data.war_members(id).select_map(:mid).join(', ')
           reply.call "Wordwar #{id} has ended! #{members}"
         }
 
@@ -274,15 +260,15 @@ class Rogare::Plugins::Wordwar
           # bot restarted while a war was running.
 
           to_end = (start + duration) - Time.now
-          if to_end.negative?
-            # We're after the END of the war, but before Redis expired
-            # the keys, and also the keys were not erased manually, so
-            # it must be that the war ended as the bot was restarting!
-            # Oh no. That means we're probably a bit late.
+          info = war_info id
+          if to_end.negative? && !info[:ended]
+            # We're after the END of the war, but the war is not marked
+            # as ended, so it must be that the war ended as the bot was
+            # restarting! Oh no. That means we're probably a bit late.
             ending.call
             erase_war id
           else
-            unless @@redis.exists rk(id, 'started')
+            unless info[:started]
               # The war is not marked as started but it is started, so
               # the bot probably restarted at the exact moment the war
               # was supposed to start. That means we're probably late.
@@ -299,14 +285,10 @@ class Rogare::Plugins::Wordwar
     end
 
     def start_war(id)
-      @@redis.set rk(id, 'started'), '1'
+      Rogare::Data.wars.where(id: id).update(started: true)
     end
 
     def erase_war(id)
-      @@redis.keys(rk(id, '*')).each do |k|
-        @@redis.rename k, "archive:#{k}"
-      end
-
       Rogare::Data.wars.where(id: id).update(ended: true)
     end
 
@@ -330,44 +312,18 @@ class Rogare::Plugins::Wordwar
        end, neg]
     end
 
-    def rk(war, sub = nil)
-      ['wordwar', war, sub].compact.join ':'
-    end
-
-    def all_wars
-      @@redis.keys(rk('*', 'start')).map do |k|
-        war_info k.gsub(/(^wordwar:|:start$)/, '')
-      end
-    end
-
     def war_info(id)
-      {
-        id: id,
-        channels: @@redis.smembers(rk(id, 'channels')),
-        owner: @@redis.get(rk(id, 'owner')),
-        members: @@redis.smembers(rk(id, 'members')),
-        start: Chronic.parse(@@redis.get(rk(id, 'start'))),
-        end: Chronic.parse(@@redis.get(rk(id, 'end')))
-      }
+      war = Rogare::Data.current_war(id).first
+      war[:end] = war[:start] + war[:seconds]
+      war
     end
 
     def store_war(m, time, duration)
       # War is in the past???
       return if ((time + duration) - Time.now).to_i.negative?
 
-      k = @@redis.incr rk('count')
-
-      @@redis.multi do
-        @@redis.sadd rk(k, 'channels'), m.channel.to_s
-        @@redis.set rk(k, 'owner'), m.user.mid
-        @@redis.sadd rk(k, 'members'), m.user.mid
-        @@redis.set rk(k, 'start'), time.to_s
-        @@redis.set rk(k, 'end'), (time + duration).to_s
-      end
-
       user = Rogare::Data.user_from_discord m.user
       wid = Rogare::Data.wars.insert(
-        id: k,
         start: time,
         seconds: duration,
         creator: user[:id],
@@ -376,12 +332,12 @@ class Rogare::Plugins::Wordwar
 
       Rogare::Data.warmembers.insert(user_id: user[:id], war_id: wid)
 
-      k
+      wid
     end
 
     def load_existing_wars
-      all_wars.reject { |w| w[:end] < Time.now }.map do |war|
-        set_war_timer(war[:id], war[:start], war[:end] - war[:start])
+      Rogare::Data.current_wars.each do |war|
+        set_war_timer(war[:id], war[:start], war[:seconds])
       end
     end
   end
