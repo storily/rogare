@@ -214,7 +214,7 @@ class Rogare::Plugins::Wordwar
     m.reply "Wordwar #{k} deleted."
 
     user = Rogare::Data.user_from_discord m.user
-    Rogare::Data.wars.where(id: k).update(cancelled: true, canceller: user[:id])
+    Rogare::Data.wars.where(id: k).update(cancelled: Time.now, canceller: user[:id])
   end
 
   class << self
