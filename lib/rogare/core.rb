@@ -10,7 +10,11 @@ module Rogare
     end
 
     def prefix
-      '!'
+      if ENV['RACK_ENV'] == 'production'
+        '!'
+      else
+        '§'
+      end
     end
 
     def tz

@@ -3,7 +3,7 @@
 class Rogare::Plugins::QuickCheck
   extend Rogare::Plugin
 
-  command '!', hidden: true
+  command Rogare.prefix, hidden: true
   match_empty :execute
 
   def execute(m, _param)
