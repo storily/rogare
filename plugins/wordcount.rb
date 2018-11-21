@@ -33,7 +33,7 @@ class Rogare::Plugins::Wordcount
   end
 
   match_command /all\s*/, method: :all_counts
-  match_command /live(?:\s+(.+))?/, method: :live_counts
+  match_command /live\s+.+/, method: :live_count_no_more
   match_command /set\s+(.+)/, method: :set_username
   match_command /goal\s+(\d+k?)/, method: :set_goal
   match_command /@(\d+k?)\s+(.+)/, method: :with_goal
@@ -41,17 +41,13 @@ class Rogare::Plugins::Wordcount
   match_command /(.+)/
   match_empty :own_count
 
+  def live_count_no_more(m)
+    m.reply 'Included in the normal commands now'
+  end
+
   def own_count(m, goal = nil)
     goal = nil if goal == ''
     get_counts(m, [m.user.mid], goal: goal)
-  end
-
-  def live_counts(m, param = nil)
-    if param
-      execute(m, param, live: true)
-    else
-      get_counts(m, [m.user.mid], live: true)
-    end
   end
 
   def all_counts(m)
