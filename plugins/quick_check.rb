@@ -9,19 +9,9 @@ class Rogare::Plugins::QuickCheck
   def execute(m, _param)
     if defined? Rogare::Plugins::Wordcount
       wc = Rogare::Plugins::Wordcount.new
-      usual = wc.get_counts(m, [m.user.mid], return: true).first
-      live = wc.get_counts(m, [m.user.mid], live: true, return: true).first
+      data = wc.get_counts(m, [m.user.mid], return: true).first
 
-      if usual && live
-        usual[:live] = live[:diff]
-
-        if usual[:count] > 100_000 && rand > 0.8
-          m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Awely].sample} Wordcount"
-          sleep 1
-        end
-
-        m.reply wc.format usual
-      end
+      wc.present_one(m, data) if data
     end
 
     if defined? Rogare::Plugins::Wordwar

@@ -153,28 +153,21 @@ class Rogare::Plugins::Wordcount
       goal = 50_000 if goal.nil? || goal == 0.0
       goal = goal.to_f
 
-      goal_today = if opts[:live]
-                     ((goal / month_secs) * timediff).round
-                   else
-                     (goal / 30 * nth).round
-                   end
+      goal_live = ((goal / month_secs) * timediff).round
+      goal_today = (goal / 30 * nth).round
 
-      diff = goal_today - count
+      diff_live = goal_live - count
+      diff_today = goal_today - count
 
-      data = {
+      {
         name: name.to_s,
         count: count,
         percent: (100.0 * count / goal).round(1),
         today: get_today(name),
-        diff: diff,
+        diff: diff_today,
+        live: diff_live,
         goal: goal
       }
-
-      if opts[:return]
-        data
-      else
-        format data
-      end
     end
 
     return counts if opts[:return]
@@ -184,7 +177,11 @@ class Rogare::Plugins::Wordcount
       return
     end
 
-    m.reply counts.join(', ')
+    if counts.count == 1
+      present_one m, counts.first
+    else
+      m.reply counts.map { |c| format c }.join(', ')
+    end
   end
 
   def format(data)
@@ -198,9 +195,7 @@ class Rogare::Plugins::Wordcount
       else
         "#{data[:diff].abs} ahead"
       end,
-      if data[:live].nil?
-        nil
-      elsif data[:live].zero?
+      if data[:live].zero?
         'up to live'
       elsif data[:live].positive?
         "#{data[:live]} behind live"
@@ -215,5 +210,14 @@ class Rogare::Plugins::Wordcount
         end
       end
     ].compact.join(', ')})"
+  end
+
+  def present_one(m, data)
+    if data[:count] > 100_000 && rand > 0.8
+      m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Awely].sample} Wordcount"
+      sleep 1
+    end
+
+    m.reply format data
   end
 end
