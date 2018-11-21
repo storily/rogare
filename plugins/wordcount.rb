@@ -129,7 +129,7 @@ class Rogare::Plugins::Wordcount
     # to display, instead we only request word counts up until the first one
     # that has a valid count.
     random_found = false
-    counts = names.map do |name|
+    counts = names.compact.map do |name|
       break if opts[:random] && random_found
 
       count = get_count(name)
@@ -174,7 +174,7 @@ class Rogare::Plugins::Wordcount
       else
         format data
       end
-    end.compact
+    end
 
     return counts if opts[:return]
 
