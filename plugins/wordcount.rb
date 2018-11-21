@@ -140,11 +140,8 @@ class Rogare::Plugins::Wordcount
 
       user = Rogare::Data.users.where(nano_user: name.to_s).first
       tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
-      now = tz.now
-
-      ENV['TZ'] = tz.canonical_identifier if tz != TZInfo::Timezone.get(Rogare.tz)
-      timediff = now - Chronic.parse('1st')
-      ENV['TZ'] = Rogare.tz if tz != TZInfo::Timezone.get(Rogare.tz)
+      now = tz.local_to_utc(tz.now)
+      timediff = now - Rogare::Data.first_of(now.month, tz)
 
       day_secs = 60 * 60 * 24
       month_secs = day_secs * 30

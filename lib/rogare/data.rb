@@ -114,10 +114,10 @@ module Rogare::Data
         .reverse(:started)
     end
 
-    def first_of(month)
-      # Assume +1300. In November it will be right, otherwise it will be off but
-      # in the right "direction" i.e. there won't be surprised 'but it IS month'
-      DateTime.parse("#{Time.new.year}-#{month}-01 00:00:00 +1300").to_time
+    def first_of(month, tz = nil)
+      tz ||= TZInfo::Timezone.get Rogare.tz
+      tz_string = tz.current_period.offset.abbreviation
+      DateTime.parse("#{Time.new.year}-#{month}-01 00:00:00 #{tz_string}").to_time
     end
 
     def ensure_novel(did)
