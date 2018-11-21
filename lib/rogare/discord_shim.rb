@@ -72,6 +72,10 @@ class DiscordUserShim
   def send(message)
     @member.pm message
   end
+
+  def to_db
+    Rogare::Data.user_from_discord self
+  end
 end
 
 class DiscordChannelShim

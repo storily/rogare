@@ -10,7 +10,8 @@ class Rogare::Plugins::Wordcount
     '`!%`, or: `!% <nanoname>`, or: `!% <@nick>` (to see others’ counts)',
     'To register your nano name against your current nick: `!% set <nanoname>`',
     'To set your goal: `!% goal <number>` (do it after `!% set`)',
-    'To use a goal just for this call: `!% @<number> [nick]`'
+    'To use a goal just for this call: `!% @<number> [nick]`',
+    'To set your timezone: `!% tz <e.g. Pacific/Auckland>`'
   ]
   handle_help
 
@@ -33,10 +34,10 @@ class Rogare::Plugins::Wordcount
   end
 
   match_command /all\s*/, method: :all_counts
-  match_command /live\s+.+/, method: :live_count_no_more
   match_command /set\s+(.+)/, method: :set_username
   match_command /goal\s+(\d+k?)/, method: :set_goal
   match_command /@(\d+k?)\s+(.+)/, method: :with_goal
+  match_command /tz\s+(.+)/, method: :set_timezone
   match_command /@(\d+k?)\s*$/, method: :own_count
   match_command /(.+)/
   match_empty :own_count
@@ -77,6 +78,15 @@ class Rogare::Plugins::Wordcount
 
   def with_goal(m, goal, param)
     execute(m, param, goal: goal)
+  end
+
+  def set_timezone(m, tz)
+    tz.strip!
+    return m.reply 'That’s not a valid timezone.' unless TZInfo::Timezone.get(tz)
+
+    user = m.user.to_db
+    Rogare::Data.users.where(id: user[:id]).update(tz: tz)
+    m.reply "Your timezone has been set to #{tz}."
   end
 
   def execute(m, param = '', opts = {})
