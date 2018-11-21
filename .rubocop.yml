@@ -36,6 +36,7 @@ Naming/UncommunicativeMethodParamName:
     - id
     - m
     - _m
+    - tz
 
 Style/ClassAndModuleChildren:
   Enabled: false

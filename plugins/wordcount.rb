@@ -149,6 +149,7 @@ class Rogare::Plugins::Wordcount
 
       nth = (timediff / day_secs).ceil
       goal = opts[:goal]
+      goal = nil if opts[:goal].to_i.zero?
       goal = Rogare::Data.ensure_novel(user[:discord_id])[:goal] if user && !goal
       goal = 50_000 if goal.nil? || goal == 0.0
       goal = goal.to_f
