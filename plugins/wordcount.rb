@@ -144,7 +144,8 @@ class Rogare::Plugins::Wordcount
       timediff = now - Rogare::Data.first_of(now.month, tz)
 
       day_secs = 60 * 60 * 24
-      month_secs = day_secs * 30
+      month_days = Date.new(now.year, now.month, -1).day
+      month_secs = day_secs * month_days
 
       nth = (timediff / day_secs).ceil
       goal = opts[:goal]
