@@ -34,10 +34,10 @@ class Rogare::Plugins::Wordcount
   end
 
   match_command /all\s*/, method: :all_counts
+  match_command /tz\s+(.+)/, method: :set_timezone
   match_command /set\s+(.+)/, method: :set_username
   match_command /goal\s+(\d+k?)/, method: :set_goal
   match_command /@(\d+k?)\s+(.+)/, method: :with_goal
-  match_command /tz\s+(.+)/, method: :set_timezone
   match_command /@(\d+k?)\s*$/, method: :own_count
   match_command /(.+)/
   match_empty :own_count
@@ -82,7 +82,13 @@ class Rogare::Plugins::Wordcount
 
   def set_timezone(m, tz)
     tz.strip!
-    return m.reply 'That’s not a valid timezone.' unless TZInfo::Timezone.get(tz)
+
+    begin
+      TZInfo::Timezone.get(tz)
+    rescue StandardError => e
+      logs "Invalid timezone: #{e}"
+      return m.reply 'That’s not a valid timezone.'
+    end
 
     user = m.user.to_db
     Rogare::Data.users.where(id: user[:id]).update(tz: tz)
