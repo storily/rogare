@@ -11,7 +11,7 @@ class Rogare::Plugins::Choose
   match_empty :help_message
 
   def execute(m, param)
-    if rand < 0.01
+    if rand < 0.05
       return m.reply [
         'yes', 'both', 'all of the above', 'not super sure, actually', 'Gryffindor!'
       ].sample
