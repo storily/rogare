@@ -226,8 +226,8 @@ class Rogare::Plugins::Wordcount
   end
 
   def present_one(m, data)
-    if data[:count] > 100_000 && rand > 0.8
-      m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Awely].sample} Wordcount"
+    if data[:count] > 100_000 && rand > 0.5
+      m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Monstrous].sample} Wordcount"
       sleep 1
     end
 
