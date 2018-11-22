@@ -18,7 +18,8 @@ class Rogare::Plugins::QuickCheck
       ww = Rogare::Plugins::Wordwar.new
 
       Rogare::Data.current_wars.each do |war|
-        ww.say_war_info m, ww.war_info(war)
+        war[:end] = war[:start] + war[:seconds]
+        ww.say_war_info m, war
       end
     end
 
