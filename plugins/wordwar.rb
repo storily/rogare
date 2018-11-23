@@ -36,10 +36,13 @@ class Rogare::Plugins::Wordwar
     param.sub!(/#.+$/, '')
     time, durstr = param.strip.split(/for/i).map(&:strip)
 
+    atmode = time =~ /^at/i
     time = time.sub(/^at/i, '').strip if time.downcase.start_with? 'at'
     durstr = '15 minutes' if durstr.nil? || durstr.empty?
 
     timenow = Time.now
+
+    time = time.match(/(\d{1,2})(\d{2})/)[1..2].join(':') if atmode && /^\d{3,4}$/.match?(time)
 
     timeat = Chronic.parse(time)
     timeat = Chronic.parse("in #{time}") if timeat.nil?
