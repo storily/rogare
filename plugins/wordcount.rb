@@ -146,7 +146,7 @@ class Rogare::Plugins::Wordcount
 
       count = get_count(name)
       next if opts[:random] && count.nil?
-      next "#{name}: user does not exist or has no current novel" if count.nil?
+      next { name: name, count: nil } if count.nil?
 
       random_found = true
 
@@ -226,6 +226,10 @@ class Rogare::Plugins::Wordcount
   end
 
   def present_one(m, data)
+    logs data.inspect
+
+    return m.reply "#{data[:name]}: user does not exist or has no current novel" if data[:count].nil?
+
     if data[:count] > 100_000 && rand > 0.5
       m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Monstrous].sample} Wordcount"
       sleep 1

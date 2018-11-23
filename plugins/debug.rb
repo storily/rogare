@@ -65,7 +65,7 @@ class Rogare::Plugins::Debug
 
     next if %i[
       uptime help_message
-      my_id my_name my_nano my_time
+      my_id my_name my_user my_time
       user_info name_info name_adjust
       kind_info kind_map
     ].include? method
