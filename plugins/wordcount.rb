@@ -144,12 +144,6 @@ class Rogare::Plugins::Wordcount
     counts = names.compact.map do |name|
       break if opts[:random] && random_found
 
-      count = get_count(name)
-      next if opts[:random] && count.nil?
-      next { name: name, count: nil } if count.nil?
-
-      random_found = true
-
       user = Rogare::Data.users.where(nano_user: name.to_s).first
       tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
       now = tz.local_to_utc(tz.now)
@@ -168,6 +162,16 @@ class Rogare::Plugins::Wordcount
 
       goal_live = ((goal / month_secs) * timediff).round
       goal_today = (goal / 30 * nth).round
+
+      if user[:id] == 10 # tamgar sets their count in their nick
+        count = user[:nick].split(/[\[\]]/).last.to_i
+      else
+        count = get_count(name)
+        next if opts[:random] && count.nil?
+        next { name: name, count: nil } if count.nil?
+      end
+
+      random_found = true
 
       diff_live = goal_live - count
       diff_today = goal_today - count
