@@ -3,7 +3,8 @@
 class Rogare::Plugins::Pronouns
   extend Rogare::Plugin
 
-  command 'pronouns', hidden: true
+  command 'pronouns'
+  aliases 'gender'
   usage '`!%` - You’re a sweetie'
   handle_help
 

@@ -3,7 +3,9 @@
 class Rogare::Plugins::QuickCheck
   extend Rogare::Plugin
 
-  command Rogare.prefix, hidden: true
+  command Rogare.prefix
+  usage '`!%` - Quick check of things'
+  handle_help
   match_empty :execute
 
   def execute(m, _param)

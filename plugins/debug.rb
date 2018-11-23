@@ -3,7 +3,8 @@
 class Rogare::Plugins::Debug
   extend Rogare::Plugin
 
-  command 'debug', hidden: true
+  command 'debug'
+  aliases 'show'
   usage [
     'All commands are restricted to #bot-testing, and some are admin-restricted.',
     '**Public commands:**',
