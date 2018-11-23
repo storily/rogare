@@ -123,7 +123,7 @@ class Rogare::Plugins::Wordcount
 
     names.map! do |name|
       # Exact match from @mention / mid
-      if /^<@\d+>$/.match?(name)
+      if /^<@!?\d+>$/.match?(name)
         du = Rogare.from_discord_mid(name)
         next Rogare::Data.get_nano_user(du.inner) if du
       end

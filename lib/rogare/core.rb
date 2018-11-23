@@ -98,7 +98,7 @@ module Rogare
 
     def nixnotif(nick)
       # If we get a mentionable discord ID, lookup the user and retrieve a nick:
-      if /<@\d+>/.match?(nick)
+      if /<@!?\d+>/.match?(nick)
         du = from_discord_mid(nick)
         nick = du.nick if du
       end
