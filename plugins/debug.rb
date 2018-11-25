@@ -127,7 +127,21 @@ class Rogare::Plugins::Debug
   end
 
   def name_stats(m)
-    m.debugly Rogare::Data.name_stats.to_json
+    stats = Rogare::Data.name_stats
+
+    nt = stats[:total]
+    ng = stats[:firsts]
+    ns = stats[:lasts]
+
+    nm = stats[:kinds].delete :male
+    nf = stats[:kinds].delete :female
+    ne = stats[:kinds].delete :enby
+
+    m.reply "**#{nt}** unique given names " \
+      "(**#{ng}** total, with **#{nm}** male, **#{nf}** female, and **#{ne}** explicitely enby) " \
+      "and surnames (**#{ns}** total)." \
+      "\nKinds: " +
+            stats[:kinds].map { |k, v| "**#{v}** #{k}" }.join(', ') + '.'
   end
 
   def kind_map(m)
