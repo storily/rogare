@@ -17,7 +17,7 @@ class Rogare::Plugins::Debug
 
     '`!% user info <@user or ID or nick>` - Show user’s db info',
     '`!% name info <name>` - Show !name name db info (quite verbose)',
-    '`!% kind info` - Show !name kind list',
+    '`!% name stats` - Show !name kind list and stats',
     '`!% kind map` - Show !name kind map',
     '`!% name adjust <name> <+/-kind>` - File an adjustment for a name to be (+) or not be (-) a particular kind.',
 
@@ -45,7 +45,7 @@ class Rogare::Plugins::Debug
 
   match_command /user info (.+)/, method: :user_info
   match_command /name info ([[:alnum:]]+)/, method: :name_info
-  match_command /kind info/, method: :kind_info
+  match_command /name stats/, method: :name_stats
   match_command /kind map/, method: :kind_map
   match_command /name adjust ([[:alnum:]]+) ([+\-]\w+)/, method: :name_adjust
   match_command /name regen/, method: :name_regen
@@ -126,8 +126,8 @@ class Rogare::Plugins::Debug
     )
   end
 
-  def kind_info(m)
-    m.reply Rogare::Data.all_kinds.join(', ')
+  def name_stats(m)
+    m.debugly Rogare::Data.name_stats.to_json
   end
 
   def kind_map(m)

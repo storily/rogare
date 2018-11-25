@@ -217,6 +217,30 @@ module Rogare::Data
       current_war(id).count.positive?
     end
 
+    def name_stats
+      queries = Rogare::Data.all_kinds.map do |kind|
+        Rogare::Data.names.where(
+          Sequel.pg_array(:kinds).contains(Rogare::Data.kinds(kind))
+        ).select { count('*') }.as(kind)
+      end
+
+      queries << Rogare::Data.names.select { count('*') }.as(:total)
+      queries << Rogare::Data.names.where(surname: false).select { count('*') }.as(:firsts)
+      queries << Rogare::Data.names.where(surname: true).select { count('*') }.as(:lasts)
+
+      stats = Rogare.sql.select { queries }.first
+      total = stats.delete :total
+      firsts = stats.delete :firsts
+      lasts = stats.delete :lasts
+
+      {
+        total: total,
+        firsts: firsts,
+        lasts: lasts,
+        kinds: stats
+      }
+    end
+
     memoize :all_kinds
   end
 end
