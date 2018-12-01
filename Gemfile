@@ -3,6 +3,7 @@
 source 'https://rubygems.org'
 ruby '~>2.5.1'
 
+gem 'activesupport', '~>5.0'
 gem 'chronic', '~>0.10.2'
 gem 'chronic_duration', '~>0.10.2'
 gem 'discordrb', '~>3.3.0'
