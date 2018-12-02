@@ -7,8 +7,10 @@ class Rogare::Plugins::Novel
   usage [
     '`%!` - Show your current novel(s).',
     '`%! done` - Show your finished novel(s).',
-    '`%! new [nano|camp] [name...]` - Start a new novel. `nano` and `camp` novels can only be created in their month or the 2 weeks before.',
-    '`%! ID` - Show info about any novel. In the following sub commands, omitting `ID` will match your latest.',
+    '`%! new [nano|camp] [name...]` - Start a new novel. ' \
+      '`nano` and `camp` novels can only be created in their month or the 2 weeks before.',
+    '`%! ID` - Show info about any novel. ' \
+      'In the following sub commands, omitting `ID` will match your latest.',
     '`%! [ID] rename [name...]` - Rename your novel.',
     '`%! [ID] goal NUMBER` - Set a wordcount goal for your novel. `0` disables.',
     # '`%! [ID] curve linear|???` - Set which curve to use for your novel’s goal.',
@@ -63,10 +65,10 @@ class Rogare::Plugins::Novel
   def finished_novels(m)
     user = m.user.to_db
     novels = Rogare::Data
-      .novels
-      .where { (user_id =~ user[:id]) & (finished =~ true) }
-      .reverse(:started)
-      .all
+             .novels
+             .where { (user_id =~ user[:id]) & (finished =~ true) }
+             .reverse(:started)
+             .all
 
     return m.reply 'None finished (yet!)' if novels.empty?
 
@@ -85,41 +87,41 @@ class Rogare::Plugins::Novel
     user = m.user.to_db
     name.strip!
 
-    type = if name =~ /^nano\s/i
-      name.sub(/^nano\s+/i, '')
-      :nano
-    elsif name =~ /^camp\s/i
-      name.sub(/^camp\s+/i, '')
-      :camp
-    else
-      :manual
-    end
+    ntype = if /^nano\s/i.match?(name)
+              name.sub(/^nano\s+/i, '')
+              'nano'
+            elsif /^camp\s/i.match?(name)
+              name.sub(/^camp\s+/i, '')
+              'camp'
+            else
+              'manual'
+            end
 
-    if type == :nano && (
+    if ntype == 'nano' && (
       Time.now < (Rogare::Data.first_of(11) - 2.weeks) ||
       Time.now >= Rogare::Data.first_of(12))
-      return m.reply "Can’t create nano novel outside of nano time"
+      return m.reply 'Can’t create nano novel outside of nano time'
     end
 
-    if type == :camp && (
+    if ntype == 'camp' && (
       Time.now < (Rogare::Data.first_of(4) - 2.weeks) ||
       Time.now >= Rogare::Data.first_of(5) ||
       Time.now < (Rogare::Data.first_of(7) - 2.weeks) ||
       Time.now >= Rogare::Data.first_of(8))
-      return m.reply "Can’t create camp novel outside of camp time"
+      return m.reply 'Can’t create camp novel outside of camp time'
     end
 
-    id = Rogare::Data.novels.insert(user_id: user[:id], name: name, type: type.to_s)
+    id = Rogare::Data.novels.insert(user_id: user[:id], name: name, type: ntype)
     m.reply "New novel created: #{id}."
   end
 
   def finish_novel(m, id)
     user = m.user.to_db
     novel = if id.empty?
-      Rogare::Data.current_novels(user).first
-    else
-      Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first
-    end
+              Rogare::Data.current_novels(user).first
+            else
+              Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first
+            end
 
     return m.reply 'No such novel' unless novel
     return m.reply 'Already marked done' if novel[:finished]
@@ -133,10 +135,10 @@ class Rogare::Plugins::Novel
   def unfinish_novel(m, id)
     user = m.user.to_db
     novel = if id.empty?
-      Rogare::Data.current_novels(user).first
-    else
-      Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first
-    end
+              Rogare::Data.current_novels(user).first
+            else
+              Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first
+            end
 
     return m.reply 'No such novel' unless novel
     return m.reply 'Not marked done' unless novel[:finished]
@@ -150,10 +152,11 @@ class Rogare::Plugins::Novel
   def format_novel(novel)
     "#{novel[:id]}. “#{(novel[:name] || 'Untitled').gsub(/\s+/, ' ')}”. " \
     '' + [
-      "#{novel[:type] == 'manual' ? 'S' : "#{novel[:type].capitalize} novel s"}tarted #{novel[:started].strftime('%Y-%m-%d')}",
+      (novel[:type] == 'manual' ? 'S' : "#{novel[:type].capitalize} novel s") +
+      "tarted #{novel[:started].strftime('%Y-%m-%d')}",
       (Rogare::Data.goal_format novel[:goal] if novel[:goal]),
       ("#{novel[:curve]} curve" if novel[:goal] && novel[:curve] != 'linear'),
-      ('done' if novel[:finished]),
+      ('done' if novel[:finished])
     ].compact.join(', ') + '.'
   end
 end

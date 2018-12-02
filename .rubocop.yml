@@ -38,6 +38,9 @@ Naming/UncommunicativeMethodParamName:
     - _m
     - tz
 
+Style/AsciiComments:
+  Enabled: false
+
 Style/ClassAndModuleChildren:
   Enabled: false
 
