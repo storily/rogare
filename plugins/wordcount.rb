@@ -219,13 +219,7 @@ class Rogare::Plugins::Wordcount
       else
         "#{data[:live].abs} ahead live"
       end,
-      if data[:goal] != 50_000
-        if data[:goal] < 10_000
-          "#{(data[:goal] / 1_000).round(1)}k goal"
-        else
-          "#{(data[:goal] / 1_000).round}k goal"
-        end
-      end
+      (Rogare::Data.goal_format data[:goal] if data[:goal] != 50_000)
     ].compact.join(', ')})"
   end
 

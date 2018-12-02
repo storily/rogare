@@ -241,6 +241,16 @@ module Rogare::Data
       }
     end
 
+    def goal_format(goal)
+      if goal < 1_000
+        "#{goal} words goal"
+      elsif goal < 10_000
+        "#{(goal / 1_000.0).round(1)}k goal"
+      else
+        "#{(goal / 1_000.0).round}k goal"
+      end
+    end
+
     memoize :all_kinds
   end
 end
