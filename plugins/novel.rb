@@ -5,17 +5,17 @@ class Rogare::Plugins::Novel
 
   command 'novel'
   usage [
-    '`%!` - Show your current novel(s).',
-    '`%! done` - Show your finished novel(s).',
-    '`%! new [nano|camp] [name...]` - Start a new novel. ' \
+    '`!%` - Show your current novel(s).',
+    '`!% done` - Show your finished novel(s).',
+    '`!% new [nano|camp] [name...]` - Start a new novel. ' \
       '`nano` and `camp` novels can only be created in their month or the 2 weeks before.',
-    '`%! ID` - Show info about any novel. ' \
+    '`!% ID` - Show info about any novel. ' \
       'In the following sub commands, omitting `ID` will match your latest.',
-    '`%! [ID] rename [name...]` - Rename your novel.',
-    '`%! [ID] goal NUMBER` - Set a wordcount goal for your novel. `0` disables.',
-    # '`%! [ID] curve linear|???` - Set which curve to use for your novel’s goal.',
-    '`%! [ID] finish` and `unfinish` - Set your novel’s done status.',
-    # '`%! [ID] stats` - Show detailed wordcount stats about your novel. Will PM you.'
+    '_(not yet)_ `!% [ID] rename [name...]` - Rename your novel.',
+    '_(not yet)_ `!% [ID] goal NUMBER` - Set a wordcount goal for your novel. `0` disables.',
+    # '`!% [ID] curve linear|???` - Set which curve to use for your novel’s goal.',
+    '`!% [ID] finish` and `unfinish` - Set your novel’s done status.',
+    '_(not yet)_ `!% [ID] stats` - Show detailed wordcount stats about your novel. Will PM you.'
   ]
   handle_help
 
