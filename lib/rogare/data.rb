@@ -129,7 +129,8 @@ module Rogare::Data
       # we don't, and you'll have to tell us to make a new one if you want.
 
       if this_is_november
-        if latest_novel.nil? || latest_novel[:started] < first_of(11)
+        appropriate_start = first_of(11) - 2.weeks
+        if latest_novel.nil? || latest_novel[:started] < appropriate_start
           # This is nano, start a new novel!
           id = novels.insert(
             user_id: user[:id],
