@@ -11,11 +11,11 @@ class Rogare::Plugins::Novel
       '`nano` and `camp` novels can only be created in their month or the 2 weeks before.',
     '`!% ID` - Show info about any novel. ' \
       'In the following sub commands, omitting `ID` will match your latest.',
-    '_(not yet)_ `!% [ID] rename [name...]` - Rename your novel.',
-    '_(not yet)_ `!% [ID] goal NUMBER` - Set a wordcount goal for your novel. `0` disables.',
+    '`!% [ID] rename [name...]` - Rename your novel.',
+    '`!% [ID] goal <number>` - Set a wordcount goal for your novel. `0` disables.',
     # '`!% [ID] curve linear|???` - Set which curve to use for your novel’s goal.',
     '`!% [ID] finish` and `unfinish` - Set your novel’s done status.',
-    '_(not yet)_ `!% [ID] stats` - Show detailed wordcount stats about your novel. Will PM you.'
+    # '`!% [ID] stats` - Show detailed wordcount stats about your novel. Will PM you.'
   ]
   handle_help
 
@@ -115,13 +115,38 @@ class Rogare::Plugins::Novel
     m.reply "New novel created: #{id}."
   end
 
+  def rename_novel(m, id, name)
+    user = m.user.to_db
+    novel = load_novel user, id
+
+    return m.reply 'No such novel' unless novel
+
+    name.strip!
+    Rogare::Data.novels.where(id: novel[:id]).update(name: name)\
+
+    novel[:name] = name
+    m.reply format_novel(novel)
+  end
+
+  def goalify_novel(m, id, goal)
+    user = m.user.to_db
+    novel = load_novel user, id
+
+    return m.reply 'No such novel' unless novel
+
+    goal.sub! /k$/, '000'
+    goal = goal.to_i
+    goal = nil if goal.zero?
+
+    Rogare::Data.novels.where(id: novel[:id]).update(goal: goal)
+
+    novel[:goal] = goal
+    m.reply format_novel(novel)
+  end
+
   def finish_novel(m, id)
     user = m.user.to_db
-    novel = if id.empty?
-              Rogare::Data.current_novels(user).first
-            else
-              Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first
-            end
+    novel = load_novel user, id
 
     return m.reply 'No such novel' unless novel
     return m.reply 'Already marked done' if novel[:finished]
@@ -134,11 +159,7 @@ class Rogare::Plugins::Novel
 
   def unfinish_novel(m, id)
     user = m.user.to_db
-    novel = if id.empty?
-              Rogare::Data.current_novels(user).first
-            else
-              Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first
-            end
+    novel = load_novel user, id
 
     return m.reply 'No such novel' unless novel
     return m.reply 'Not marked done' unless novel[:finished]
@@ -147,6 +168,14 @@ class Rogare::Plugins::Novel
 
     novel[:finished] = false
     m.reply format_novel(novel)
+  end
+
+  def load_novel(user, id)
+    if id.empty?
+      Rogare::Data.current_novels(user).first
+    else
+      Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first
+    end
   end
 
   def format_novel(novel)
