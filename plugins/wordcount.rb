@@ -8,10 +8,8 @@ class Rogare::Plugins::Wordcount
   aliases 'count'
   usage [
     '`!%`, or: `!% <nanoname>`, or: `!% <@nick>` (to see others’ counts)',
-    'To register your nano name against your current nick: `!% set <nanoname>`',
-    'To set your goal: `!% goal <number>` (do it after `!% set`)',
-    'To use a goal just for this call: `!% @<number> [nick]`',
-    'To set your timezone: `!% tz <e.g. Pacific/Auckland>`'
+    'To register your nano name against your discord user: `!my nano <nanoname>`',
+    'To set your goal: `!novel goal <count>`. To set your timezone: `!my tz <timezone>`.'
   ]
   handle_help
 
@@ -34,15 +32,8 @@ class Rogare::Plugins::Wordcount
   end
 
   match_command /all\s*/, method: :all_counts
-  match_command /tz\s+(.+)/, method: :set_timezone
-  match_command /set\s+(.+)/, method: :set_username
-  match_command /goal\s+(\d+k?)/, method: :set_goal
   match_command /(.+)/
   match_empty :own_count
-
-  def live_count_no_more(m)
-    m.reply 'Included in the normal commands now'
-  end
 
   def own_count(m)
     get_counts(m, [m.user.mid])
@@ -53,39 +44,6 @@ class Rogare::Plugins::Wordcount
     return m.reply 'No names set' if names.empty?
 
     get_counts(m, names)
-  end
-
-  def set_username(m, param)
-    name = param.strip.split.join('-')
-
-    Rogare::Data.set_nano_user(m.user, name)
-    m.reply "Your username has been set to #{name}."
-    own_count(m)
-  end
-
-  def set_goal(m, goal)
-    goal.sub! /k$/, '000'
-
-    novel = Rogare::Data.current_novels(Rogare::Data.user_from_discord(m.user)).first
-    Rogare::Data.novels.where(id: novel[:id]).update(goal: goal.to_i)
-
-    m.reply "Your goal has been set to #{goal}."
-    own_count(m, goal.to_i)
-  end
-
-  def set_timezone(m, tz)
-    tz.strip!
-
-    begin
-      TZInfo::Timezone.get(tz)
-    rescue StandardError => e
-      logs "Invalid timezone: #{e}"
-      return m.reply 'That’s not a valid timezone.'
-    end
-
-    user = m.user.to_db
-    Rogare::Data.users.where(id: user[:id]).update(tz: tz)
-    m.reply "Your timezone has been set to #{tz}."
   end
 
   def execute(m, param = '', opts = {})

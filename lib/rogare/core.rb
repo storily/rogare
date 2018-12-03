@@ -70,7 +70,7 @@ module Rogare
       end
 
       bot.message do |event|
-        prev_seen = Rogare::Data.user_seen(event.author)
+        Rogare::Data.user_seen(event.author)
       end
 
       bot
