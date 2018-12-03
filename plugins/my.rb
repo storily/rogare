@@ -28,7 +28,11 @@ class Rogare::Plugins::My
   def set_nano(m, name)
     name = name.strip.split.join('-')
 
-    # TODO: check against nano site for basic validity
+    res = Typhoeus.get "https://nanowrimo.org/participants/#{name}"
+    unless res.code == 200
+      m.reply "No such nano name (`#{name}`) found on the nano website"
+      return
+    end
 
     Rogare::Data.set_nano_user(m.user, name)
     m.reply "Your nano name has been set to #{name}."
