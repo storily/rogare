@@ -156,14 +156,20 @@ class Rogare::Plugins::Wordcount
       goal_live = ((goal / month_secs) * timediff).round
       goal_today = (goal / 30 * nth).round
 
+      count = 0
+      today = 0
+
       if user[:id] == 10 # tamgar sets their count in their nick
         count = user[:nick].split(/[\[\]]/).last.to_i
       elsif novel && novel[:temp_count].positive?
+        # TODO: proper counts
         count = novel[:temp_count]
-      else
+      elsif novel[:type] == 'nano' # TODO: camp
         count = get_count(name)
         next if opts[:random] && count.nil?
         next { name: name, count: nil } if count.nil?
+
+        today = get_today(name)
       end
 
       random_found = true
@@ -175,7 +181,7 @@ class Rogare::Plugins::Wordcount
         name: name.to_s,
         count: count,
         percent: (100.0 * count / goal).round(1),
-        today: get_today(name),
+        today: today,
         diff: diff_today,
         live: diff_live,
         goal: goal
