@@ -35,8 +35,8 @@ class Rogare::Plugins::Novel
   match_command /(\d+)\s+goal\s+days\s+(.+)/, method: :dailify_novel
   match_command /()goal\s+days\s+(.+)/, method: :dailify_novel
 
-  match_command /(\d+)\s+goal\s+repeat(?:ing)?\s+(.+)/, method: :repeat_novel
-  match_command /()goal\s+repeat(?:ing)?\s+(.+)/, method: :repeat_novel
+  match_command /(\d+)\s+goal\s+repeat(?:ing)?(\s+.+)?/, method: :repeat_novel
+  match_command /()goal\s+repeat(?:ing)?(\s+.+)?/, method: :repeat_novel
 
   # match_command /(\d+)\s+goal\s+curve\s+(.+)/, method: :curve_novel
   # match_command /()goal\s+curve\s+(.+)/, method: :curve_novel
@@ -169,7 +169,7 @@ class Rogare::Plugins::Novel
     m.reply format_novel(novel)
   end
 
-  def repeat_novel(m, id, repeat)
+  def repeat_novel(m, id, repeat = '')
     user = m.user.to_db
     novel = load_novel user, id
 
