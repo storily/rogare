@@ -121,7 +121,29 @@ class Rogare::Plugins::Novel
       return m.reply 'Can’t create camp novel outside of camp time'
     end
 
-    id = Rogare::Data.novels.insert(user_id: user[:id], name: name, type: ntype)
+    novel = {
+      name: name,
+      type: ntype,
+      user_id: user[:id]
+    }
+
+    if ntype == 'nano'
+      novel[:started] = Rogare::Data.first_of(11)
+      novel[:goal_days] = 30
+      novel[:goal] = 50_000
+    end
+
+    if ntype == 'camp'
+      if Time.now >= (Rogare::Data.first_of(4) - 2.weeks) || Time.now < Rogare::Data.first_of(5)
+        novel[:started] = Rogare::Data.first_of(4)
+        novel[:goal_days] = 30
+      elsif Time.now >= (Rogare::Data.first_of(7) - 2.weeks) || Time.now < Rogare::Data.first_of(8)
+        novel[:started] = Rogare::Data.first_of(7)
+        novel[:goal_days] = 31
+      end
+    end
+
+    id = Rogare::Data.novels.insert(novel)
     m.reply "New novel created: #{id}."
   end
 

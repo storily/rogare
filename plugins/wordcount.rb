@@ -9,7 +9,7 @@ class Rogare::Plugins::Wordcount
   usage [
     '`!%`, or: `!% <nanoname>`, or: `!% <@nick>` (to see others’ counts)',
     'To register your nano name against your discord user: `!my nano <nanoname>`',
-    'To set your goal: `!novel goal <count>`. To set your timezone: `!my tz <timezone>`.'
+    'To set your goal: `!novel goal set <count>`. To set your timezone: `!my tz <timezone>`.'
   ]
   handle_help
 
