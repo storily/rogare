@@ -8,6 +8,8 @@ class Rogare::Plugins::Wordcount
   aliases 'count'
   usage [
     '`!%`, or: `!% <nanoname>`, or: `!% <@nick>` (to see others’ counts)',
+    '`!% set <words>` or `!% add <words>` - Set or increment your word count.',
+    '`!% add <words> to <novel ID>` - Set the word count for a particular novel.',
     'To register your nano name against your discord user: `!my nano <nanoname>`',
     'To set your goal: `!novel goal set <count>`. To set your timezone: `!my tz <timezone>`.'
   ]
@@ -31,8 +33,9 @@ class Rogare::Plugins::Wordcount
     doc.at_css('user_wordcount').content.to_i
   end
 
-  match_command /all\s*/, method: :all_counts
-  match_command /(.+)/
+  match_command /all/, method: :all_counts
+  match_command /set\s+(\d+)(?:\s+to\s+(\d+))/, method: :set_count
+  match_command /add\s+(\d+)(?:\s+to\s+(\d+))/, method: :add_count
   match_empty :own_count
 
   def own_count(m)
@@ -44,6 +47,37 @@ class Rogare::Plugins::Wordcount
     return m.reply 'No names set' if names.empty?
 
     get_counts(m, names)
+  end
+
+  def set_count(m, words, id = '')
+    user = m.user.to_db
+    novel = load_novel user, id
+
+    return m.reply 'No such novel' if id && !novel
+    return m.reply 'You don’t have a novel yet' unless novel
+    return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
+    return m.reply 'Can’t set wordcount of a nano/camp novel (yet)' if %w[nano camp].include? novel[:type]
+
+    words = words.strip.to_i
+    return m.reply "You're trying to set wc to 0… really? Not doing that." if words.zero?
+
+    Rogare::Data.novels.where(id: novel[:id]).update(temp_count: words)
+    own_count(m)
+  end
+
+  def add_count(m, words, id = '')
+    user = m.user.to_db
+    novel = load_novel user, id
+
+    return m.reply 'No such novel' if id && !novel
+    return m.reply 'You don’t have a novel yet' unless novel
+    return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
+    return m.reply 'Can’t set wordcount of a nano/camp novel (yet)' if %w[nano camp].include? novel[:type]
+
+    words = words.strip.to_i
+
+    Rogare::Data.novels.where(id: novel[:id]).update(temp_count: novel[:temp_count] + words)
+    own_count(m)
   end
 
   def execute(m, param = '', opts = {})
@@ -124,6 +158,8 @@ class Rogare::Plugins::Wordcount
 
       if user[:id] == 10 # tamgar sets their count in their nick
         count = user[:nick].split(/[\[\]]/).last.to_i
+      elsif novel && novel[:temp_count].positive?
+        count = novel[:temp_count]
       else
         count = get_count(name)
         next if opts[:random] && count.nil?
