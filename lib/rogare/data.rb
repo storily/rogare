@@ -147,6 +147,14 @@ module Rogare::Data
       latest_novel
     end
 
+    def load_novel(user, id)
+      if id.empty?
+        Rogare::Data.current_novels(user).first
+      else
+        Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first
+      end
+    end
+
     def name_query(args)
       last = args[:kinds].include? 'last'
       args[:kinds] -= %w[last male female enby] if last

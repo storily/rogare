@@ -232,11 +232,7 @@ class Rogare::Plugins::Novel
   end
 
   def load_novel(user, id)
-    if id.empty?
-      Rogare::Data.current_novels(user).first
-    else
-      Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first
-    end
+    Rogare::Data.load_novel user, id
   end
 
   def format_novel(novel)

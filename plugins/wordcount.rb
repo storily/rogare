@@ -51,7 +51,7 @@ class Rogare::Plugins::Wordcount
 
   def set_count(m, words, id = '')
     user = m.user.to_db
-    novel = load_novel user, id
+    novel = Rogare::Data.load_novel user, id
 
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
@@ -67,7 +67,7 @@ class Rogare::Plugins::Wordcount
 
   def add_count(m, words, id = '')
     user = m.user.to_db
-    novel = load_novel user, id
+    novel = Rogare::Data.load_novel user, id
 
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
