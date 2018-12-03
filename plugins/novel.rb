@@ -12,10 +12,14 @@ class Rogare::Plugins::Novel
     '`!% ID` - Show info about any novel. ' \
       'In the following sub commands, omitting `ID` will match your latest.',
     '`!% [ID] rename [name...]` - Rename your novel.',
-    '`!% [ID] goal <number>` - Set a wordcount goal for your novel. `0` disables.',
-    # '`!% [ID] curve linear|???` - Set which curve to use for your novel’s goal.',
     '`!% [ID] finish` and `unfinish` - Set your novel’s done status.',
-    # '`!% [ID] stats` - Show detailed wordcount stats about your novel. Will PM you.'
+    # '`!% [ID] stats` - Show detailed wordcount stats about your novel. Will PM you.',
+    '`!% [ID] goal set <number>` - Set a wordcount goal for your novel. `0` disables.',
+    '`!% [ID] goal days <number>` - Set a wordcount goal length in days. `0` disables.',
+    # '`!% [ID] goal curve linear|???` - Set which curve to use for goal calculations.',
+    '`!% [ID] goal repeating yes|no` - Set whether the goal repeats after its days.',
+    "\nFor example, a revolving weekly goal of 5000 words would be set up with: " \
+      '`!% goal set 5k`, `!% goal days 7`, `!% goal repeating yes`.'
   ]
   handle_help
 
@@ -25,11 +29,17 @@ class Rogare::Plugins::Novel
   match_command /(\d+)\s+rename\s+(.+)/, method: :rename_novel
   match_command /()rename\s+(.+)/, method: :rename_novel
 
-  match_command /(\d+)\s+goal\s+(.+)/, method: :goalify_novel
-  match_command /()goal\s+(.+)/, method: :goalify_novel
+  match_command /(\d+)\s+goal\s+set\s+(.+)/, method: :goalify_novel
+  match_command /()goal\s+set\s+(.+)/, method: :goalify_novel
 
-  # match_command /(\d+)\s+curve\s+(.+)/, method: :curve_novel
-  # match_command /()curve\s+(.+)/, method: :curve_novel
+  match_command /(\d+)\s+goal\s+days\s+(.+)/, method: :dailify_novel
+  match_command /()goal\s+days\s+(.+)/, method: :dailify_novel
+
+  match_command /(\d+)\s+goal\s+repeat(?:ing)?\s+(.+)/, method: :repeat_novel
+  match_command /()goal\s+repeat(?:ing)?\s+(.+)/, method: :repeat_novel
+
+  # match_command /(\d+)\s+goal\s+curve\s+(.+)/, method: :curve_novel
+  # match_command /()goal\s+curve\s+(.+)/, method: :curve_novel
 
   match_command /(\d+)\s+finish/, method: :finish_novel
   match_command /finish\s+(\d+)/, method: :finish_novel
@@ -122,7 +132,7 @@ class Rogare::Plugins::Novel
     return m.reply 'No such novel' unless novel
 
     name.strip!
-    Rogare::Data.novels.where(id: novel[:id]).update(name: name)\
+    Rogare::Data.novels.where(id: novel[:id]).update(name: name)
 
     novel[:name] = name
     m.reply format_novel(novel)
@@ -134,13 +144,42 @@ class Rogare::Plugins::Novel
 
     return m.reply 'No such novel' unless novel
 
-    goal.sub! /k$/, '000'
+    goal.sub! /k$/i, '000'
     goal = goal.to_i
     goal = nil if goal.zero?
 
     Rogare::Data.novels.where(id: novel[:id]).update(goal: goal)
 
     novel[:goal] = goal
+    m.reply format_novel(novel)
+  end
+
+  def dailify_novel(m, id, days)
+    user = m.user.to_db
+    novel = load_novel user, id
+
+    return m.reply 'No such novel' unless novel
+
+    days = days.to_i
+    days = nil if days.zero?
+
+    Rogare::Data.novels.where(id: novel[:id]).update(goal_days: days)
+
+    novel[:goal_days] = days
+    m.reply format_novel(novel)
+  end
+
+  def repeat_novel(m, id, repeat)
+    user = m.user.to_db
+    novel = load_novel user, id
+
+    return m.reply 'No such novel' unless novel
+
+    repeat = repeat.strip =~ /^(yes|y|1|true|t|)$/i
+
+    Rogare::Data.novels.where(id: novel[:id]).update(goal_repeat: repeat)
+
+    novel[:goal_repeat] = repeat
     m.reply format_novel(novel)
   end
 
@@ -184,6 +223,8 @@ class Rogare::Plugins::Novel
       (novel[:type] == 'manual' ? 'S' : "#{novel[:type].capitalize} novel s") +
       "tarted #{novel[:started].strftime('%Y-%m-%d')}",
       (Rogare::Data.goal_format novel[:goal] if novel[:goal]),
+      ("for #{novel[:goal_days]} days" if novel[:goal] && novel[:goal_days]),
+      ('repeating' if novel[:goal] && novel[:goal_repeating]),
       ("#{novel[:curve]} curve" if novel[:goal] && novel[:curve] != 'linear'),
       ('done' if novel[:finished])
     ].compact.join(', ') + '.'

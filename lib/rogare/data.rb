@@ -135,7 +135,9 @@ module Rogare::Data
           id = novels.insert(
             user_id: user[:id],
             started: first_of(11),
-            type: 'nano'
+            type: 'nano',
+            goal: 50_000,
+            goal_days: 30
           )
 
           return novels.where(id: id).first
