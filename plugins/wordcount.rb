@@ -37,8 +37,6 @@ class Rogare::Plugins::Wordcount
   match_command /tz\s+(.+)/, method: :set_timezone
   match_command /set\s+(.+)/, method: :set_username
   match_command /goal\s+(\d+k?)/, method: :set_goal
-  match_command /@(\d+k?)\s+(.+)/, method: :with_goal
-  match_command /@(\d+k?)\s*$/, method: :own_count
   match_command /(.+)/
   match_empty :own_count
 
@@ -46,9 +44,8 @@ class Rogare::Plugins::Wordcount
     m.reply 'Included in the normal commands now'
   end
 
-  def own_count(m, goal = nil)
-    goal = nil if goal == ''
-    get_counts(m, [m.user.mid], goal: goal)
+  def own_count(m)
+    get_counts(m, [m.user.mid])
   end
 
   def all_counts(m)
@@ -74,10 +71,6 @@ class Rogare::Plugins::Wordcount
 
     m.reply "Your goal has been set to #{goal}."
     own_count(m, goal.to_i)
-  end
-
-  def with_goal(m, goal, param)
-    execute(m, param, goal: goal)
   end
 
   def set_timezone(m, tz)
