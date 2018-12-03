@@ -140,10 +140,6 @@ module Rogare::Data
 
           return novels.where(id: id).first
         end
-      elsif latest_novel.nil?
-        # No unfinished novels, start one now
-        id = novels.insert(user_id: user[:id])
-        return novels.where(id: id).first
       end
 
       latest_novel

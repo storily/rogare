@@ -71,7 +71,6 @@ module Rogare
 
       bot.message do |event|
         prev_seen = Rogare::Data.user_seen(event.author)
-        ensure_novel(event.author.id) if prev_seen < Rogare::Data.first_of(11)
       end
 
       bot

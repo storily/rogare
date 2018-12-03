@@ -149,6 +149,14 @@ class Rogare::Plugins::Wordcount
       now = tz.local_to_utc(tz.now)
       timediff = now - Rogare::Data.first_of(now.month, tz)
 
+      if user
+        novel = Rogare::Data.ensure_novel(user[:discord_id])
+        unless novel
+          m.reply "#{name} has no current novel"
+          next
+        end
+      end
+
       day_secs = 60 * 60 * 24
       month_days = Date.new(now.year, now.month, -1).day
       month_secs = day_secs * month_days
@@ -156,7 +164,7 @@ class Rogare::Plugins::Wordcount
       nth = (timediff / day_secs).ceil
       goal = opts[:goal]
       goal = nil if opts[:goal].to_i.zero?
-      goal = Rogare::Data.ensure_novel(user[:discord_id])[:goal] if user && !goal
+      goal = novel[:goal] if user && !goal
       goal = 50_000 if goal.nil? || goal == 0.0
       goal = goal.to_f
 
