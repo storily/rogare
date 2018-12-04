@@ -126,20 +126,29 @@ class Rogare::Plugins::Wordcount
           timetarget = novel[:started] + novel[:goal_days].days
           timediff = now - timetarget
 
-          day_secs = 60 * 60 * 24
-          goal_secs = day_secs * novel[:goal_days]
-
-          nth = (timediff / day_secs).ceil
-          goal = novel[:goal].to_f
-
-          goal_live = ((goal / goal_secs) * timediff).round
-          goal_today = (goal / novel[:goal_days] * nth).round
-
-          data[:target] = {
-            diff: goal_today - data[:count],
-            live: goal_live - data[:count],
-            percent: (100.0 * data[:count] / goal).round(1)
+          data[:days] = {
+            total: novel[:goal_days],
+            finish: timetarget,
+            left: timediff,
+            expired: !timediff.positive? # TODO: && !count[:novel][:days_repeat]
           }
+
+          unless data[:days][:expired]
+            day_secs = 60 * 60 * 24
+            goal_secs = day_secs * novel[:goal_days]
+
+            nth = (timediff / day_secs).ceil
+            goal = novel[:goal].to_f
+
+            goal_live = ((goal / goal_secs) * timediff).round
+            goal_today = (goal / novel[:goal_days] * nth).round
+
+            data[:target] = {
+              diff: goal_today - data[:count],
+              live: goal_live - data[:count],
+              percent: (100.0 * data[:count] / goal).round(1)
+            }
+          end
         end
 
         data
@@ -185,9 +194,19 @@ class Rogare::Plugins::Wordcount
     if count[:novel][:goal]
       if count[:novel][:type] == 'nano'
         deets << Rogare::Data.goal_format(count[:novel][:goal]) unless count[:novel][:goal] == 50_000
+        deets << 'nano has ended' if count[:days][:expired]
+      elsif count[:days] && count[:days][:expired]
+        deets << Rogare::Data.goal_format(count[:novel][:goal])
+        deets << "over #{count[:days][:total]} days"
+        deets << 'expired'
+      elsif count[:target]
+        deets << Rogare::Data.goal_format(count[:novel][:goal])
+
+        day_secs = 60 * 60 * 24
+        days = (count[:days][:left] / day_secs).floor
+        deets << days == 1 ? 'one day left' : "#{days} days left"
       else
         deets << Rogare::Data.goal_format(count[:novel][:goal])
-        deets << "over #{count[:novel][:goal_days]} days" if count[:target]
       end
     end
 
