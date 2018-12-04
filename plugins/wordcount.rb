@@ -138,7 +138,7 @@ class Rogare::Plugins::Wordcount
           data[:target] = {
             diff: goal_today - data[:count],
             live: goal_live - data[:count],
-            percent: (100.0 * count / goal).round(1)
+            percent: (100.0 * data[:count] / goal).round(1)
           }
         end
 

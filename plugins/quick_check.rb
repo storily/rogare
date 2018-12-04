@@ -9,6 +9,8 @@ class Rogare::Plugins::QuickCheck
   match_empty :execute
 
   def execute(m, _param)
+    great = false
+
     if defined? Rogare::Plugins::Wordcount
       wc = Rogare::Plugins::Wordcount.new
       novels = wc.get_counts([m.user.to_db]).first
@@ -17,7 +19,7 @@ class Rogare::Plugins::QuickCheck
         m.reply 'You have no current novels!'
       else
         wc.display_novels m, novels
-        m.reply 'You’re doing great!' if rand > 0.95
+        great = true
       end
     end
 
@@ -29,5 +31,7 @@ class Rogare::Plugins::QuickCheck
         ww.say_war_info m, war
       end
     end
+
+    m.reply 'You’re doing great!' if great && rand > 0.95
   end
 end
