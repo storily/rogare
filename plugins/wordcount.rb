@@ -187,7 +187,7 @@ class Rogare::Plugins::Wordcount
         deets << Rogare::Data.goal_format(count[:novel][:goal]) unless count[:novel][:goal] == 50_000
       else
         deets << Rogare::Data.goal_format(count[:novel][:goal])
-        deets << "in #{count[:novel][:goal_days]} days" if count[:target]
+        deets << "over #{count[:novel][:goal_days]} days" if count[:target]
       end
     end
 
