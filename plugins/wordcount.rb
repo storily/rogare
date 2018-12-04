@@ -49,6 +49,7 @@ class Rogare::Plugins::Wordcount
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
     return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
+
     # return m.reply 'Can’t set wordcount of a nano/camp novel (yet)' if %w[nano camp].include? novel[:type]
 
     words = words.strip.to_i
@@ -65,6 +66,7 @@ class Rogare::Plugins::Wordcount
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
     return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
+
     # return m.reply 'Can’t set wordcount of a nano/camp novel (yet)' if %w[nano camp].include? novel[:type]
 
     words = words.strip.to_i
@@ -141,8 +143,6 @@ class Rogare::Plugins::Wordcount
 
         today = get_today(name)
       end
-
-      random_found = true
 
       diff_live = goal_live - count
       diff_today = goal_today - count
