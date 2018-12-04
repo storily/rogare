@@ -25,6 +25,7 @@ class Rogare::Plugins::Novel
 
   match_command /done/, method: :finished_novels
   match_command /new\s+(.+)/, method: :create_novel
+  match_command /new/, method: :help_message
 
   match_command /(\d+)\s+rename\s+(.+)/, method: :rename_novel
   match_command /()rename\s+(.+)/, method: :rename_novel
@@ -70,6 +71,14 @@ class Rogare::Plugins::Novel
     say = novels.map { |nov| format_novel nov }.join("\n")
     say += "\nand #{nmore} more" if nmore
     m.reply say
+  end
+
+  def show_novel(m, id)
+    novel = Rogare::Data.novels.where(id: id.to_i).first
+
+    return m.reply 'No such novel' unless novel
+
+    m.reply format_novel novel
   end
 
   def finished_novels(m)
