@@ -72,7 +72,7 @@ class Rogare::Plugins::Wordcount
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
     return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
-    return m.reply 'Can’t set wordcount of a nano/camp novel (yet)' if %w[nano camp].include? novel[:type]
+    # return m.reply 'Can’t set wordcount of a nano/camp novel (yet)' if %w[nano camp].include? novel[:type]
 
     words = words.strip.to_i
 
@@ -104,8 +104,6 @@ class Rogare::Plugins::Wordcount
   end
 
   def get_counts(m, names, opts = {})
-    opts[:goal]&.sub! /k$/, '000'
-
     names.map! do |name|
       # Exact match from @mention / mid
       if /^<@!?\d+>$/.match?(name)
@@ -147,8 +145,6 @@ class Rogare::Plugins::Wordcount
       month_secs = day_secs * month_days
 
       nth = (timediff / day_secs).ceil
-      goal = opts[:goal]
-      goal = nil if opts[:goal].to_i.zero?
       goal = novel[:goal] if user && !goal
       goal = 50_000 if goal.nil? || goal == 0.0
       goal = goal.to_f
