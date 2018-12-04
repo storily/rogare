@@ -75,24 +75,13 @@ class Rogare::Plugins::Wordcount
 
   def execute(m, param = '', opts = {})
     names = []
-    random_user = false
 
     param.strip.split.each do |p|
-      p = p.downcase.to_sym
-      case p
-      when /^(me|self|myself|i)$/i
-        names << m.user.mid
-      when /^(random|rand|any)$/i
-        random_user = true
-        names.push(*m.channel.users.shuffle.map(&:mid))
-      else
-        names << p
-      end
+      names << p.downcase.to_sym
     end
     names << m.user.mid if names.empty?
     names.uniq!
 
-    opts[:random] = random_user
     get_counts(m, names, opts)
   end
 
@@ -112,14 +101,7 @@ class Rogare::Plugins::Wordcount
       name
     end
 
-    # `random_found` exists so that we don't check every single user in the
-    # channel for a valid NaNoWriMo wordcount before choosing a random one
-    # to display, instead we only request word counts up until the first one
-    # that has a valid count.
-    random_found = false
     counts = names.compact.map do |name|
-      break if opts[:random] && random_found
-
       user = Rogare::Data.users.where(nano_user: name.to_s).first
       tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
       now = tz.local_to_utc(tz.now)
@@ -155,7 +137,6 @@ class Rogare::Plugins::Wordcount
         count = novel[:temp_count]
       elsif novel[:type] == 'nano' # TODO: camp
         count = get_count(name)
-        next if opts[:random] && count.nil?
         next { name: name, count: nil } if count.nil?
 
         today = get_today(name)
@@ -178,11 +159,6 @@ class Rogare::Plugins::Wordcount
     end
 
     return counts if opts[:return]
-
-    if opts[:random] && counts.empty?
-      m.reply 'No users in this channel have novels!'
-      return
-    end
 
     if counts.count == 1
       present_one m, counts.first
