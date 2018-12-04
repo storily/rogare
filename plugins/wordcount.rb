@@ -33,20 +33,13 @@ class Rogare::Plugins::Wordcount
     doc.at_css('user_wordcount').content.to_i
   end
 
-  match_command /all/, method: :all_counts
   match_command /set\s+(\d+)(?:\s+to\s+(\d+))/, method: :set_count
   match_command /add\s+(\d+)(?:\s+to\s+(\d+))/, method: :add_count
+  match_command /(.+)/
   match_empty :own_count
 
   def own_count(m)
     get_counts(m, [m.user.mid])
-  end
-
-  def all_counts(m)
-    names = Rogare::Data.all_nano_users
-    return m.reply 'No names set' if names.empty?
-
-    get_counts(m, names)
   end
 
   def set_count(m, words, id = '')
@@ -56,7 +49,7 @@ class Rogare::Plugins::Wordcount
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
     return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
-    return m.reply 'Can’t set wordcount of a nano/camp novel (yet)' if %w[nano camp].include? novel[:type]
+    # return m.reply 'Can’t set wordcount of a nano/camp novel (yet)' if %w[nano camp].include? novel[:type]
 
     words = words.strip.to_i
     return m.reply "You're trying to set wc to 0… really? Not doing that." if words.zero?
