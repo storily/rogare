@@ -11,9 +11,14 @@ class Rogare::Plugins::QuickCheck
   def execute(m, _param)
     if defined? Rogare::Plugins::Wordcount
       wc = Rogare::Plugins::Wordcount.new
-      data = wc.get_counts(m, [m.user.mid], return: true).first
+      novels = wc.get_counts([m.user.to_db]).first
 
-      wc.present_one(m, data) if data
+      if novels.empty?
+        m.reply 'You have no current novels!'
+      else
+        wc.display_novels m, novels
+        m.reply 'You’re doing great!' if rand > 0.95
+      end
     end
 
     if defined? Rogare::Plugins::Wordwar
@@ -24,7 +29,5 @@ class Rogare::Plugins::QuickCheck
         ww.say_war_info m, war
       end
     end
-
-    m.reply 'You’re doing great!' if rand > 0.95
   end
 end

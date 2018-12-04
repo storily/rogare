@@ -35,11 +35,36 @@ class Rogare::Plugins::Wordcount
 
   match_command /set\s+(\d+)(?:\s+to\s+(\d+))/, method: :set_count
   match_command /add\s+(\d+)(?:\s+to\s+(\d+))/, method: :add_count
-  match_command /(.+)/
+  match_command /(.+)/, method: :other_counts
   match_empty :own_count
 
   def own_count(m)
-    get_counts(m, [m.user.mid])
+    novels = get_counts([m.user.to_db]).first
+
+    return m.reply 'Something is very wrong' unless novels
+    return m.reply 'You have no current novel' if novels.empty?
+
+    display_novels m, novels
+  end
+
+  def other_counts(m, param = '')
+    names = param.strip.split.uniq.compact
+    return own_count(m) if names.empty?
+
+    users = get_counts(names.map do |name|
+      if /^<@!?\d+>$/.match?(name)
+        # Exact match from @mention / mid
+        Rogare.from_discord_mid(name).to_db
+      else
+        # Case-insensitive match from nick
+        Rogare::Data.users.where { nick =~ /^#{name}$/i }.first
+      end
+    end.compact)
+
+    return m.reply 'No valid users found' unless users
+    return m.reply 'No current novels found' if users.select { |n| n.length.positive? }.empty?
+
+    display_novels m, users.flatten(1)
   end
 
   def set_count(m, words, id = '')
@@ -75,130 +100,101 @@ class Rogare::Plugins::Wordcount
     own_count(m)
   end
 
-  def execute(m, param = '', opts = {})
-    names = []
+  def get_counts(users)
+    users.map do |user|
+      Rogare::Data.current_novels(user).map do |novel|
+        data = {
+          user: user,
+          novel: novel,
+          count: 0
+        }
 
-    param.strip.split.each do |p|
-      names << p.downcase.to_sym
-    end
-    names << m.user.mid if names.empty?
-    names.uniq!
-
-    get_counts(m, names, opts)
-  end
-
-  def get_counts(m, names, opts = {})
-    names.map! do |name|
-      # Exact match from @mention / mid
-      if /^<@!?\d+>$/.match?(name)
-        du = Rogare.from_discord_mid(name)
-        next Rogare::Data.get_nano_user(du.inner) if du
-      end
-
-      # Case-insensitive match from nick
-      from_nick = Rogare::Data.users.where { nick =~ /^#{name}$/i }.first
-      next from_nick[:nano_user] if from_nick && from_nick[:nano_user]
-
-      # Otherwise just assume nano name == given name
-      name
-    end
-
-    counts = names.compact.map do |name|
-      user = Rogare::Data.users.where(nano_user: name.to_s).first
-      tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
-      now = tz.local_to_utc(tz.now)
-      timediff = now - Rogare::Data.first_of(now.month, tz)
-
-      if user
-        novel = Rogare::Data.ensure_novel(user[:discord_id])
-        unless novel
-          m.reply "#{name} has no current novel"
-          next
+        if user[:id] == 10 && user[:nick] =~ /\[\d+\]$/ # tamgar sets their count in their nick
+          data[:count] = user[:nick].split(/[\[\]]/).last.to_i
+        elsif novel && novel[:temp_count].positive?
+          # TODO: proper count and today
+          data[:count] = novel[:temp_count]
+        elsif novel[:type] == 'nano' # TODO: camp
+          data[:count] = get_count(user[:nano_user]) || 0
+          data[:today] = get_today(user[:nano_user]) if data[:count].positive?
         end
+
+        # no need to do any time calculations if there's no time limit
+        if novel[:goal_days]
+          tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
+          now = tz.local_to_utc(tz.now)
+          timetarget = novel[:started] + novel[:goal_days].days
+          timediff = now - timetarget
+
+          day_secs = 60 * 60 * 24
+          goal_secs = day_secs * novel[:goal_days]
+
+          nth = (timediff / day_secs).ceil
+          goal = novel[:goal].to_f
+
+          goal_live = ((goal / goal_secs) * timediff).round
+          goal_today = (goal / novel[:goal_days] * nth).round
+
+          data[:target] = {
+            diff: goal_today - data[:count],
+            live: goal_live - data[:count],
+            percent: (100.0 * count / goal).round(1)
+          }
+        end
+
+        data
       end
-
-      day_secs = 60 * 60 * 24
-      month_days = Date.new(now.year, now.month, -1).day
-      month_secs = day_secs * month_days
-
-      nth = (timediff / day_secs).ceil
-      goal = novel[:goal] if user && !goal
-      goal = 50_000 if goal.nil? || goal == 0.0
-      goal = goal.to_f
-
-      goal_live = ((goal / month_secs) * timediff).round
-      goal_today = (goal / 30 * nth).round
-
-      count = 0
-      today = 0
-
-      if user[:id] == 10 # tamgar sets their count in their nick
-        count = user[:nick].split(/[\[\]]/).last.to_i
-      elsif novel && novel[:temp_count].positive?
-        # TODO: proper counts
-        count = novel[:temp_count]
-      elsif novel[:type] == 'nano' # TODO: camp
-        count = get_count(name)
-        next { name: name, count: nil } if count.nil?
-
-        today = get_today(name)
-      end
-
-      diff_live = goal_live - count
-      diff_today = goal_today - count
-
-      {
-        name: name.to_s,
-        count: count,
-        percent: (100.0 * count / goal).round(1),
-        today: today,
-        diff: diff_today,
-        live: diff_live,
-        goal: goal
-      }
-    end
-
-    return counts if opts[:return]
-
-    if counts.count == 1
-      present_one m, counts.first
-    else
-      m.reply counts.map { |c| format c }.join(', ')
     end
   end
 
-  def format(data)
-    "#{Rogare.nixnotif(data[:name])}: #{data[:count]} (#{[
-      "#{data[:percent]}%",
-      ("today: #{data[:today]}" if data[:today]),
-      if data[:diff].zero?
-        'up to date'
-      elsif data[:diff].positive?
-        "#{data[:diff]} behind"
-      else
-        "#{data[:diff].abs} ahead"
-      end,
-      if data[:live].zero?
-        'up to live'
-      elsif data[:live].positive?
-        "#{data[:live]} behind live"
-      else
-        "#{data[:live].abs} ahead live"
-      end,
-      (Rogare::Data.goal_format data[:goal] if data[:goal] != 50_000)
-    ].compact.join(', ')})"
-  end
-
-  def present_one(m, data)
-    logs data.inspect
-
-    return m.reply "#{data[:name]}: user does not exist or has no current novel" if data[:count].nil?
-
-    if data[:count] > 100_000 && rand > 0.5
+  def display_novels(m, novels)
+    if rand > 0.5 && !novels.select { |n| n[:novel][:type] == 'nano' && n[:count] > 100_000 }.empty?
       m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Monstrous].sample} Wordcount"
       sleep 1
     end
 
-    m.reply format data
+    m.reply novels.map { |n| format n }.join("\n")
+  end
+
+  def format(count)
+    deets = []
+
+    deets << "#{count[:target][:percent]}%" if count[:target]
+    deets << "today: #{count[:today]}" if count[:today]
+
+    if count[:target]
+      diff = count[:target][:diff]
+      deets << if diff.zero?
+                 'up to date'
+               elsif diff.positive?
+                 "#{diff} behind"
+               else
+                 "#{diff.abs} ahead"
+               end
+
+      live = count[:target][:live]
+      deets << if live.zero?
+                 'up to live'
+               elsif live.positive?
+                 "#{live} behind live"
+               else
+                 "#{live.abs} ahead live"
+               end
+    end
+
+    if count[:novel][:goal]
+      if count[:novel][:type] == 'nano'
+        deets << Rogare::Data.goal_format(count[:novel][:goal]) unless count[:novel][:goal] == 50_000
+      else
+        deets << Rogare::Data.goal_format(count[:novel][:goal])
+        deets << "in #{count[:novel][:goal_days]} days" if count[:target]
+      end
+    end
+
+    name = count[:novel][:name]
+    name = name[0, 35] + '…' if name && name.length > 40
+    name = " _“#{name}”_" if name
+
+    "#{count[:user][:nick]}:#{name} — **#{count[:count]}** (#{deets.join(', ')})"
   end
 end
