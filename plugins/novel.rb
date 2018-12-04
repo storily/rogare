@@ -116,17 +116,20 @@ class Rogare::Plugins::Novel
               'manual'
             end
 
+    tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
+    now = tz.local_to_utc(tz.now)
+
     if ntype == 'nano' && (
-      Time.now < (Rogare::Data.first_of(11) - 2.weeks) ||
-      Time.now >= Rogare::Data.first_of(12))
+      now < (Rogare::Data.first_of(11, tz) - 2.weeks) ||
+      now >= Rogare::Data.first_of(12, tz))
       return m.reply 'Can’t create nano novel outside of nano time'
     end
 
     if ntype == 'camp' && (
-      Time.now < (Rogare::Data.first_of(4) - 2.weeks) ||
-      Time.now >= Rogare::Data.first_of(5) ||
-      Time.now < (Rogare::Data.first_of(7) - 2.weeks) ||
-      Time.now >= Rogare::Data.first_of(8))
+      now < (Rogare::Data.first_of(4, tz) - 2.weeks) ||
+      now >= Rogare::Data.first_of(5, tz) ||
+      now < (Rogare::Data.first_of(7, tz) - 2.weeks) ||
+      now >= Rogare::Data.first_of(8, tz))
       return m.reply 'Can’t create camp novel outside of camp time'
     end
 
@@ -137,17 +140,17 @@ class Rogare::Plugins::Novel
     }
 
     if ntype == 'nano'
-      novel[:started] = Rogare::Data.first_of(11)
+      novel[:started] = Rogare::Data.first_of(11, tz)
       novel[:goal_days] = 30
       novel[:goal] = 50_000
     end
 
     if ntype == 'camp'
-      if Time.now >= (Rogare::Data.first_of(4) - 2.weeks) || Time.now < Rogare::Data.first_of(5)
-        novel[:started] = Rogare::Data.first_of(4)
+      if now >= (Rogare::Data.first_of(4, tz) - 2.weeks) || now < Rogare::Data.first_of(5, tz)
+        novel[:started] = Rogare::Data.first_of(4, tz)
         novel[:goal_days] = 30
-      elsif Time.now >= (Rogare::Data.first_of(7) - 2.weeks) || Time.now < Rogare::Data.first_of(8)
-        novel[:started] = Rogare::Data.first_of(7)
+      elsif now >= (Rogare::Data.first_of(7, tz) - 2.weeks) || now < Rogare::Data.first_of(8, tz)
+        novel[:started] = Rogare::Data.first_of(7, tz)
         novel[:goal_days] = 31
       end
     end
