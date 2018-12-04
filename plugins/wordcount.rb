@@ -123,13 +123,17 @@ class Rogare::Plugins::Wordcount
         if novel[:goal_days]
           tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
           now = tz.local_to_utc(tz.now)
-          timetarget = novel[:started] + novel[:goal_days].days
-          timediff = now - timetarget
+
+          totaldiff = novel[:goal_days].days
+          timetarget = novel[:started] + totaldiff
+          timediff = timetarget - now
 
           data[:days] = {
             total: novel[:goal_days],
+            length: totaldiff,
             finish: timetarget,
             left: timediff,
+            gone: totaldiff - timediff,
             expired: !timediff.positive? # TODO: && !count[:novel][:days_repeat]
           }
 
@@ -137,10 +141,10 @@ class Rogare::Plugins::Wordcount
             day_secs = 60 * 60 * 24
             goal_secs = day_secs * novel[:goal_days]
 
-            nth = (timediff / day_secs).ceil
+            nth = (data[:days][:gone] / day_secs).ceil
             goal = novel[:goal].to_f
 
-            goal_live = ((goal / goal_secs) * timediff).round
+            goal_live = ((goal / goal_secs) * data[:days][:gone]).round
             goal_today = (goal / novel[:goal_days] * nth).round
 
             data[:target] = {
@@ -204,7 +208,7 @@ class Rogare::Plugins::Wordcount
 
         day_secs = 60 * 60 * 24
         days = (count[:days][:left] / day_secs).floor
-        deets << days == 1 ? 'one day left' : "#{days} days left"
+        deets << (days == 1 ? 'one day left' : "#{days} days left")
       else
         deets << Rogare::Data.goal_format(count[:novel][:goal])
       end
