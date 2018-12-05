@@ -37,6 +37,7 @@ Naming/UncommunicativeMethodParamName:
     - m
     - _m
     - tz
+    - wc
 
 Style/AsciiComments:
   Enabled: false
