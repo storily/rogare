@@ -24,6 +24,10 @@ module Rogare::Data
       Rogare.sql[:users_wars]
     end
 
+    def wordcounts
+      Rogare.sql[:wordcounts]
+    end
+
     def pga(*things)
       Sequel.pg_array(things)
     end
@@ -153,6 +157,15 @@ module Rogare::Data
       else
         Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first
       end
+    end
+
+    def novel_wordcount(id)
+      wc = wordcounts.where(novel_id: id).reverse(:as_at).select(:words).first
+      wc ? wc[:words] : 0
+    end
+
+    def set_novel_wordcount(id, wc)
+      wordcounts.insert(novel_id: id, words: wc)
     end
 
     def name_query(args)

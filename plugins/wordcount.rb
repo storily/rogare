@@ -76,12 +76,7 @@ class Rogare::Plugins::Wordcount
     return m.reply 'You don’t have a novel yet' unless novel
     return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
 
-    # return m.reply 'Can’t set wordcount of a nano/camp novel (yet)' if %w[nano camp].include? novel[:type]
-
-    words = words.strip.to_i
-    return m.reply "You're trying to set wc to 0… really? Not doing that." if words.zero?
-
-    Rogare::Data.novels.where(id: novel[:id]).update(temp_count: words)
+    Rogare::Data.set_novel_wordcount(novel[:id], words.strip.to_i)
     own_count(m)
   end
 
@@ -93,11 +88,8 @@ class Rogare::Plugins::Wordcount
     return m.reply 'You don’t have a novel yet' unless novel
     return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
 
-    # return m.reply 'Can’t set wordcount of a nano/camp novel (yet)' if %w[nano camp].include? novel[:type]
-
-    words = words.strip.to_i
-
-    Rogare::Data.novels.where(id: novel[:id]).update(temp_count: novel[:temp_count] + words)
+    existing = Rogare::Data.novel_wordcount(novel[:id])
+    Rogare::Data.set_novel_wordcount(novel[:id], existing + words.strip.to_i)
     own_count(m)
   end
 
@@ -110,11 +102,12 @@ class Rogare::Plugins::Wordcount
           count: 0
         }
 
+        db_wc = Rogare::Data.novel_wordcount(novel[:id])
+
         if user[:id] == 10 && user[:nick] =~ /\[\d+\]$/ # tamgar sets their count in their nick
           data[:count] = user[:nick].split(/[\[\]]/).last.to_i
-        elsif novel && novel[:temp_count].positive?
-          # TODO: proper count and today
-          data[:count] = novel[:temp_count]
+        elsif db_wc.positive?
+          data[:count] = db_wc
         elsif novel[:type] == 'nano' # TODO: camp
           data[:count] = get_count(user[:nano_user]) || 0
           data[:today] = get_today(user[:nano_user]) if data[:count].positive?
