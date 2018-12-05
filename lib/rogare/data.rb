@@ -148,7 +148,7 @@ module Rogare::Data
     end
 
     def load_novel(user, id)
-      if id.empty?
+      if id.nil? || id.empty?
         Rogare::Data.current_novels(user).first
       else
         Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first

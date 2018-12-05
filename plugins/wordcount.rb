@@ -33,8 +33,9 @@ class Rogare::Plugins::Wordcount
     doc.at_css('user_wordcount').content.to_i
   end
 
-  match_command /set\s+(\d+)(?:\s+to\s+(\d+))/, method: :set_count
-  match_command /add\s+(\d+)(?:\s+to\s+(\d+))/, method: :add_count
+  match_command /set\s+(\d+)(?:\s+to\s+(\d+))?/, method: :set_count
+  match_command /add\s+(\d+)(?:\s+to\s+(\d+))?/, method: :add_count
+  match_command /(set|add)\s+.+/, method: :help_message
   match_command /(.+)/, method: :other_counts
   match_empty :own_count
 
