@@ -212,6 +212,6 @@ class Rogare::Plugins::Wordcount
     name = name[0, 35] + '…' if name && name.length > 40
     name = " _“#{name}”_" if name
 
-    "#{count[:user][:nick]}:#{name} — **#{count[:count]}** (#{deets.join(', ')})"
+    "[#{count[:novel][:id]}] #{count[:user][:nick]}:#{name} — **#{count[:count]}** (#{deets.join(', ')})"
   end
 end
