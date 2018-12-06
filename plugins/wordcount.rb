@@ -34,7 +34,7 @@ class Rogare::Plugins::Wordcount
   end
 
   match_command /set\s+(\d+)(?:\s+to\s+(\d+))?/, method: :set_count
-  match_command /add\s+(\d+)(?:\s+to\s+(\d+))?/, method: :add_count
+  match_command /add\s+(-?\d+)(?:\s+to\s+(\d+))?/, method: :add_count
   match_command /(set|add)\s+.+/, method: :help_message
   match_command /(.+)/, method: :other_counts
   match_empty :own_count
@@ -89,6 +89,15 @@ class Rogare::Plugins::Wordcount
     return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
 
     existing = Rogare::Data.novel_wordcount(novel[:id])
+
+    new_words = existing + if words.start_with? '-'
+                             words[1..-1].to_i * -1
+                           else
+                             words.to_i
+                           end
+
+    return m.reply "Can’t remove more words than the novel has (#{existing})" if new_words.negative?
+
     Rogare::Data.set_novel_wordcount(novel[:id], existing + words.strip.to_i)
     own_count(m)
   end
