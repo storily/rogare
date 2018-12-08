@@ -200,7 +200,7 @@ module Rogare::Data
 
     def novel_todaycount(id)
       count = novel_todaycount_stmt.call(id: id)
-      count ? count[:words] : 0
+      (count && count[:words]) || 0
     end
 
     def set_novel_wordcount(id, wc)
