@@ -164,6 +164,45 @@ module Rogare::Data
       wc ? wc[:words] : 0
     end
 
+    def novel_todaycount_stmt
+      novel_tz = Rogare.sql[:novel_tz].select(:tz).limit(1)
+      novel_tz_cte = users
+                     .join(:novels, user_id: :id)
+                     .where(Sequel[:novels][:id] => :$id)
+                     .select(Sequel[:tz].cast(:text))
+
+      today = Rogare.sql[:today].select(:today).limit(1)
+      today_cte = Rogare.sql[:novel_tz].select do
+        date_trunc('day', timezone(:tz, now.function)).as(:today)
+      end
+
+      before = Rogare.sql[:before_today].select(:words).limit(1)
+      before_today_cte = wordcounts
+                         .where { (novel_id =~ :$id) & (timezone(novel_tz, as_at) < today) }
+                         .reverse(:as_at)
+                         .select(:words)
+                         .limit(1)
+
+      during_today_cte = wordcounts
+                         .where { (novel_id =~ :$id) & (timezone(novel_tz, as_at) >= today) }
+                         .reverse(:as_at)
+                         .select(:words)
+                         .limit(1)
+
+      Rogare.sql[:during_today]
+            .with(:novel_tz, novel_tz_cte)
+            .with(:today, today_cte)
+            .with(:before_today, before_today_cte)
+            .with(:during_today, during_today_cte)
+            .select { (words - before).as(:words) }
+            .prepare(:first, :novel_todaycount)
+    end
+
+    def novel_todaycount(id)
+      count = novel_todaycount_stmt.call(id: id)
+      count ? count[:words] : 0
+    end
+
     def set_novel_wordcount(id, wc)
       wordcounts.insert(novel_id: id, words: wc)
     end
@@ -271,6 +310,6 @@ module Rogare::Data
       end
     end
 
-    memoize :all_kinds
+    memoize :all_kinds, :novel_todaycount_stmt
   end
 end

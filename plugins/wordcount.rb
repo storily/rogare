@@ -117,6 +117,7 @@ class Rogare::Plugins::Wordcount
           data[:count] = user[:nick].split(/[\[\]]/).last.to_i
         elsif db_wc.positive?
           data[:count] = db_wc
+          data[:today] = Rogare::Data.novel_todaycount(novel[:id])
         elsif novel[:type] == 'nano' # TODO: camp
           data[:count] = get_count(user[:nano_user]) || 0
           data[:today] = get_today(user[:nano_user]) if data[:count].positive?
