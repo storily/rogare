@@ -9,8 +9,8 @@ class Rogare::Plugins::Wordcount
   usage [
     '`!%`, or: `!% <nanoname>`, or: `!% <@nick>` (to see others’ counts)',
     '`!% set <words>` or `!% add <words>` - Set or increment your word count.',
-    '`!% (set|add) <words> to <novel ID>` - Set the word count for a particular novel.',
-    '`!% set today <words> [to <novel ID>]` - Set the word count for today.',
+    '`!% (set|add) <words> (for|to) <novel ID>` - Set the word count for a particular novel.',
+    '`!% set today <words> [for <novel ID>]` - Set the word count for today.',
     '`!% add <words> to <novel ID>` - Set the word count for a particular novel.',
     'To register your nano name against your discord user: `!my nano <nanoname>`',
     'To set your goal: `!novel goal set <count>`. To set your timezone: `!my tz <timezone>`.'
@@ -35,10 +35,9 @@ class Rogare::Plugins::Wordcount
     doc.at_css('user_wordcount').content.to_i
   end
 
-  match_command /set\s+today\s+(\d+)(?:\s+to\s+(\d+))?/, method: :set_today_count
-
-  match_command /set\s+(\d+)(?:\s+to\s+(\d+))?/, method: :set_count
-  match_command /add\s+(-?\d+)(?:\s+to\s+(\d+))?/, method: :add_count
+  match_command /set\s+today\s+(\d+)(?:\s+(for|to)\s+(\d+))?/, method: :set_today_count
+  match_command /set\s+(\d+)(?:\s+(for|to)\s+(\d+))?/, method: :set_count
+  match_command /add\s+(-?\d+)(?:\s+(for|to)\s+(\d+))?/, method: :add_count
 
   match_command /(set|add)\s+.+/, method: :help_message
   match_command /(.+)/, method: :other_counts
