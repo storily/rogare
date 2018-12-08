@@ -98,7 +98,7 @@ class Rogare::Plugins::Wordcount
 
     return m.reply "Can’t remove more words than the novel has (#{existing})" if new_words.negative?
 
-    Rogare::Data.set_novel_wordcount(novel[:id], existing + words.strip.to_i)
+    Rogare::Data.set_novel_wordcount(novel[:id], new_words)
     own_count(m)
   end
 
