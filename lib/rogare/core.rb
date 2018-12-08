@@ -55,7 +55,16 @@ module Rogare
         'Poketome Go',
         'Wordsmith’s Creed: Odyssey',
         'Plotfinder: Kingmaker',
-        'and wandering and lusting'
+        'and wandering and lusting',
+        'Super Script Bros',
+        'Tom Clancy’s The Pagebreak 2',
+        'Kingdom Inks III',
+        'Wolfenstein: YA debut',
+        'Ori and the Will of the Writs',
+        'Scribe of Solitude',
+        'Dashen',
+        'Presscalibur',
+        'Civilization VI: Gathering Dust'
       ].sample
     end
 
