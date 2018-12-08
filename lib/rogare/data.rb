@@ -140,8 +140,8 @@ module Rogare::Data
             user_id: user[:id],
             type: 'nano',
             goal: 50_000,
-            goal_days: 30
-            started: first_of(11, tz),
+            goal_days: 30,
+            started: first_of(11, tz)
           )
 
           return novels.where(id: id).first
