@@ -18,6 +18,7 @@ gem 'puma', '~>3.12', require: false
 gem 'sequel', '~>5.10'
 gem 'sequel_pg', '~>1.11', require: 'sequel'
 gem 'sinatra', '~>2.0', require: 'sinatra/base'
+gem 'treetop', '~>1.6'
 gem 'typhoeus', '~>0.6.9'
 gem 'tzinfo', '~>1.2'
 

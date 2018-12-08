@@ -1,0 +1,110 @@
+grammar GoalTerms
+  rule line
+    # [<letter>] [<number> words] [<number> days] [(no)repeat] [start <date>]
+    bareline / idline
+  end
+
+  rule bareline
+    term ( ws term)*
+  end
+
+  rule idline
+    ( goal_id ws )? ( term ws )* term
+  end
+
+  rule goal_id
+    ([a-zA-Z])+
+  end
+
+  rule term
+    words / days / repeat / start
+  end
+
+  rule ws
+    ( ' ' / "\t" / "\u00a0" )+
+  end
+
+  rule words
+    number 'k'? ws 'words'
+  end
+
+  rule days
+    number ws 'days'
+  end
+
+  rule repeat
+    yesrepeat / norepeat
+  end
+
+  rule start
+    'start' ws date
+  end
+
+  rule yesrepeat
+    'repeat' / 'repeating'
+  end
+
+  rule norepeat
+    'norepeat' / 'norepeating' / ('non' ws 'repeating') / ('not' ws 'repeating')
+  end
+
+  rule number
+    '0' / ([1-9] [0-9]+)
+  end
+
+  rule date
+    isodate / risodate / relative / ycaldate / rcaldate / caldate / weekday / month
+  end
+
+  rule relative
+    'yesterday' / 'today' / 'tomorrow' / 'now'
+  end
+
+  rule weekday
+    ('mon' / 'tues' / 'wednes' / 'thurs' / 'fri' / 'satur' / 'sun') 'day'
+  end
+
+  rule isodate
+    year '-' nmonth '-' nday
+  end
+
+  rule risodate
+    nday '-' nmonth '-' year
+  end
+
+  rule caldate
+    nday ws month ( ws year )?
+  end
+
+  rule rcaldate
+    month ws nday
+  end
+
+  rule ycaldate
+    month ws year
+  end
+
+  rule nday
+    ([1-2] [0-9]) / ('3' [0-1]) / [1-9]
+  end
+
+  rule nmonth
+    ('1' [0-2]) / [1-9]
+  end
+
+  rule month
+    longmonth / shortmonth
+  end
+
+  rule longmonth
+    'january' / 'february' / 'mars' / 'april' / 'may' / 'june' / 'july' / 'august' / 'september' / 'october' / 'november' / 'december'
+  end
+
+  rule shortmonth
+    'jan' / 'feb' / 'mar' / 'apr' / 'may' / 'jun' / 'jul' / 'aug' / 'sept' / 'sep' / 'oct' / 'nov' / 'dec'
+  end
+
+  rule year
+    '20' [1-9] [0-9]
+  end
+end

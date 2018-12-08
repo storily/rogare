@@ -310,6 +310,11 @@ module Rogare::Data
       end
     end
 
-    memoize :all_kinds, :novel_todaycount_stmt
+    def goal_parser
+      Treetop.load 'lib/goalterms.treetop'
+      GoalTermsParser.new
+    end
+
+    memoize :all_kinds, :goal_parser, :novel_todaycount_stmt
   end
 end
