@@ -9,6 +9,8 @@ class Rogare::Plugins::Wordcount
   usage [
     '`!%`, or: `!% <nanoname>`, or: `!% <@nick>` (to see others’ counts)',
     '`!% set <words>` or `!% add <words>` - Set or increment your word count.',
+    '`!% (set|add) <words> to <novel ID>` - Set the word count for a particular novel.',
+    '`!% set today <words> [to <novel ID>]` - Set the word count for today.',
     '`!% add <words> to <novel ID>` - Set the word count for a particular novel.',
     'To register your nano name against your discord user: `!my nano <nanoname>`',
     'To set your goal: `!novel goal set <count>`. To set your timezone: `!my tz <timezone>`.'
@@ -33,8 +35,11 @@ class Rogare::Plugins::Wordcount
     doc.at_css('user_wordcount').content.to_i
   end
 
+  match_command /set\s+today\s+(\d+)(?:\s+to\s+(\d+))?/, method: :set_today_count
+
   match_command /set\s+(\d+)(?:\s+to\s+(\d+))?/, method: :set_count
   match_command /add\s+(-?\d+)(?:\s+to\s+(\d+))?/, method: :add_count
+
   match_command /(set|add)\s+.+/, method: :help_message
   match_command /(.+)/, method: :other_counts
   match_empty :own_count
@@ -77,6 +82,22 @@ class Rogare::Plugins::Wordcount
     return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
 
     Rogare::Data.set_novel_wordcount(novel[:id], words.strip.to_i)
+    own_count(m)
+  end
+
+  def set_today_count(m, words, id = '')
+    user = m.user.to_db
+    novel = Rogare::Data.load_novel user, id
+
+    return m.reply 'No such novel' if id && !novel
+    return m.reply 'You don’t have a novel yet' unless novel
+    return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
+
+    existing = Rogare::Data.novel_wordcount(novel[:id])
+    today = Rogare::Data.novel_todaycount(novel[:id])
+    gap = words.strip.to_i - today
+
+    Rogare::Data.set_novel_wordcount(novel[:id], existing + gap)
     own_count(m)
   end
 
