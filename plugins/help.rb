@@ -34,7 +34,7 @@ class Rogare::Plugins::Help
 
   def readable_commands
     command_list.map do |coms|
-      coms.map! { |c| "#{bot_prefix}#{c}" }
+      coms.map! { |c| "`#{bot_prefix}#{c}`" }
       [
         coms.shift,
         ("(aliases: #{coms.join(', ')})" unless coms.empty?)
