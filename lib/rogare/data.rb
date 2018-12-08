@@ -118,8 +118,7 @@ module Rogare::Data
         .reverse(:started)
     end
 
-    def first_of(month, tz = nil)
-      tz ||= TZInfo::Timezone.get Rogare.tz
+    def first_of(month, tz)
       tz_string = tz.current_period.offset.abbreviation
       DateTime.parse("#{Time.new.year}-#{month}-01 00:00:00 #{tz_string}").to_time
     end
@@ -127,21 +126,22 @@ module Rogare::Data
     def ensure_novel(did)
       user = users.where(discord_id: did).first
       latest_novel = current_novels(user).first
+      tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
 
-      this_is_november = first_of(11) <= Time.new && Time.new < first_of(12)
+      this_is_november = first_of(11, tz) <= Time.new && Time.new < first_of(12, tz)
       # We only assume and create a novel when it's november. If it's camp time,
       # we don't, and you'll have to tell us to make a new one if you want.
 
       if this_is_november
-        appropriate_start = first_of(11) - 2.weeks
+        appropriate_start = first_of(11, tz) - 2.weeks
         if latest_novel.nil? || latest_novel[:started] < appropriate_start
           # This is nano, start a new novel!
           id = novels.insert(
             user_id: user[:id],
-            started: first_of(11),
             type: 'nano',
             goal: 50_000,
             goal_days: 30
+            started: first_of(11, tz),
           )
 
           return novels.where(id: id).first
