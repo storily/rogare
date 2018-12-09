@@ -1,23 +1,35 @@
 grammar GoalTerms
   rule line
     # [<letter>] [<number> words] [<number> days] [(no)repeat] [start <date>]
-    bareline / idline
+    (bareline / idline) {
+      def value
+        GoalTerms.flascend elements
+      end
+    }
   end
 
   rule bareline
-    term ( ws term)*
+    (ft:term rt:( ws term)*)
   end
 
   rule idline
-    ( goal_id ws )? ( term ws )* term
+    (( id:goal_id ws )? rt:( term ws )* lt:term)
   end
 
   rule goal_id
-    (([a-zA-Z])+) <GoalTerms::Id>
+    ([a-z])+ {
+      def value
+        GoalTerms::Letter.new text_value
+      end
+    }
   end
 
   rule term
-    words / days / repeat / start
+    (words / days / repeat / start) {
+      def value
+        super
+      end
+    }
   end
 
   rule ws
@@ -25,31 +37,56 @@ grammar GoalTerms
   end
 
   rule words
-    (number k:'k'? ws 'words') <GoalTerms::Words>
+    number k:'k'? ws 'words' {
+      def value
+        mult = k.empty? ? 1 : 1000
+        GoalTerms::Words.new(number.value * mult)
+      end
+    }
   end
 
   rule days
-    number ws 'days' <GoalTerms::Days>
+    number ws 'days' {
+      def value
+        GoalTerms::Days.new(number.value)
+      end
+    }
   end
 
   rule repeat
-    (yesrepeat / norepeat) <GoalTerms::Repeat>
+    yesrepeat / norepeat
   end
 
   rule start
-    ('start' ws date) <GoalTerms::Date>
+    ('start' ws date)  {
+      def value
+        GoalTerms::Start.new date.text_value
+      end
+    }
   end
 
   rule yesrepeat
-    'repeat' / 'repeating'
+    ('repeat' / 'repeating')  {
+      def value
+        GoalTerms::Repeat.new true
+      end
+    }
   end
 
   rule norepeat
-    'norepeat' / 'norepeating' / ('non' ws 'repeating') / ('not' ws 'repeating')
+    ('norepeat' / 'norepeating' / ('non' ws 'repeating') / ('not' ws 'repeating'))  {
+      def value
+        GoalTerms::Repeat.new false
+      end
+    }
   end
 
   rule number
-    ('0' / ([1-9] [0-9]+)) <GoalTerms::Number>
+    ('0' / ([1-9] [0-9]+)) {
+      def value
+        text_value.to_i
+      end
+    }
   end
 
   rule date

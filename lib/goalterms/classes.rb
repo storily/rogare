@@ -1,40 +1,44 @@
 # frozen_string_literal: true
 
 module GoalTerms
-  module Id
-    def value
-      text_value
+  class << self
+    def flascend(elements)
+      return if elements.nil?
+      elements.flat_map do |el|
+        next el.value if el.respond_to? :value
+        next flascend el.elements if el.respond_to? :elements
+        el
+      end.compact
     end
   end
 
-  module Number
-    def value
-      text_value.to_i
+  class Letter
+    def initialize(id)
+      @id = id.upcase
     end
   end
 
-  module Words
-    def value
-      mult = k.empty? ? 1 : 1000
-      number.value * mult
+  class Words
+    def initialize(words)
+      @words = words
     end
   end
 
-  module Days
-    def value
-      number.value
+  class Days
+    def initialize(days)
+      @days = days
     end
   end
 
-  module Repeat
-    def value
-      norepeat.empty?
+  class Repeat
+    def initialize(yes)
+      @repeat = yes
     end
   end
 
-  module Date
-    def value
-      text_value
+  class Start
+    def initialize(date)
+      @date = date
     end
   end
 end
