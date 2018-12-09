@@ -176,7 +176,12 @@ class Rogare::Plugins::Novel
 
   def parse_goal(line)
     # [<letter>] [<number> words] [<number> days] [(no)repeat] [start <date>]
-    Rogare::Data.goal_parser.parse(line.strip.downcase).value
+    parser = Rogare::Data.goal_parser
+    tree = parser.parse line.strip.downcase
+
+    return "Bad input: #{parser.failure_reason}" unless tree
+
+    tree.value
   end
 
   def new_goal(m, _id, line)

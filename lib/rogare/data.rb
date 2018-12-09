@@ -310,7 +310,7 @@ module Rogare::Data
       end
     end
 
-    def goal_parser
+    def goal_parser_impl
       require './lib/goalterms/classes'
 
       if ENV['RACK_ENV'] == 'production'
@@ -318,7 +318,10 @@ module Rogare::Data
       else
         Treetop.load 'lib/goalterms/grammar.treetop'
       end
+    end
 
+    def goal_parser
+      goal_parser_impl
       GoalTermsParser.new
     end
 
@@ -328,6 +331,6 @@ module Rogare::Data
           .gsub(/\s+/, ' ')
     end
 
-    memoize :all_kinds, :goal_parser, :novel_todaycount_stmt
+    memoize :all_kinds, :goal_parser_impl, :novel_todaycount_stmt
   end
 end
