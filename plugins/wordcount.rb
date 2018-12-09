@@ -240,7 +240,7 @@ class Rogare::Plugins::Wordcount
 
     name = count[:novel][:name]
     name = name[0, 35] + '…' if name && name.length > 40
-    name = " _“#{name}”_" if name
+    name = " _“#{Rogare::Data.encode_entities name}”_" if name
 
     "[#{count[:novel][:id]}] #{count[:user][:nick]}:#{name} — **#{count[:count]}** (#{deets.join(', ')})"
   end

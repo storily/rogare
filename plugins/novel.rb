@@ -260,7 +260,7 @@ class Rogare::Plugins::Novel
   end
 
   def format_novel(novel)
-    "#{novel[:id]}. “#{(novel[:name] || 'Untitled').gsub(/\s+/, ' ')}”. " \
+    "#{novel[:id]}. “#{Rogare::Data.encode_entities(novel[:name] || 'Untitled')}”. " \
     '' + [
       (novel[:type] == 'manual' ? 'S' : "#{novel[:type].capitalize} novel s") +
       "tarted #{novel[:started].strftime('%Y-%m-%d')}",

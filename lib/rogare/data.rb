@@ -322,6 +322,12 @@ module Rogare::Data
       GoalTermsParser.new
     end
 
+    def encode_entities(raws)
+      raws.gsub(/(_|\*|\`)/, '\\1')
+          .gsub('~~', '\~\~')
+          .gsub(/\s+/, ' ')
+    end
+
     memoize :all_kinds, :goal_parser, :novel_todaycount_stmt
   end
 end
