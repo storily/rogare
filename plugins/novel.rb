@@ -32,6 +32,8 @@ class Rogare::Plugins::Novel
 
   match_command /(\d+)\s+goal\s+set\s+(.+)/, method: :goalify_novel
   match_command /()goal\s+set\s+(.+)/, method: :goalify_novel
+  match_command /(\d+)\s+goal\s+new\s+(.+)/, method: :new_goal
+  match_command /()goal\s+new\s+(.+)/, method: :new_goal
 
   match_command /(\d+)\s+goal\s+days\s+(.+)/, method: :dailify_novel
   match_command /()goal\s+days\s+(.+)/, method: :dailify_novel
@@ -170,6 +172,16 @@ class Rogare::Plugins::Novel
 
     novel[:name] = name
     m.reply format_novel(novel)
+  end
+
+  def parse_goal(line)
+    # [<letter>] [<number> words] [<number> days] [(no)repeat] [start <date>]
+    Rogare::Data.goal_parser.parse line.strip.downcase
+  end
+
+  def new_goal(m, _id, line)
+    params = parse_goal line
+    m.debugly params
   end
 
   def goalify_novel(m, id, goal)

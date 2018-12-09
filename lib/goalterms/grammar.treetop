@@ -13,7 +13,7 @@ grammar GoalTerms
   end
 
   rule goal_id
-    ([a-zA-Z])+
+    (([a-zA-Z])+) <GoalTerms::Id>
   end
 
   rule term
@@ -25,19 +25,19 @@ grammar GoalTerms
   end
 
   rule words
-    number 'k'? ws 'words'
+    (number k:'k'? ws 'words') <GoalTerms::Words>
   end
 
   rule days
-    number ws 'days'
+    number ws 'days' <GoalTerms::Days>
   end
 
   rule repeat
-    yesrepeat / norepeat
+    (yesrepeat / norepeat) <GoalTerms::Repeat>
   end
 
   rule start
-    'start' ws date
+    ('start' ws date) <GoalTerms::Date>
   end
 
   rule yesrepeat
@@ -49,7 +49,7 @@ grammar GoalTerms
   end
 
   rule number
-    '0' / ([1-9] [0-9]+)
+    ('0' / ([1-9] [0-9]+)) <GoalTerms::Number>
   end
 
   rule date

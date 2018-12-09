@@ -311,7 +311,14 @@ module Rogare::Data
     end
 
     def goal_parser
-      Treetop.load 'lib/goalterms.treetop'
+      require './lib/goalterms/classes'
+
+      if ENV['RACK_ENV'] == 'production'
+        require './lib/goalterms/grammar.rb'
+      else
+        Treetop.load 'lib/goalterms/grammar.treetop'
+      end
+
       GoalTermsParser.new
     end
 
