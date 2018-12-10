@@ -7,7 +7,7 @@ class Rogare::Plugins::Wordcount
   command 'wc'
   aliases 'count'
   usage [
-    '`!%`, or: `!% <nanoname>`, or: `!% <@nick>` (to see others’ counts)',
+    '`!%`, `!% <id>`, `!% <nanoname>`, or `!% <@nick>` (to see others’ counts)',
     '`!% set <words>` or `!% add <words>` - Set or increment your word count.',
     '`!% (set|add) <words> (for|to) <novel ID>` - Set the word count for a particular novel.',
     '`!% set today <words> [for <novel ID>]` - Set the word count for today.',
@@ -40,6 +40,7 @@ class Rogare::Plugins::Wordcount
   match_command /add\s+(-?\d+)(?:\s+(?:for|to)\s+(\d+))?/, method: :add_count
 
   match_command /(set|add)\s+.+/, method: :help_message
+  match_command /(\d+)/, method: :novel_count
   match_command /(.+)/, method: :other_counts
   match_empty :own_count
 
@@ -70,6 +71,14 @@ class Rogare::Plugins::Wordcount
     return m.reply 'No current novels found' if users.select { |n| n.length.positive? }.empty?
 
     display_novels m, users.flatten(1)
+  end
+
+  def novel_count(m, id)
+    novel = Rogare::Data.novels.where(id: id.to_i).first
+    return m.reply 'No such novel' unless novel
+
+    count = get_novel_count novel
+    display_novels m, [count]
   end
 
   def set_count(m, words, id = '')
@@ -122,64 +131,70 @@ class Rogare::Plugins::Wordcount
     own_count(m)
   end
 
+  def get_novel_count(novel, user = nil)
+    user ||= Rogare::Data.users.where(id: novel[:user_id]).first
+
+    data = {
+      user: user,
+      novel: novel,
+      count: 0
+    }
+
+    db_wc = Rogare::Data.novel_wordcount(novel[:id])
+
+    if user[:id] == 10 && user[:nick] =~ /\[\d+\]$/ # tamgar sets their count in their nick
+      data[:count] = user[:nick].split(/[\[\]]/).last.to_i
+    elsif db_wc.positive?
+      data[:count] = db_wc
+      data[:today] = Rogare::Data.novel_todaycount(novel[:id])
+    elsif novel[:type] == 'nano' # TODO: camp
+      data[:count] = get_count(user[:nano_user]) || 0
+      data[:today] = get_today(user[:nano_user]) if data[:count].positive?
+    end
+
+    # no need to do any time calculations if there's no time limit
+    if novel[:goal_days]
+      tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
+      now = tz.local_to_utc(tz.now)
+
+      totaldiff = novel[:goal_days].days
+      timetarget = novel[:started] + totaldiff
+      timediff = timetarget - now
+
+      data[:days] = {
+        total: novel[:goal_days],
+        length: totaldiff,
+        finish: timetarget,
+        left: timediff,
+        gone: totaldiff - timediff,
+        expired: !timediff.positive? # TODO: && !count[:novel][:days_repeat]
+      }
+
+      unless data[:days][:expired]
+        day_secs = 60 * 60 * 24
+        goal_secs = day_secs * novel[:goal_days]
+
+        nth = (data[:days][:gone] / day_secs).ceil
+        goal = novel[:goal].to_f
+
+        goal_live = ((goal / goal_secs) * data[:days][:gone]).round
+        goal_today = (goal / novel[:goal_days] * nth).round
+
+        data[:target] = {
+          diff: goal_today - data[:count],
+          live: goal_live - data[:count],
+          percent: (100.0 * data[:count] / goal).round(1)
+        }
+      end
+    end
+
+    data
+  end
+
   def get_counts(users)
     users.map do |user|
       Rogare::Data.current_novels(user).map do |novel|
-        data = {
-          user: user,
-          novel: novel,
-          count: 0
-        }
-
-        db_wc = Rogare::Data.novel_wordcount(novel[:id])
-
-        if user[:id] == 10 && user[:nick] =~ /\[\d+\]$/ # tamgar sets their count in their nick
-          data[:count] = user[:nick].split(/[\[\]]/).last.to_i
-        elsif db_wc.positive?
-          data[:count] = db_wc
-          data[:today] = Rogare::Data.novel_todaycount(novel[:id])
-        elsif novel[:type] == 'nano' # TODO: camp
-          data[:count] = get_count(user[:nano_user]) || 0
-          data[:today] = get_today(user[:nano_user]) if data[:count].positive?
-        end
-
-        # no need to do any time calculations if there's no time limit
-        if novel[:goal_days]
-          tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
-          now = tz.local_to_utc(tz.now)
-
-          totaldiff = novel[:goal_days].days
-          timetarget = novel[:started] + totaldiff
-          timediff = timetarget - now
-
-          data[:days] = {
-            total: novel[:goal_days],
-            length: totaldiff,
-            finish: timetarget,
-            left: timediff,
-            gone: totaldiff - timediff,
-            expired: !timediff.positive? # TODO: && !count[:novel][:days_repeat]
-          }
-
-          unless data[:days][:expired]
-            day_secs = 60 * 60 * 24
-            goal_secs = day_secs * novel[:goal_days]
-
-            nth = (data[:days][:gone] / day_secs).ceil
-            goal = novel[:goal].to_f
-
-            goal_live = ((goal / goal_secs) * data[:days][:gone]).round
-            goal_today = (goal / novel[:goal_days] * nth).round
-
-            data[:target] = {
-              diff: goal_today - data[:count],
-              live: goal_live - data[:count],
-              percent: (100.0 * data[:count] / goal).round(1)
-            }
-          end
-        end
-
-        data
+        get_novel_count novel, user
       end
     end
   end
