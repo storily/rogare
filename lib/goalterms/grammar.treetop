@@ -3,7 +3,7 @@ grammar GoalTerms
     # [<letter>] [<number> words] [<number> days] [(no)repeat] [start <date>]
     (bareline / idline) {
       def value
-        GoalTerms.flascend elements
+        GoalTerms::Line.new GoalTerms.flascend elements
       end
     }
   end
