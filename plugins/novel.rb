@@ -7,6 +7,7 @@ class Rogare::Plugins::Novel
   usage [
     '`!%` - Show your current novel(s).',
     '`!% done` - Show your finished novel(s).',
+    # '`!% all` - PMs you all your novel(s).',
     '`!% new [nano|camp] [name...]` - Start a new novel. ' \
       '`nano` and `camp` novels can only be created in their month or the 2 weeks before.',
     '`!% ID` - Show info about any novel. ' \
@@ -80,7 +81,13 @@ class Rogare::Plugins::Novel
 
     return m.reply 'No such novel' unless novel
 
-    m.reply format_novel novel
+    say = Rogare::Data.current_goals(novel).map.with_index do |goal, i|
+      letter = GoalTerms.offset_to_s(i + 1)
+      "#{letter}: #{goal[:words]} words"
+    end
+
+    say.unshift format_novel(novel)
+    m.reply say.join("\n")
   end
 
   def finished_novels(m)
@@ -141,23 +148,42 @@ class Rogare::Plugins::Novel
       user_id: user[:id]
     }
 
+    goal = nil
+
     if ntype == 'nano'
       novel[:started] = Rogare::Data.first_of(11, tz)
-      novel[:goal_days] = 30
-      novel[:goal] = 50_000
+      goal = {
+        start: novel[:started],
+        finish: Rogare::Data.first_of(12, tz),
+        words: 50_000
+      }
     end
 
     if ntype == 'camp'
       if now >= (Rogare::Data.first_of(4, tz) - 2.weeks) || now < Rogare::Data.first_of(5, tz)
         novel[:started] = Rogare::Data.first_of(4, tz)
-        novel[:goal_days] = 30
+        goal = {
+          start: novel[:started],
+          finish: Rogare::Data.first_of(5, tz),
+          words: 30
+        }
       elsif now >= (Rogare::Data.first_of(7, tz) - 2.weeks) || now < Rogare::Data.first_of(8, tz)
         novel[:started] = Rogare::Data.first_of(7, tz)
-        novel[:goal_days] = 31
+        goal = {
+          start: novel[:started],
+          finish: Rogare::Data.first_of(8, tz),
+          words: 31
+        }
       end
     end
 
     id = Rogare::Data.novels.insert(novel)
+
+    if goal
+      goal[:novel_id] = id
+      Rogare::Data.goals.insert(goal)
+    end
+
     m.reply "New novel created: #{id}."
   end
 

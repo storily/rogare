@@ -12,6 +12,15 @@ module GoalTerms
         el
       end.compact
     end
+
+    def offset_to_s(offset)
+      offset.to_i
+            .to_s(26)
+            .upcase
+            .split('')
+            .map { |l| (l.ord + (l.ord < 65 ? 16 : 9)).chr }
+            .join
+    end
   end
 
   class Line

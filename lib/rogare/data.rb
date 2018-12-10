@@ -28,6 +28,10 @@ module Rogare::Data
       Rogare.sql[:wordcounts]
     end
 
+    def goals
+      Rogare.sql[:goals]
+    end
+
     def pga(*things)
       Sequel.pg_array(things)
     end
@@ -138,10 +142,15 @@ module Rogare::Data
           # This is nano, start a new novel!
           id = novels.insert(
             user_id: user[:id],
-            type: 'nano',
-            goal: 50_000,
-            goal_days: 30,
-            started: first_of(11, tz)
+            started: first_of(11, tz),
+            type: 'nano'
+          )
+
+          goals.insert(
+            novel_id: id,
+            words: 50_000,
+            start: first_of(11, tz),
+            finish: first_of(12, tz)
           )
 
           return novels.where(id: id).first
@@ -323,6 +332,15 @@ module Rogare::Data
     def goal_parser
       goal_parser_impl
       GoalTermsParser.new
+    end
+
+    def current_goals(novel)
+      goals.where { (novel_id =~ novel[:id]) & (finish > now.function) & (removed =~ nil) }
+           .order_by(:start, :id)
+    end
+
+    def current_goal(novel, offset)
+      current_goals(novel).offset(offset).first
     end
 
     def encode_entities(raws)
