@@ -2,6 +2,7 @@ AllCops:
   TargetRubyVersion: '2.5'
   Exclude:
     - 'lib/goalterms/grammar.rb'
+    - 'vendor/**'
 
 Lint/AmbiguousRegexpLiteral:
   Enabled: false
