@@ -13,31 +13,49 @@ module GoalTerms
       end.compact
     end
 
+    def letter_to_i(id)
+      id.split('').reverse.map.with_index do |letter, i|
+        (letter.ord - 64) * ('10'.to_i(26)**i)
+      end.sum
+    end
+
     def offset_to_s(offset)
-      offset.to_i
-            .to_s(26)
-            .upcase
-            .split('')
-            .map { |l| (l.ord + (l.ord < 65 ? 16 : 9)).chr }
-            .join
+      (offset + 1)
+        .to_s(26)
+        .upcase
+        .split('')
+        .map { |l| (l.ord + (l.ord < 65 ? 16 : 9)).chr }
+        .join
     end
   end
 
   class Line
     def initialize(terms)
       terms.each do |term|
-        @id_offset = term.to_i if term.is_a? GoalTerms::Letter
+        @offset = (term.to_i - 1) if term.is_a? GoalTerms::Letter
+        @letter = term.to_s if term.is_a? GoalTerms::Letter
         @words = term.to_i if term.is_a? GoalTerms::Words
         @days = term.to_i if term.is_a? GoalTerms::Days
         @repeat = term.on if term.is_a? GoalTerms::Repeat
         @start = term if term.is_a? GoalTerms::Start
+        @curve = term if term.is_a? GoalTerms::Curve
       end
     end
 
-    attr_reader :letter, :words, :days, :repeat
+    attr_reader :offset, :letter, :words, :days, :repeat, :curve
 
-    def start(tz = TZInfo::Timezone.get(Rogare.tz))
+    def default_start!
+      @start ||= GoalTerms::Start.new 'today'
+    end
+
+    def start(tz = TimeZone.new(Rogare.tz))
+      return unless @start
       @start.to_date(tz)
+    end
+
+    def finish(tz = nil)
+      return unless start && days
+      start(tz) + days.days
     end
   end
 
@@ -51,9 +69,7 @@ module GoalTerms
     end
 
     def to_i
-      @id.split('').reverse.map.with_index do |letter, i|
-        (letter.ord - 64) * ('10'.to_i(26)**i)
-      end.sum
+      GoalTerms.letter_to_i @id
     end
   end
 
@@ -64,6 +80,16 @@ module GoalTerms
 
     def to_i
       @words
+    end
+  end
+
+  class Curve
+    def initialize(curve)
+      @curve = curve
+    end
+
+    def to_s
+      @curve.downcase
     end
   end
 
@@ -99,7 +125,7 @@ module GoalTerms
     def to_date(tz)
       Chronic.time_class = tz
       dt = Chronic.parse(@date)
-      dt&.to_date
+      dt&.to_date.to_datetime
     ensure
       Chronic.time_class = Time
     end

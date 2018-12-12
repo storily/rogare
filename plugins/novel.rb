@@ -15,13 +15,15 @@ class Rogare::Plugins::Novel
     '`!% [ID] rename [name...]` - Rename your novel.',
     '`!% [ID] finish` and `unfinish` - Set your novel’s done status.',
     # '`!% [ID] stats` - Show detailed wordcount stats about your novel. Will PM you.',
-    '`!% [ID] goal set <number>` - Set a wordcount goal for your novel. `0` disables.',
-    '`!% [ID] goal days <number>` - Set a wordcount goal length in days. `0` disables.',
-    # '`!% [ID] goal curve linear|???` - Set which curve to use for goal calculations.',
-    '`!% [ID] goal repeating yes|no` - Set whether the goal repeats after its days.',
+    '`!% [ID] goal new [<number> words] [<number> days] [(no)repeat] [start <date>]` '\
+      '- Add a new word goal to the novel.',
+    '`!% [ID] goal edit [same as above]` or `!% [ID] goal edit <letter> [...]` '\
+      '- Edit a goal. If `<letter>` is omitted, guesses.',
+    '`!% [ID] goal remove <letter>` ' \
+      '- Remove the goal from the novel. If `<letter>` is omitted, guesses.',
     "\nFor example, a revolving weekly goal of 5000 words would be set up with: " \
-      '`!% goal set 5k`, `!% goal days 7`, `!% goal repeating yes`.'
-  ]
+      '`!% goal new 5k words 7 days repeat start monday`.'
+  ] # todo: nano goals rather than nano novels
   handle_help
 
   match_command /done/, method: :finished_novels
@@ -31,19 +33,18 @@ class Rogare::Plugins::Novel
   match_command /(\d+)\s+rename\s+(.+)/, method: :rename_novel
   match_command /()rename\s+(.+)/, method: :rename_novel
 
-  match_command /(\d+)\s+goal\s+set\s+(.+)/, method: :goalify_novel
-  match_command /()goal\s+set\s+(.+)/, method: :goalify_novel
   match_command /(\d+)\s+goal\s+new\s+(.+)/, method: :new_goal
   match_command /()goal\s+new\s+(.+)/, method: :new_goal
 
-  match_command /(\d+)\s+goal\s+days\s+(.+)/, method: :dailify_novel
-  match_command /()goal\s+days\s+(.+)/, method: :dailify_novel
+  match_command /(\d+)\s+goal\s+edit\s+(.+)/, method: :edit_goal
+  match_command /()goal\s+edit\s+(.+)/, method: :edit_goal
 
-  match_command /(\d+)\s+goal\s+repeat(?:ing)?(\s+.+)?/, method: :repeat_novel
-  match_command /()goal\s+repeat(?:ing)?(\s+.+)?/, method: :repeat_novel
+  match_command /(\d+)\s+goal\s+(?:remove|rm)(?:\s+([a-z]+))?/, method: :remove_goal
+  match_command /()goal\s+(?:remove|rm)(?:\s+([a-z]+))?/, method: :remove_goal
 
-  # match_command /(\d+)\s+goal\s+curve\s+(.+)/, method: :curve_novel
-  # match_command /()goal\s+curve\s+(.+)/, method: :curve_novel
+  match_command /(\d+)\s+goal/, method: :show_novel
+  match_command /(\d+)\s+goal\s+(.*)/, method: :help_message
+  match_command /goal\s+(.*)/, method: :help_message
 
   match_command /(\d+)\s+finish/, method: :finish_novel
   match_command /finish\s+(\d+)/, method: :finish_novel
@@ -73,7 +74,7 @@ class Rogare::Plugins::Novel
 
     say = novels.map { |nov| format_novel nov }.join("\n")
     say += "\nand #{nmore} more" if nmore
-    m.reply say
+    m.reply say.strip
   end
 
   def show_novel(m, id)
@@ -81,13 +82,7 @@ class Rogare::Plugins::Novel
 
     return m.reply 'No such novel' unless novel
 
-    say = Rogare::Data.current_goals(novel).map.with_index do |goal, i|
-      letter = GoalTerms.offset_to_s(i + 1)
-      "#{letter}: #{goal[:words]} words"
-    end
-
-    say.unshift format_novel(novel)
-    m.reply say.join("\n")
+    m.reply format_novel(novel)
   end
 
   def finished_novels(m)
@@ -108,7 +103,7 @@ class Rogare::Plugins::Novel
 
     say = novels.map { |nov| format_novel nov }.join("\n")
     say += "\nand #{nmore} more" if nmore
-    m.reply say
+    m.reply say.strip
   end
 
   def create_novel(m, name)
@@ -205,58 +200,78 @@ class Rogare::Plugins::Novel
     parser = Rogare::Data.goal_parser
     tree = parser.parse line.strip.downcase
 
-    return "Bad input: #{parser.failure_reason}" unless tree
+    raise "Bad input: #{parser.failure_reason}" unless tree
 
     tree.value
   end
 
-  def new_goal(m, _id, line)
-    params = parse_goal line
-    m.debugly params
-  end
-
-  def goalify_novel(m, id, goal)
+  def new_goal(m, id, line)
     user = m.user.to_db
     novel = load_novel user, id
+    tz = TimeZone.new(user[:tz] || Rogare.tz)
 
     return m.reply 'No such novel' unless novel
 
-    goal.sub! /k$/i, '000'
-    goal = goal.to_i
-    goal = nil if goal.zero?
+    begin
+      goal = parse_goal line
+      goal.default_start!
+    rescue StandardError => err
+      return m.reply err
+    end
 
-    Rogare::Data.novels.where(id: novel[:id]).update(goal: goal)
+    return m.reply "I need at least a word count" unless goal.words && goal.words.positive?
 
-    novel[:goal] = goal
+    Rogare::Data.goals.insert({
+      novel_id: novel[:id],
+      words: goal.words,
+      start: goal.start(tz),
+      finish: goal.finish(tz),
+      repeat: goal.repeat,
+      curve: goal.curve,
+    }.compact)
+
     m.reply format_novel(novel)
   end
 
-  def dailify_novel(m, id, days)
+  def edit_goal(m, id, line)
     user = m.user.to_db
     novel = load_novel user, id
+    tz = TimeZone.new(user[:tz] || Rogare.tz)
 
     return m.reply 'No such novel' unless novel
 
-    days = days.to_i
-    days = nil if days.zero?
+    begin
+      goal = parse_goal line
+    rescue StandardError => err
+      return m.reply err
+    end
 
-    Rogare::Data.novels.where(id: novel[:id]).update(goal_days: days)
+    current = Rogare::Data.current_goal(novel, goal.offset || 0)
+    update = {}
+    update[:words] = goal.words if goal.words && goal.words != current[:words]
+    update[:start] = goal.start(tz) if goal.start && goal.start(tz) != current[:start]
+    update[:finish] = goal.finish(tz) if goal.finish(tz) && goal.finish(tz) != current[:finish]
+    update[:repeat] = goal.repeat if goal.repeat && goal.repeat != current[:repeat]
+    update[:curve] = goal.curve if goal.curve && goal.curve != current[:curve]
 
-    novel[:goal_days] = days
+    update[:finish] = nil if goal.days.zero?
+
+    Rogare::Data.goals.where(id: current[:id]).update(update) unless update.empty?
+
     m.reply format_novel(novel)
   end
 
-  def repeat_novel(m, id, repeat = '')
+  def remove_goal(m, id, letter = nil)
     user = m.user.to_db
     novel = load_novel user, id
 
     return m.reply 'No such novel' unless novel
 
-    repeat = repeat.strip =~ /^(yes|y|1|true|t|)$/i
+    offset = letter ? (GoalTerms.letter_to_i(letter) - 1) : 0
+    goal = Rogare::Data.current_goal(novel, offset)
 
-    Rogare::Data.novels.where(id: novel[:id]).update(goal_repeat: repeat)
+    Rogare::Data.goals.where(id: goal[:id]).update(removed: Sequel.function(:now))
 
-    novel[:goal_repeat] = repeat
     m.reply format_novel(novel)
   end
 
@@ -290,16 +305,39 @@ class Rogare::Plugins::Novel
     Rogare::Data.load_novel user, id
   end
 
+  def format_goal(goal, offset = nil)
+    goal_words = Rogare::Data.goal_format(goal[:words])
+
+    if offset
+      goal_words = goal_words.sub('goal', '').strip
+      "#{GoalTerms.offset_to_s(offset)}: "
+    end.to_s + [
+      "**#{goal_words}**",
+      "starting _#{Rogare::Data.datef(goal[:start])}_",
+      ("ending _#{Rogare::Data.datef(goal[:finish])}_" if goal[:finish]),
+      ('repeating' if goal[:repeat]),
+      ("#{goal[:curve]} curve" if goal[:curve] != 'linear')
+    ].compact.join(', ') # todo: strike if goal is achieved before finish line
+  end
+
   def format_novel(novel)
-    "#{novel[:id]}. “#{Rogare::Data.encode_entities(novel[:name] || 'Untitled')}”. " \
+    goals = Rogare::Data.current_goals(novel).all
+
+    "#{novel[:finished] ? '📘' : '📖'} " \
+    "#{novel[:id]}. “**#{Rogare::Data.encode_entities(novel[:name] || 'Untitled')}**”. " \
     '' + [
       (novel[:type] == 'manual' ? 'S' : "#{novel[:type].capitalize} novel s") +
-      "tarted #{novel[:started].strftime('%Y-%m-%d')}",
-      (Rogare::Data.goal_format novel[:goal] if novel[:goal]),
-      ("for #{novel[:goal_days]} days" if novel[:goal] && novel[:goal_days]),
-      ('repeating' if novel[:goal] && novel[:goal_repeating]),
-      ("#{novel[:curve]} curve" if novel[:goal] && novel[:curve] != 'linear'),
+      "tarted _#{Rogare::Data.datef(novel[:started])}_",
+      (if goals.empty?
+        nil
+      elsif goals.length == 1
+        format_goal goals.first
+      else
+        "**#{goals.length}** current/future goals:"
+      end unless novel[:finished]),
       ('done' if novel[:finished])
-    ].compact.join(', ') + '.'
+    ].compact.join(', ') + if goals.length > 1
+      "\n" + goals.map.with_index { |goal, i| format_goal(goal, i) }.join("\n") + "\n"
+    end.to_s # todo append number of past goals
   end
 end

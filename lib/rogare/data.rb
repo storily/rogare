@@ -330,16 +330,18 @@ module Rogare::Data
     end
 
     def goal_parser
-      goal_parser_impl
       GoalTermsParser.new
     end
 
     def current_goals(novel)
-      goals.where { (novel_id =~ novel[:id]) & (finish > now.function) & (removed =~ nil) }
-           .order_by(:start, :id)
+      goals.where do
+        (novel_id =~ novel[:id]) &
+          (removed =~ nil) &
+          ((finish > now.function) | (finish =~ nil))
+      end.order_by(:start, :id)
     end
 
-    def current_goal(novel, offset)
+    def current_goal(novel, offset = 0)
       current_goals(novel).offset(offset).first
     end
 
@@ -347,6 +349,10 @@ module Rogare::Data
       raws.gsub(/(_|\*|\`)/, '\\1')
           .gsub('~~', '\~\~')
           .gsub(/\s+/, ' ')
+    end
+
+    def datef(date)
+      date.strftime('%-d %b %Y')
     end
 
     memoize :all_kinds, :goal_parser_impl, :novel_todaycount_stmt
