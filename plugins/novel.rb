@@ -5,9 +5,7 @@ class Rogare::Plugins::Novel
 
   command 'novel'
   usage [
-    '`!%` - Show your current novel(s).',
-    '`!% done` - Show your finished novel(s).',
-    # '`!% all` - PMs you all your novel(s).',
+    '`!%` - Show your novel(s).',
     '`!% new [nano|camp] [name...]` - Start a new novel. ' \
       '`nano` and `camp` novels can only be created in their month or the 2 weeks before.',
     '`!% ID` - Show info about any novel. ' \
@@ -26,7 +24,6 @@ class Rogare::Plugins::Novel
   ] # TODO: nano goals rather than nano novels
   handle_help
 
-  match_command /done/, method: :finished_novels
   match_command /new\s+(.+)/, method: :create_novel
   match_command /new/, method: :help_message
 
@@ -58,22 +55,25 @@ class Rogare::Plugins::Novel
   # match_command /()stats\s+(.+)/, method: :statsify_novel
 
   match_command /(\d+)/, method: :show_novel
-  match_empty :current_novels
+  match_empty :show_novels
 
-  def current_novels(m)
+  def show_novels(m)
     user = m.user.to_db
-    novels = Rogare::Data.current_novels(user).all
-
-    return m.reply 'No current novels! Start one with `!novel new name...`' if novels.empty?
+    novels = Rogare::Data
+             .novels
+             .where(user_id: user[:id])
+             .reverse(:started)
+             .all
 
     nmore = nil
-    if novels.length > 4 # not an off-by-one! shows 1,2,3,4,3+2,3+3 etc...
-      nmore = novels.length - 3
-      novels.first!(3)
+    if novels.length > 8
+      nmore = novels.length - 8
+      novels.first!(8)
     end
 
     say = novels.map { |nov| format_novel nov }.join("\n")
     say += "\nand #{nmore} more" if nmore
+    # say += "(use `!novel all` to get them as PM)" if nmore && rand > 0.8
     m.reply say.strip
   end
 
@@ -83,27 +83,6 @@ class Rogare::Plugins::Novel
     return m.reply 'No such novel' unless novel
 
     m.reply format_novel(novel)
-  end
-
-  def finished_novels(m)
-    user = m.user.to_db
-    novels = Rogare::Data
-             .novels
-             .where { (user_id =~ user[:id]) & (finished =~ true) }
-             .reverse(:started)
-             .all
-
-    return m.reply 'None finished (yet!)' if novels.empty?
-
-    nmore = nil
-    if novels.length > 4 # not an off-by-one! shows 1,2,3,4,3+2,3+3 etc...
-      nmore = novels.length - 3
-      novels.first!(3)
-    end
-
-    say = novels.map { |nov| format_novel nov }.join("\n")
-    say += "\nand #{nmore} more" if nmore
-    m.reply say.strip
   end
 
   def create_novel(m, name)
