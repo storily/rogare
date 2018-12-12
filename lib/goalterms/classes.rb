@@ -46,15 +46,18 @@ module GoalTerms
 
     def default_start!
       @start ||= GoalTerms::Start.new 'today'
+      nil
     end
 
     def start(tz = TimeZone.new(Rogare.tz))
       return unless @start
+
       @start.to_date(tz)
     end
 
     def finish(tz = nil)
       return unless start && days
+
       start(tz) + days.days
     end
   end
@@ -125,7 +128,7 @@ module GoalTerms
     def to_date(tz)
       Chronic.time_class = tz
       dt = Chronic.parse(@date)
-      dt&.to_date.to_datetime
+      dt&.to_date&.to_datetime
     ensure
       Chronic.time_class = Time
     end

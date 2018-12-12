@@ -23,7 +23,7 @@ class Rogare::Plugins::Novel
       '- Remove the goal from the novel. If `<letter>` is omitted, guesses.',
     "\nFor example, a revolving weekly goal of 5000 words would be set up with: " \
       '`!% goal new 5k words 7 days repeat start monday`.'
-  ] # todo: nano goals rather than nano novels
+  ] # TODO: nano goals rather than nano novels
   handle_help
 
   match_command /done/, method: :finished_novels
@@ -219,7 +219,7 @@ class Rogare::Plugins::Novel
       return m.reply err
     end
 
-    return m.reply "I need at least a word count" unless goal.words && goal.words.positive?
+    return m.reply 'I need at least a word count' unless goal.words&.positive?
 
     Rogare::Data.goals.insert({
       novel_id: novel[:id],
@@ -227,7 +227,7 @@ class Rogare::Plugins::Novel
       start: goal.start(tz),
       finish: goal.finish(tz),
       repeat: goal.repeat,
-      curve: goal.curve,
+      curve: goal.curve
     }.compact)
 
     m.reply format_novel(novel)
@@ -317,7 +317,7 @@ class Rogare::Plugins::Novel
       ("ending _#{Rogare::Data.datef(goal[:finish])}_" if goal[:finish]),
       ('repeating' if goal[:repeat]),
       ("#{goal[:curve]} curve" if goal[:curve] != 'linear')
-    ].compact.join(', ') # todo: strike if goal is achieved before finish line
+    ].compact.join(', ') # TODO: strike if goal is achieved before finish line
   end
 
   def format_novel(novel)
@@ -330,16 +330,18 @@ class Rogare::Plugins::Novel
       (novel[:type] == 'manual' ? 'S' : "#{novel[:type].capitalize} novel s") +
       "tarted _#{Rogare::Data.datef(novel[:started])}_",
       ("**#{words}** words" if words.positive?),
-      (if goals.empty?
-        nil
-      elsif goals.length == 1
-        format_goal goals.first
-      else
-        "**#{goals.length}** current/future goals:"
-      end unless novel[:finished]),
+      (unless novel[:finished]
+         if goals.empty?
+           nil
+         elsif goals.length == 1
+           format_goal goals.first
+         else
+           "**#{goals.length}** current/future goals:"
+         end
+       end),
       ('done' if novel[:finished])
     ].compact.join(', ') + if goals.length > 1
-      "\n" + goals.map.with_index { |goal, i| format_goal(goal, i) }.join("\n") + "\n"
-    end.to_s # todo append number of past goals
+                             "\n" + goals.map.with_index { |goal, i| format_goal(goal, i) }.join("\n") + "\n"
+                           end.to_s # TODO: append number of past goals
   end
 end
