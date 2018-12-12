@@ -152,33 +152,53 @@ class Rogare::Plugins::Wordcount
       data[:today] = get_today(user[:nano_user]) if data[:count].positive?
     end
 
+    goal = Rogare::Data.current_goal(novel)
+    data[:goal] = goal
+
+
+
     # no need to do any time calculations if there's no time limit
-    if novel[:goal_days]
+    if goal && goal[:finish]
       tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
       now = tz.local_to_utc(tz.now)
 
-      totaldiff = novel[:goal_days].days
-      timetarget = novel[:started] + totaldiff
+      gfinish = tz.utc_to_local goal[:finish]
+      gstart = tz.utc_to_local goal[:start]
+
+      totaldiff = tz.utc_to_local gfinish - gstart
+      days = (totaldiff / 1.day).ceil
+      totaldiff = days.days
+
+      timetarget = gfinish
       timediff = timetarget - now
 
+      logs 'start'
+      logs gstart
+      logs tz.utc_to_local novel[:started]
+
+      logs 'finish'
+      logs gfinish
+      logs gstart + totaldiff
+
+      # TODO: repeats
+
       data[:days] = {
-        total: novel[:goal_days],
+        total: days,
         length: totaldiff,
-        finish: timetarget,
+        finish: goal[:finish],
         left: timediff,
         gone: totaldiff - timediff,
-        expired: !timediff.positive? # TODO: && !count[:novel][:days_repeat]
+        expired: !timediff.positive?
       }
 
       unless data[:days][:expired]
-        day_secs = 60 * 60 * 24
-        goal_secs = day_secs * novel[:goal_days]
+        goal_secs = 1.day.to_i * data[:days][:total]
 
-        nth = (data[:days][:gone] / day_secs).ceil
-        goal = novel[:goal].to_f
+        nth = (data[:days][:gone] / 1.day.to_i).ceil
+        goal = goal[:words].to_f
 
         goal_live = ((goal / goal_secs) * data[:days][:gone]).round
-        goal_today = (goal / novel[:goal_days] * nth).round
+        goal_today = (goal / data[:days][:total] * nth).round
 
         data[:target] = {
           diff: goal_today - data[:count],
@@ -234,22 +254,20 @@ class Rogare::Plugins::Wordcount
                end
     end
 
-    if count[:novel][:goal]
+    if count[:goal]
       if count[:novel][:type] == 'nano'
-        deets << Rogare::Data.goal_format(count[:novel][:goal]) unless count[:novel][:goal] == 50_000
+        deets << Rogare::Data.goal_format(count[:goal][:words]) unless count[:goal][:words] == 50_000
         deets << 'nano has ended' if count[:days][:expired]
       elsif count[:days] && count[:days][:expired]
-        deets << Rogare::Data.goal_format(count[:novel][:goal])
+        deets << Rogare::Data.goal_format(count[:goal][:words])
         deets << "over #{count[:days][:total]} days"
         deets << 'expired'
       elsif count[:target]
-        deets << Rogare::Data.goal_format(count[:novel][:goal])
-
-        day_secs = 60 * 60 * 24
-        days = (count[:days][:left] / day_secs).floor
+        deets << Rogare::Data.goal_format(count[:goal][:words])
+        days = (count[:days][:left] / 1.day.to_i).floor
         deets << (days == 1 ? 'one day left' : "#{days} days left")
       else
-        deets << Rogare::Data.goal_format(count[:novel][:goal])
+        deets << Rogare::Data.goal_format(count[:goal][:words])
       end
     end
 
