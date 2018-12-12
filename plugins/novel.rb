@@ -322,12 +322,14 @@ class Rogare::Plugins::Novel
 
   def format_novel(novel)
     goals = Rogare::Data.current_goals(novel).all
+    words = Rogare::Data.novel_wordcount(novel[:id])
 
     "#{novel[:finished] ? '📘' : '📖'} " \
     "#{novel[:id]}. “**#{Rogare::Data.encode_entities(novel[:name] || 'Untitled')}**”. " \
     '' + [
       (novel[:type] == 'manual' ? 'S' : "#{novel[:type].capitalize} novel s") +
       "tarted _#{Rogare::Data.datef(novel[:started])}_",
+      ("**#{words}** words" if words.positive?),
       (if goals.empty?
         nil
       elsif goals.length == 1
