@@ -163,20 +163,12 @@ class Rogare::Plugins::Wordcount
       gfinish = tz.utc_to_local goal[:finish]
       gstart = tz.utc_to_local goal[:start]
 
-      totaldiff = tz.utc_to_local gfinish - gstart
-      days = (totaldiff / 1.day).ceil
+      totaldiff = gfinish - gstart.end_of_day
+      days = (totaldiff / 1.day).to_i
       totaldiff = days.days
 
       timetarget = gfinish
       timediff = timetarget - now
-
-      logs 'start'
-      logs gstart
-      logs tz.utc_to_local novel[:started]
-
-      logs 'finish'
-      logs gfinish
-      logs gstart + totaldiff
 
       # TODO: repeats
 
