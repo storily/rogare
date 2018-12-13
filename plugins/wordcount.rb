@@ -17,7 +17,7 @@ class Rogare::Plugins::Wordcount
   ]
   handle_help
 
-  def get_today(name)
+  def nano_get_today(name)
     res = Typhoeus.get "https://nanowrimo.org/participants/#{name}/stats"
     return unless res.code == 200
 
@@ -25,7 +25,7 @@ class Rogare::Plugins::Wordcount
     doc.at_css('#novel_stats .stat:nth-child(2) .value').content.gsub(/[,\s]/, '').to_i
   end
 
-  def get_count(name)
+  def nano_get_count(name)
     res = Typhoeus.get "https://nanowrimo.org/wordcount_api/wc/#{name}"
     return unless res.code == 200
 
@@ -148,8 +148,8 @@ class Rogare::Plugins::Wordcount
       data[:count] = db_wc
       data[:today] = Rogare::Data.novel_todaycount(novel[:id])
     elsif novel[:type] == 'nano' # TODO: camp
-      data[:count] = get_count(user[:nano_user]) || 0
-      data[:today] = get_today(user[:nano_user]) if data[:count].positive?
+      data[:count] = nano_get_count(user[:nano_user]) || 0
+      data[:today] = nano_get_today(user[:nano_user]) if data[:count].positive?
     end
 
     goal = Rogare::Data.current_goal(novel)
