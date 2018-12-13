@@ -155,8 +155,6 @@ class Rogare::Plugins::Wordcount
     goal = Rogare::Data.current_goal(novel)
     data[:goal] = goal
 
-
-
     # no need to do any time calculations if there's no time limit
     if goal && goal[:finish]
       tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)

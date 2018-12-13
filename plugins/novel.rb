@@ -6,8 +6,7 @@ class Rogare::Plugins::Novel
   command 'novel'
   usage [
     '`!%` - Show your novel(s).',
-    '`!% new [nano|camp] [name...]` - Start a new novel. ' \
-      '`nano` and `camp` novels can only be created in their month or the 2 weeks before.',
+    '`!% new [name...]` - Start a new novel. ',
     '`!% ID` - Show info about any novel. ' \
       'In the following sub commands, omitting `ID` will match your latest.',
     '`!% [ID] rename [name...]` - Rename your novel.',
@@ -87,76 +86,11 @@ class Rogare::Plugins::Novel
 
   def create_novel(m, name)
     user = m.user.to_db
-    name.strip!
 
-    ntype = if /^nano\s/i.match?(name)
-              name.sub(/^nano\s+/i, '')
-              'nano'
-            elsif /^camp\s/i.match?(name)
-              name.sub(/^camp\s+/i, '')
-              'camp'
-            else
-              'manual'
-            end
-
-    tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
-    now = tz.local_to_utc(tz.now)
-
-    if ntype == 'nano' && (
-      now < (Rogare::Data.first_of(11, tz) - 2.weeks) ||
-      now >= Rogare::Data.first_of(12, tz))
-      return m.reply 'Can’t create nano novel outside of nano time'
-    end
-
-    if ntype == 'camp' && (
-      now < (Rogare::Data.first_of(4, tz) - 2.weeks) ||
-      now >= Rogare::Data.first_of(5, tz) ||
-      now < (Rogare::Data.first_of(7, tz) - 2.weeks) ||
-      now >= Rogare::Data.first_of(8, tz))
-      return m.reply 'Can’t create camp novel outside of camp time'
-    end
-
-    novel = {
-      name: name,
-      type: ntype,
+    id = Rogare::Data.novels.insert(
+      name: name.strip,
       user_id: user[:id]
-    }
-
-    goal = nil
-
-    if ntype == 'nano'
-      novel[:started] = Rogare::Data.first_of(11, tz)
-      goal = {
-        start: novel[:started],
-        finish: Rogare::Data.first_of(12, tz),
-        words: 50_000
-      }
-    end
-
-    if ntype == 'camp'
-      if now >= (Rogare::Data.first_of(4, tz) - 2.weeks) || now < Rogare::Data.first_of(5, tz)
-        novel[:started] = Rogare::Data.first_of(4, tz)
-        goal = {
-          start: novel[:started],
-          finish: Rogare::Data.first_of(5, tz),
-          words: 30
-        }
-      elsif now >= (Rogare::Data.first_of(7, tz) - 2.weeks) || now < Rogare::Data.first_of(8, tz)
-        novel[:started] = Rogare::Data.first_of(7, tz)
-        goal = {
-          start: novel[:started],
-          finish: Rogare::Data.first_of(8, tz),
-          words: 31
-        }
-      end
-    end
-
-    id = Rogare::Data.novels.insert(novel)
-
-    if goal
-      goal[:novel_id] = id
-      Rogare::Data.goals.insert(goal)
-    end
+    )
 
     m.reply "New novel created: #{id}."
   end
@@ -175,7 +109,6 @@ class Rogare::Plugins::Novel
   end
 
   def parse_goal(line)
-    # [<letter>] [<number> words] [<number> days] [(no)repeat] [start <date>]
     parser = Rogare::Data.goal_parser
     tree = parser.parse line.strip.downcase
 
@@ -306,8 +239,7 @@ class Rogare::Plugins::Novel
     "#{novel[:finished] ? '📘' : '📖'} " \
     "#{novel[:id]}. “**#{Rogare::Data.encode_entities(novel[:name] || 'Untitled')}**”. " \
     '' + [
-      (novel[:type] == 'manual' ? 'S' : "#{novel[:type].capitalize} novel s") +
-      "tarted _#{Rogare::Data.datef(novel[:started])}_",
+      "Started _#{Rogare::Data.datef(novel[:started])}_",
       ("**#{words}** words" if words.positive?),
       (unless novel[:finished]
          if goals.empty?
@@ -321,6 +253,7 @@ class Rogare::Plugins::Novel
       ('done' if novel[:finished])
     ].compact.join(', ') + if goals.length > 1
                              "\n" + goals.map.with_index { |goal, i| format_goal(goal, i) }.join("\n") + "\n"
-                           end.to_s # TODO: append number of past goals
+                           end.to_s
+    # TODO: append number of past goals
   end
 end
