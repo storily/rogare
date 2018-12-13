@@ -128,7 +128,7 @@ module GoalTerms
     def to_date(tz)
       Chronic.time_class = tz
       dt = Chronic.parse(@date)
-      dt&.to_date&.to_datetime
+      dt&.to_date
     ensure
       Chronic.time_class = Time
     end

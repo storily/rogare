@@ -157,11 +157,11 @@ class Rogare::Plugins::Wordcount
 
     # no need to do any time calculations if there's no time limit
     if goal && goal[:finish]
-      tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
-      now = tz.local_to_utc(tz.now)
+      tz = TimeZone.new(user[:tz] || Rogare.tz)
+      now = tz.now
 
-      gfinish = tz.utc_to_local goal[:finish]
-      gstart = tz.utc_to_local goal[:start]
+      gstart = tz.local goal[:start].year, goal[:start].month, goal[:start].day
+      gfinish = tz.local(goal[:finish].year, goal[:finish].month, goal[:finish].day).end_of_day
 
       totaldiff = gfinish - gstart.end_of_day
       days = (totaldiff / 1.day).to_i
