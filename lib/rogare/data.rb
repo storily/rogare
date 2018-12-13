@@ -168,9 +168,17 @@ module Rogare::Data
       end
     end
 
-    def novel_wordcount(id)
-      wc = wordcounts.where(novel_id: id).reverse(:as_at).select(:words).first
+    def novel_wordcount_at(id, time)
+      wc = wordcounts
+           .where { (novel_id =~ id) & (as_at < time) }
+           .reverse(:as_at)
+           .select(:words)
+           .first
       wc ? wc[:words] : 0
+    end
+
+    def novel_wordcount(id)
+      novel_wordcount_at(id, Time.now)
     end
 
     def novel_todaycount_stmt

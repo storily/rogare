@@ -187,13 +187,21 @@ class Rogare::Plugins::Wordcount
         nth = (data[:days][:gone] / 1.day.to_i).ceil
         goal = goal[:words].to_f
 
+        count_at_goal_start = if db_dc.positive?
+                                Rogare::Data.novel_wordcount_at novel[:id], gstart
+                              else
+                                0
+                              end
+
+        count_from_goal_start = data[:count] - count_at_goal_start
+
         goal_live = ((goal / goal_secs) * data[:days][:gone]).round
         goal_today = (goal / data[:days][:total] * nth).round
 
         data[:target] = {
-          diff: goal_today - data[:count],
-          live: goal_live - data[:count],
-          percent: (100.0 * data[:count] / goal).round(1)
+          diff: goal_today - count_from_goal_start,
+          live: goal_live - count_from_goal_start,
+          percent: (100.0 * count_from_goal_start / goal).round(1)
         }
       end
     end
