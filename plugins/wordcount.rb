@@ -187,7 +187,7 @@ class Rogare::Plugins::Wordcount
         nth = (data[:days][:gone] / 1.day.to_i).ceil
         goal = goal[:words].to_f
 
-        count_at_goal_start = if db_dc.positive?
+        count_at_goal_start = if db_wc.positive?
                                 Rogare::Data.novel_wordcount_at novel[:id], gstart
                               else
                                 0
