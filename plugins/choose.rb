@@ -11,13 +11,15 @@ class Rogare::Plugins::Choose
   match_empty :help_message
 
   def execute(m, param)
-    if rand < 0.05
+    xor = /\s+xor\s+/ =~ param
+
+    if !xor && rand < 0.05
       return m.reply [
         'yes', 'both', 'all of the above', 'not super sure, actually', 'Gryffindor!'
       ].sample
     end
 
-    args = param.split.map { |x| x.casecmp('or').zero? ? x.downcase : x }.join(' ').split(' or ')
+    args = param.split(/\s+x?or\s+/i)
 
     s = Set.new args
     return unless s.length > 1 && (args.length == s.length)
