@@ -169,7 +169,7 @@ class Rogare::Plugins::Novel
     update[:curve] = goal.curve if goal.curve && goal.curve != current[:curve]
 
     update[:name] = nil if goal.name == ''
-    update[:finish] = nil if goal.days.zero?
+    update[:finish] = nil if goal.days && goal.days.zero?
 
     Rogare::Data.goals.where(id: current[:id]).update(update) unless update.empty?
 
