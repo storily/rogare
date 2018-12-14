@@ -74,7 +74,7 @@ grammar GoalTerms
   end
 
   rule norepeat
-    ('norepeat' / 'norepeating' / ('non' ws 'repeating') / ('not' ws 'repeating'))  {
+    ('norepeat' / ('no' ws 'repeat') / 'norepeating' / ('non' ws 'repeating') / ('not' ws 'repeating'))  {
       def value
         GoalTerms::Repeat.new false
       end
@@ -99,6 +99,10 @@ grammar GoalTerms
 
   rule weekday
     ('mon' / 'tues' / 'wednes' / 'thurs' / 'fri' / 'satur' / 'sun') 'day'
+  end
+
+  rule slashdate
+    nday '/' nmonth '/' year
   end
 
   rule isodate
