@@ -54,7 +54,7 @@ grammar GoalTerms
   end
 
   rule name
-    'name' ws '"' name:([^"]+) '"' {
+    'name' ws '"' name:([^"]*) '"' {
       def value
         GoalTerms::Name.new(name.text_value)
       end
