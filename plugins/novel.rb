@@ -227,7 +227,7 @@ class Rogare::Plugins::Novel
       goal_words = goal_words.sub('goal', '').strip
       "#{GoalTerms.offset_to_s(offset)}: "
     end.to_s + [
-      ("(“#{Rogare::Data.encode_entities(goal[:name])}”)" unless goal[:name].empty?),
+      ("(“#{Rogare::Data.encode_entities(goal[:name])}”)" unless goal[:name].nil? || goal[:name].empty?),
       "**#{goal_words}**",
       "starting _#{Rogare::Data.datef(goal[:start])}_",
       ("ending _#{Rogare::Data.datef(goal[:finish])}_" if goal[:finish]),
