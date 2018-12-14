@@ -36,13 +36,14 @@ module GoalTerms
         @letter = term.to_s if term.is_a? GoalTerms::Letter
         @words = term.to_i if term.is_a? GoalTerms::Words
         @days = term.to_i if term.is_a? GoalTerms::Days
+        @name = term.to_s if term.is_a? GoalTerms::Name
         @repeat = term.on if term.is_a? GoalTerms::Repeat
         @start = term if term.is_a? GoalTerms::Start
         @curve = term if term.is_a? GoalTerms::Curve
       end
     end
 
-    attr_reader :offset, :letter, :words, :days, :repeat, :curve
+    attr_reader :offset, :letter, :words, :days, :name, :repeat, :curve
 
     def default_start!
       @start ||= GoalTerms::Start.new 'today'
@@ -103,6 +104,16 @@ module GoalTerms
 
     def to_i
       @days
+    end
+  end
+
+  class Name
+    def initialize(name)
+      @name = name
+    end
+
+    def to_s
+      @name.strip
     end
   end
 

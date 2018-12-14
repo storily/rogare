@@ -12,7 +12,7 @@ class Rogare::Plugins::Novel
     '`!% [ID] rename [name...]` - Rename your novel.',
     '`!% [ID] finish` and `unfinish` - Set your novel’s done status.',
     # '`!% [ID] stats` - Show detailed wordcount stats about your novel. Will PM you.',
-    '`!% [ID] goal new [<number> words] [<number> days] [(no)repeat] [start <date>]` '\
+    '`!% [ID] goal new [<number> words] [<number> days] [(no)repeat] [start <date>] [name "<name>"]` '\
       '- Add a new word goal to the novel.',
     '`!% [ID] goal edit [same as above]` or `!% [ID] goal edit <letter> [...]` '\
       '- Edit a goal. If `<letter>` is omitted, guesses.',
@@ -136,6 +136,7 @@ class Rogare::Plugins::Novel
     Rogare::Data.goals.insert({
       novel_id: novel[:id],
       words: goal.words,
+      name: goal.name,
       start: goal.start(tz),
       finish: goal.finish(tz),
       repeat: goal.repeat,
@@ -161,11 +162,13 @@ class Rogare::Plugins::Novel
     current = Rogare::Data.current_goal(novel, goal.offset || 0)
     update = {}
     update[:words] = goal.words if goal.words && goal.words != current[:words]
+    update[:name] = goal.name if goal.name && goal.name != current[:name]
     update[:start] = goal.start(tz) if goal.start && goal.start(tz) != current[:start]
     update[:finish] = goal.finish(tz) if goal.finish(tz) && goal.finish(tz) != current[:finish]
     update[:repeat] = goal.repeat if goal.repeat && goal.repeat != current[:repeat]
     update[:curve] = goal.curve if goal.curve && goal.curve != current[:curve]
 
+    update[:name] = nil if goal.name == ''
     update[:finish] = nil if goal.days.zero?
 
     Rogare::Data.goals.where(id: current[:id]).update(update) unless update.empty?
@@ -224,6 +227,7 @@ class Rogare::Plugins::Novel
       goal_words = goal_words.sub('goal', '').strip
       "#{GoalTerms.offset_to_s(offset)}: "
     end.to_s + [
+      ("(“#{Rogare::Data.encode_entities(goal[:name])}”)" unless goal[:name].empty?),
       "**#{goal_words}**",
       "starting _#{Rogare::Data.datef(goal[:start])}_",
       ("ending _#{Rogare::Data.datef(goal[:finish])}_" if goal[:finish]),

@@ -25,7 +25,7 @@ grammar GoalTerms
   end
 
   rule term
-    (words / days / repeat / start) {
+    (words / days / repeat / start / name) {
       def value
         super
       end
@@ -49,6 +49,14 @@ grammar GoalTerms
     number ws 'days' {
       def value
         GoalTerms::Days.new(number.value)
+      end
+    }
+  end
+
+  rule name
+    'name' ws '"' name:([^"]+) '"' {
+      def value
+        GoalTerms::Name.new(name.text_value)
       end
     }
   end
