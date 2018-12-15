@@ -79,7 +79,7 @@ module Rogare
       end
 
       bot.message do |event|
-        Rogare::Data.user_seen(event.author)
+        User.seen_on_discord(event.author)
       end
 
       bot

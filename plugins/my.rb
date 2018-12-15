@@ -34,7 +34,10 @@ class Rogare::Plugins::My
       return
     end
 
-    Rogare::Data.set_nano_user(m.user, name)
+    u = m.user.to_db
+    u.nano_user = name
+    u.save
+
     m.reply "Your nano name has been set to #{name}."
   end
 

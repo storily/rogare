@@ -74,7 +74,7 @@ class DiscordUserShim
   end
 
   def to_db
-    Rogare::Data.user_from_discord self
+    User.from_discord self
   end
 end
 

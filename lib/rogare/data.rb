@@ -58,60 +58,6 @@ module Rogare::Data
             .select_map(:value)
     end
 
-    def user_from_discord(discu)
-      users.where(discord_id: discu.id).first
-    end
-
-    # returns date user was last previously seen
-    def user_seen(discu)
-      nick = discu.nick || discu.username
-      discordian = user_from_discord(discu)
-
-      return new_user(discu)[:last_seen] unless discordian
-      return discordian[:last_seen] unless Time.now - discordian[:last_seen] > 60 || discordian[:nick] != nick
-
-      users.where(id: discordian[:id]).update(
-        last_seen: Sequel.function(:now),
-        nick: nick
-      )
-
-      Time.now
-    end
-
-    def new_user(discu, extra = {})
-      defaults = {
-        discord_id: discu.id,
-        nick: discu.nick || discu.username,
-        first_seen: Sequel.function(:now),
-        last_seen: Sequel.function(:now)
-      }
-
-      id = users.insert(defaults.merge(extra))
-      users.where(id: id).first
-    end
-
-    def get_nano_user(discu)
-      user = user_from_discord discu
-      (user && user[:nano_user]) || discu.nick || discu.username
-    end
-
-    def set_nano_user(discu, name)
-      user = user_from_discord(discu)
-      if user
-        users.where(id: user[:id]).update(nano_user: name)
-      else
-        new_user(discu, nano_user: name)
-      end
-    end
-
-    def all_nano_users
-      users
-        .distinct
-        .select(:nano_user)
-        .where { nano_user !~ nil }
-        .map { |u| u[:nano_user] }
-    end
-
     def current_novels(user)
       novels
         .where do
@@ -125,39 +71,6 @@ module Rogare::Data
     def first_of(month, tz)
       tz_string = tz.current_period.offset.abbreviation
       DateTime.parse("#{Time.new.year}-#{month}-01 00:00:00 #{tz_string}").to_time
-    end
-
-    def ensure_novel(did)
-      user = users.where(discord_id: did).first
-      latest_novel = current_novels(user).first
-      tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
-
-      this_is_november = first_of(11, tz) <= Time.new && Time.new < first_of(12, tz)
-      # We only assume and create a novel when it's november. If it's camp time,
-      # we don't, and you'll have to tell us to make a new one if you want.
-
-      if this_is_november
-        appropriate_start = first_of(11, tz) - 2.weeks
-        if latest_novel.nil? || latest_novel[:started] < appropriate_start
-          # This is nano, start a new novel!
-          id = novels.insert(
-            user_id: user[:id],
-            started: first_of(11, tz),
-            type: 'nano'
-          )
-
-          goals.insert(
-            novel_id: id,
-            words: 50_000,
-            start: first_of(11, tz),
-            finish: first_of(12, tz)
-          )
-
-          return novels.where(id: id).first
-        end
-      end
-
-      latest_novel
     end
 
     def load_novel(user, id)

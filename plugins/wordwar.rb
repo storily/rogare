@@ -167,7 +167,7 @@ class Rogare::Plugins::Wordwar
 
     return m.reply 'No such wordwar' unless Rogare::Data.war_exists? k
 
-    user = Rogare::Data.user_from_discord m.user
+    user = m.user.to_db
     Rogare::Data.warmembers.insert_conflict.insert(user_id: user[:id], war_id: k)
     Rogare::Data.wars.where(id: k).update(channels: Sequel.function(
       :anyarray_uniq, Sequel.function(
@@ -186,7 +186,7 @@ class Rogare::Plugins::Wordwar
 
     return m.reply 'No such wordwar' unless Rogare::Data.war_exists? k
 
-    user = Rogare::Data.user_from_discord m.user
+    user = m.user.to_db
     Rogare::Data.warmembers.where(user_id: user[:id], war_id: k).delete
 
     m.reply "You're out."
@@ -198,7 +198,7 @@ class Rogare::Plugins::Wordwar
 
     return m.reply 'No such wordwar' unless Rogare::Data.war_exists? k
 
-    user = Rogare::Data.user_from_discord m.user
+    user = m.user.to_db
     Rogare::Data.wars.where(id: k).update(cancelled: Time.now, canceller: user[:id])
 
     m.reply "Wordwar #{k} cancelled."
@@ -337,7 +337,7 @@ class Rogare::Plugins::Wordwar
       # War is in the past???
       return if ((time + duration) - Time.now).to_i.negative?
 
-      user = Rogare::Data.user_from_discord m.user
+      user = m.user.to_db
       wid = Rogare::Data.wars.insert(
         start: time,
         seconds: duration,

@@ -2,11 +2,11 @@
 
 require './cli'
 
-logs '=====> Loading modules'
+logs '=====> Loading commands'
 Dir['./plugins/*.rb'].each do |p|
   name = Pathname.new(p).basename('.rb').to_s
-  if ENV['MODULES_WHITELIST']
-    next unless ENV['MODULES_WHITELIST'].split(',').include? name
+  if ENV['COMMANDS_WHITELIST']
+    next unless ENV['COMMANDS_WHITELIST'].split(',').include? name
   end
 
   require p

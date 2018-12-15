@@ -97,12 +97,11 @@ class Rogare::Plugins::Debug
   end
 
   def my_user(m)
-    user = Rogare::Data.user_from_discord m.user
-    m.reply "`#{user.inspect}`"
+    m.reply "`#{m.user.to_db.inspect}`"
   end
 
   def my_time(m)
-    user = Rogare::Data.user_from_discord m.user
+    user = m.user.to_db
     tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
     m.reply "`#{tz}`: `#{tz.now}`"
   end
@@ -112,7 +111,7 @@ class Rogare::Plugins::Debug
     discu ||= Rogare::Data.users.where(nick: mid).first
     return m.reply "No such user: `#{mid}`" unless discu
 
-    user = Rogare::Data.user_from_discord discu
+    user = User.from_discord discu
     return m.reply "Not in db: `discord::#{discu.id}`" unless user
 
     m.debugly user
@@ -209,7 +208,10 @@ class Rogare::Plugins::Debug
     du ||= Rogare.discord.users.find { |_i, u| u.name == user }[1]
     return m.reply('No such user') unless du
 
-    Rogare::Data.set_nano_user(du, nano)
+    u = User.from_discord du
+    u.nano_user = nano
+    u.save
+
     m.reply "User `#{du.id}` nanouser set to `#{nano}`"
   end
 
@@ -220,7 +222,7 @@ class Rogare::Plugins::Debug
     du ||= Rogare.discord.users.find { |_i, u| u.name == user }[1]
     return m.reply('No such user') unless du
 
-    u = Rogare::Data.user_from_discord du
+    u = User.from_discord du
     novel = Rogare::Data.current_novels(u).first
     Rogare::Data.novels.where(id: novel[:id]).update(goal: goal.to_i)
 

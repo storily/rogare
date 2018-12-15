@@ -12,3 +12,8 @@ require './lib/rogare'
 logs '=====> Preparing resources'
 Rogare.sql
 Rogare::Data.goal_parser_impl
+
+logs '=====> Loading models'
+Dir['./models/*.rb'].each do |p|
+  require p
+end
