@@ -108,7 +108,7 @@ class Rogare::Plugins::Debug
 
   def user_info(m, mid)
     discu = Rogare.from_discord_mid mid
-    discu ||= Rogare::Data.users.where(nick: mid).first
+    discu ||= User.where(nick: mid).first
     return m.reply "No such user: `#{mid}`" unless discu
 
     user = User.from_discord discu

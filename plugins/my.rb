@@ -52,7 +52,7 @@ class Rogare::Plugins::My
     end
 
     user = m.user.to_db
-    Rogare::Data.users.where(id: user[:id]).update(tz: tz)
+    User.where(id: user[:id]).update(tz: tz)
     m.reply "Your timezone has been set to #{tz}."
   end
 end

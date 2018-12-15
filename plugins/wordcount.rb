@@ -63,7 +63,7 @@ class Rogare::Plugins::Wordcount
         Rogare.from_discord_mid(name).to_db
       else
         # Case-insensitive match from nick
-        Rogare::Data.users.where { nick =~ /^#{name}$/i }.first
+        User.where { nick =~ /^#{name}$/i }.first
       end
     end.compact)
 
@@ -132,7 +132,7 @@ class Rogare::Plugins::Wordcount
   end
 
   def get_novel_count(novel, user = nil)
-    user ||= Rogare::Data.users.where(id: novel[:user_id]).first
+    user ||= User.where(id: novel[:user_id]).first
 
     data = {
       user: user,

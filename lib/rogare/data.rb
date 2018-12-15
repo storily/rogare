@@ -4,10 +4,6 @@ module Rogare::Data
   class << self
     extend Memoist
 
-    def users
-      Rogare.sql[:users]
-    end
-
     def novels
       Rogare.sql[:novels]
     end
@@ -96,7 +92,7 @@ module Rogare::Data
 
     def novel_todaycount_stmt
       novel_tz = Rogare.sql[:novel_tz].select(:tz).limit(1)
-      novel_tz_cte = users
+      novel_tz_cte = User
                      .join(:novels, user_id: :id)
                      .where(Sequel[:novels][:id] => :$id)
                      .select(Sequel[:tz].cast(:text))
@@ -183,7 +179,7 @@ module Rogare::Data
     end
 
     def war_members(id, include_creator = false)
-      q = users
+      q = User
           .select_all(:users).select_append(Sequel.function(
             :concat,
             '<@',
