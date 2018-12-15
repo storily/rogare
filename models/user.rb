@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 class User < Sequel::Model
   def self.from_discord(discu)
-    self.where(discord_id: discu.id).first
+    where(discord_id: discu.id).first
   end
 
   def self.seen_on_discord(discu)
     nick = discu.nick || discu.username
-    discordian = self.from_discord(discu)
+    discordian = from_discord(discu)
 
-    return self.new_from_discord(discu)[:last_seen] unless discordian
+    return new_from_discord(discu)[:last_seen] unless discordian
     return discordian[:last_seen] unless Time.now - discordian[:last_seen] > 60 || discordian[:nick] != nick
 
     discordian.last_seen = Sequel.function(:now)
@@ -25,6 +27,6 @@ class User < Sequel::Model
       last_seen: Sequel.function(:now)
     }
 
-    self.create(defaults.merge(extra))
+    create(defaults.merge(extra))
   end
 end
