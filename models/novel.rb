@@ -25,7 +25,7 @@ class Novel < Sequel::Model
   end
 
   def wordcount=(wc)
-    add_wordcount Wordcount.create(words: wc)
+    add_wordcount Wordcount.new(words: wc)
   end
 
   def current_goals
