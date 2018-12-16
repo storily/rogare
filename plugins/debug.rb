@@ -119,14 +119,14 @@ class Rogare::Plugins::Debug
 
   def name_info(m, name)
     m.debugly(
-      *Rogare::Data.names.where(name: name.downcase).all,
+      *Name.where(name: name.downcase).all,
       '------------------------------------------------',
-      *Rogare.sql[:names].where(name: name.downcase).select(:name, :kinds, :source, :surname).distinct.all
+      *DB[:names].where(name: name.downcase).select(:name, :kinds, :source, :surname).distinct.all
     )
   end
 
   def name_stats(m)
-    stats = Rogare::Data.name_stats
+    stats = Name.stats
 
     nt = stats[:total]
     ng = stats[:firsts]
@@ -150,19 +150,19 @@ class Rogare::Plugins::Debug
   def name_adjust(m, name, adjustment)
     adjustment.sub!(/^\+/, '')
 
-    origs = Rogare::Data.names.where(name: name.downcase).all
+    origs = Name.where(name: name.downcase).all
     return m.reply "No such name in db: `#{name}`" if origs.empty?
 
     surname = origs.any? { |n| n[:surname] }
 
     info = {
       name: name,
-      kinds: Sequel.pg_array([Sequel[adjustment].cast(:name_kind)]),
+      kinds: Name.to_kinds([adjustment]),
       source: m.user.nick
     }
 
-    Rogare.sql[:names].insert(info)
-    Rogare.sql[:names].insert(info.merge(surname: true)) if surname
+    DB[:names].insert(info)
+    DB[:names].insert(info.merge(surname: true)) if surname
 
     m.reply "Adjustment to `#{name}` added. Ask an admin to regenerate indexes. " \
             '(Admins, do that with: `!debug name regen`.)'
@@ -170,9 +170,9 @@ class Rogare::Plugins::Debug
 
   def name_regen(m)
     m.reply 'Refreshing name scores'
-    Rogare.sql['REFRESH MATERIALIZED VIEW names_scored_raw;'].all
+    DB['REFRESH MATERIALIZED VIEW names_scored_raw;'].all
     m.reply 'Refreshing name index'
-    Rogare.sql['REFRESH MATERIALIZED VIEW names_scored;'].all
+    DB['REFRESH MATERIALIZED VIEW names_scored;'].all
     m.reply 'Refreshing done'
   end
 
