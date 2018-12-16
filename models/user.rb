@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class User < Sequel::Model
+  one_to_many :novels
+
   def self.from_discord(discu)
     where(discord_id: discu.id).first
   end
@@ -28,5 +30,22 @@ class User < Sequel::Model
     }
 
     create(defaults.merge(extra))
+  end
+
+  def current_novels
+    novels_dataset
+      .where do
+        (started <= Sequel.function(:now)) &
+          (finished =~ false)
+      end
+      .reverse(:started)
+  end
+
+  def load_novel(id)
+    if id.nil? || id.empty?
+      current_novels.first
+    else
+      novels_dataset.where(id: id).first
+    end
   end
 end

@@ -55,13 +55,7 @@ module Rogare::Data
     end
 
     def current_novels(user)
-      novels
-        .where do
-          (user_id =~ user[:id]) &
-            (started <= Sequel.function(:now)) &
-            (finished =~ false)
-        end
-        .reverse(:started)
+      user.current_novels
     end
 
     def first_of(month, tz)
@@ -70,20 +64,11 @@ module Rogare::Data
     end
 
     def load_novel(user, id)
-      if id.nil? || id.empty?
-        Rogare::Data.current_novels(user).first
-      else
-        Rogare::Data.novels.where(user_id: user[:id], id: id.to_i).first
-      end
+      user.load_novel id
     end
 
     def novel_wordcount_at(id, time)
-      wc = wordcounts
-           .where { (novel_id =~ id) & (as_at < time) }
-           .reverse(:as_at)
-           .select(:words)
-           .first
-      wc ? wc[:words] : 0
+      Novel[id].wordcount_at(time)
     end
 
     def novel_wordcount(id)
@@ -130,7 +115,7 @@ module Rogare::Data
     end
 
     def set_novel_wordcount(id, wc)
-      wordcounts.insert(novel_id: id, words: wc)
+      Novel[id].wordcount = wc
     end
 
     def name_query(args)

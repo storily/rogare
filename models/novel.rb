@@ -5,4 +5,21 @@ class Novel < Sequel::Model
 
   one_to_many :goals
   one_to_many :wordcounts
+
+  def wordcount_at(time)
+    wc = wordcounts_dataset
+         .where { as_at < time }
+         .reverse(:as_at)
+         .select(:words)
+         .first
+    wc ? wc[:words] : 0
+  end
+
+  def wordcount
+    wordcount_at Time.now
+  end
+
+  def wordcount=(wc)
+    add_wordcount Wordcount.create(words: wc)
+  end
 end
