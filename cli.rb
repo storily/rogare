@@ -9,9 +9,16 @@ Bundler.require :default, (ENV['RACK_ENV'] || 'production').to_sym
 logs '=====> Loading framework'
 require './lib/rogare'
 
-logs '=====> Preparing resources'
+logs '=====> Loading goal parser'
+require './lib/goalterms/classes'
+if ENV['RACK_ENV'] == 'production'
+  require './lib/goalterms/grammar.rb'
+else
+  Treetop.load 'lib/goalterms/grammar.treetop'
+end
+
+logs '=====> Loading sequel'
 DB = Rogare.sql
-Rogare::Data.goal_parser_impl
 Sequel::Model.plugin :eager_each
 Sequel::Model.plugin :pg_auto_constraint_validations
 Sequel::Model.plugin :prepared_statements

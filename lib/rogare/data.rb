@@ -2,8 +2,6 @@
 
 module Rogare::Data
   class << self
-    extend Memoist
-
     def novels
       DB[:novels]
     end
@@ -149,16 +147,6 @@ module Rogare::Data
       end
     end
 
-    def goal_parser_impl
-      require './lib/goalterms/classes'
-
-      if ENV['RACK_ENV'] == 'production'
-        require './lib/goalterms/grammar.rb'
-      else
-        Treetop.load 'lib/goalterms/grammar.treetop'
-      end
-    end
-
     def goal_parser
       GoalTermsParser.new
     end
@@ -184,7 +172,5 @@ module Rogare::Data
     def datef(date)
       date.strftime('%-d %b %Y')
     end
-
-    memoize :goal_parser_impl
   end
 end
