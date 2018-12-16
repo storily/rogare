@@ -13,7 +13,6 @@ class Rogare::Plugins::Debug
     '`!% my id` - Show own discord id',
     '`!% my name` - Show own name as per API',
     '`!% my user` - Show own db user',
-    '`!% my time` - Show current time as per user timezone',
 
     '`!% user info <@user or ID or nick>` - Show user’s db info',
     '`!% name info <name>` - Show !name name db info (quite verbose)',
@@ -30,8 +29,7 @@ class Rogare::Plugins::Debug
     '`!% chan find <name>` - Find a channel from name or internals',
     '`!% user ids` - Display all known users and their IDs',
 
-    '`!% wc set user <discord user> <nano user>` - Set a user’s nano name for them',
-    '`!% wc set goal <discord user> <nano goal>` - Set a user’s nano goal for them'
+    '`!% wc set user <discord user> <nano user>` - Set a user’s nano name for them'
   ]
   handle_help
 
@@ -41,7 +39,6 @@ class Rogare::Plugins::Debug
   match_command /my id/, method: :my_id
   match_command /my name/, method: :my_name
   match_command /my user/, method: :my_user
-  match_command /my time/, method: :my_time
 
   match_command /user info (.+)/, method: :user_info
   match_command /name info ([[:alnum:]]+)/, method: :name_info
@@ -55,7 +52,6 @@ class Rogare::Plugins::Debug
   match_command /user ids/, method: :user_ids
 
   match_command /wc set user (.+) (.+)/, method: :wc_set_user
-  match_command /wc set goal (.+) (.+)/, method: :wc_set_goal
 
   before_handler do |method, m|
     unless m.channel.name == 'bot-testing'
@@ -65,7 +61,7 @@ class Rogare::Plugins::Debug
 
     next if %i[
       uptime help_message
-      my_id my_name my_user my_time
+      my_id my_name my_user
       user_info name_info name_adjust
       kind_info kind_map
     ].include? method
@@ -98,12 +94,6 @@ class Rogare::Plugins::Debug
 
   def my_user(m)
     m.reply "`#{m.user.to_db.inspect}`"
-  end
-
-  def my_time(m)
-    user = m.user.to_db
-    tz = TZInfo::Timezone.get(user[:tz] || Rogare.tz)
-    m.reply "`#{tz}`: `#{tz.now}`"
   end
 
   def user_info(m, mid)
@@ -213,19 +203,5 @@ class Rogare::Plugins::Debug
     u.save
 
     m.reply "User `#{du.id}` nanouser set to `#{nano}`"
-  end
-
-  def wc_set_goal(m, user, goal)
-    goal.sub! /k$/, '000'
-
-    du = Rogare.from_discord_mid user
-    du ||= Rogare.discord.users.find { |_i, u| u.name == user }[1]
-    return m.reply('No such user') unless du
-
-    u = User.from_discord du
-    novel = Rogare::Data.current_novels(u).first
-    Rogare::Data.novels.where(id: novel[:id]).update(goal: goal.to_i)
-
-    m.reply "User `#{du.id}` (DB:#{u[:id]}) nanouser `#{u[:nano_user] || u[:nick]}` goal set to `#{goal}`"
   end
 end
