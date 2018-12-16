@@ -10,7 +10,7 @@ logs '=====> Loading framework'
 require './lib/rogare'
 
 logs '=====> Preparing resources'
-Rogare.sql
+DB = Rogare.sql
 Rogare::Data.goal_parser_impl
 
 logs '=====> Loading models'
