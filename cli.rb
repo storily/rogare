@@ -19,5 +19,6 @@ Sequel::Model.plugin :prepared_statements_safe
 
 logs '=====> Loading models'
 Dir['./models/*.rb'].each do |p|
+  logs "     > #{Pathname.new(p).basename('.rb').to_s.camelize}"
   require p
 end
