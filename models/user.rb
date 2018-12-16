@@ -49,6 +49,10 @@ class User < Sequel::Model
     end
   end
 
+  def nano_user_valid?
+    Typhoeus.get("https://nanowrimo.org/participants/#{nano_user}").code == 200
+  end
+
   def nano_today
     return unless nano_user
 

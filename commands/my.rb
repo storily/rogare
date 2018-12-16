@@ -19,40 +19,37 @@ class Rogare::Commands::My
     user = m.user.to_db
 
     m.reply [
-      "**#{user[:nick]}**, first seen _#{user[:first_seen].strftime('%Y-%m-%d')}_",
-      ("Nano user: `#{user[:nano_user]}`" if user[:nano_user]),
-      "Timezone: **#{user[:tz]}**"
+      "**#{user.nick}**, first seen _#{user.first_seen.strftime('%Y-%m-%d')}_",
+      ("Nano user: `#{user.nano_user}`" if user.nano_user),
+      "Timezone: **#{user.tz}**"
     ].compact.join("\n")
   end
 
   def set_nano(m, name)
     name = name.strip.split.join('-')
+    user = m.user.to_db
 
-    res = Typhoeus.get "https://nanowrimo.org/participants/#{name}"
-    unless res.code == 200
+    user.nano_user = name
+    unless user.nano_user_valid?
       m.reply "No such nano name (`#{name}`) found on the nano website"
       return
     end
 
-    u = m.user.to_db
-    u.nano_user = name
-    u.save
-
+    user.save
     m.reply "Your nano name has been set to #{name}."
   end
 
   def set_timezone(m, tz)
     tz.strip!
 
-    begin
-      TZInfo::Timezone.get(tz)
-    rescue StandardError => e
+    unless TimeZone.new(tz)
       logs "Invalid timezone: #{e}"
       return m.reply 'That’s not a valid timezone.'
     end
 
     user = m.user.to_db
-    User.where(id: user[:id]).update(tz: tz)
+    user.tz = tz
+    user.save
     m.reply "Your timezone has been set to #{tz}."
   end
 end
