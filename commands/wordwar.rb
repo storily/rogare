@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::Wordwar
-  extend Rogare::Plugin
+class Rogare::Commands::Wordwar
+  extend Rogare::Command
 
   command 'wordwar'
   aliases 'war', 'ww'

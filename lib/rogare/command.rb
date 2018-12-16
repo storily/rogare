@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Rogare::Plugin
+module Rogare::Command
   @@mine = {}
 
   def self.extended(base)
@@ -60,7 +60,7 @@ module Rogare::Plugin
     # pattern as they come in, and then re-match the event in priority order.
     # To compile the pattern, we remove the existing handler, add the new pattern
     # to the common pattern, re-add a handler. It's a bit messy but keeps from
-    # adding boilerplate to the plugins / removing dynamism.
+    # adding boilerplate to the commands / removing dynamism.
 
     opts[:method] ||= :execute
 
@@ -70,6 +70,7 @@ module Rogare::Plugin
 
     Rogare.discord.remove_handler my[:discord_handler] if my[:discord_handler]
     my[:discord_handler] = Rogare.discord.message(contains: my[:common_pattern]) do |event|
+      # add channel to logs
       logs "---> Discord message: ‘#{event.message.content}’ from #{event.author.username} (#{event.author.id})"
       logs "---> Handling by #{self}"
 

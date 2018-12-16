@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::Pronouns
-  extend Rogare::Plugin
+class Rogare::Commands::Pronouns
+  extend Rogare::Command
 
   command 'pronouns'
   aliases 'gender'

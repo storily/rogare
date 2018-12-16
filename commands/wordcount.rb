@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::Wordcount
-  extend Rogare::Plugin
+class Rogare::Commands::Wordcount
+  extend Rogare::Command
   extend Memoist
 
   command 'wc'

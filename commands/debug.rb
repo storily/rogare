@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::Debug
-  extend Rogare::Plugin
+class Rogare::Commands::Debug
+  extend Rogare::Command
 
   command 'debug'
   aliases 'show'

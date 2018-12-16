@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::Choose
-  extend Rogare::Plugin
+class Rogare::Commands::Choose
+  extend Rogare::Command
 
   command 'choose'
   usage '`!% <first thing> or <second thing> [or <third thing> and so on]`'

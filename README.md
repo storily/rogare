@@ -20,7 +20,7 @@ Discord bot for NaNoWriMo (NZ channel).
 
 - `DB_SCHEMA=` The database schema to use (for namespacing inside a single Postgres instance, defaults to `public`).
 
-- `WOLFRAM_KEY=` With a valid Wolfram|Alpha key for the `!calc` plugin.
+- `WOLFRAM_KEY=` With a valid Wolfram|Alpha key for the `!calc` command.
 
 ## Installation & Development
 

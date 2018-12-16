@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::QuickCheck
-  extend Rogare::Plugin
+class Rogare::Commands::QuickCheck
+  extend Rogare::Command
 
   command Rogare.prefix
   usage '`!%` - Quick check of things'
@@ -11,8 +11,8 @@ class Rogare::Plugins::QuickCheck
   def execute(m, _param)
     great = false
 
-    if defined? Rogare::Plugins::Wordcount
-      wc = Rogare::Plugins::Wordcount.new
+    if defined? Rogare::Commands::Wordcount
+      wc = Rogare::Commands::Wordcount.new
       novels = wc.get_counts([m.user.to_db]).first
 
       if novels.empty?
@@ -23,8 +23,8 @@ class Rogare::Plugins::QuickCheck
       end
     end
 
-    if defined? Rogare::Plugins::Wordwar
-      ww = Rogare::Plugins::Wordwar.new
+    if defined? Rogare::Commands::Wordwar
+      ww = Rogare::Commands::Wordwar.new
 
       Rogare::Data.current_wars.each do |war|
         war[:end] = war[:start] + war[:seconds]

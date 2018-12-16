@@ -2,8 +2,8 @@
 
 require 'numbers_in_words'
 
-class Rogare::Plugins::Name
-  extend Rogare::Plugin
+class Rogare::Commands::Name
+  extend Rogare::Command
   extend Memoist
 
   command 'name'

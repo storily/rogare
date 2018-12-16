@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::Calc
-  extend Rogare::Plugin
+class Rogare::Commands::Calc
+  extend Rogare::Command
 
   command 'calc'
   aliases '='

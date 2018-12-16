@@ -2,8 +2,8 @@
 
 require_relative '../lib/dicere'
 
-class Rogare::Plugins::Plot
-  extend Rogare::Plugin
+class Rogare::Commands::Plot
+  extend Rogare::Command
 
   command 'plot', help_includes_command: true
   aliases 'prompt', 'seed', 'event'

@@ -129,8 +129,8 @@ COLOURS = [
   'black'
 ].freeze
 
-class Rogare::Plugins::Colour
-  extend Rogare::Plugin
+class Rogare::Commands::Colour
+  extend Rogare::Command
 
   command 'colour'
   aliases 'color'

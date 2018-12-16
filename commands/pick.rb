@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::Pick
-  extend Rogare::Plugin
+class Rogare::Commands::Pick
+  extend Rogare::Command
 
   command 'pick'
   usage '`!% <start> <end>` - Picks a number/letter between start and end'

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::Say
-  extend Rogare::Plugin
+class Rogare::Commands::Say
+  extend Rogare::Command
 
   command 'say'
   usage '`!% <channel> <message>` - Say something as the bot in an arbitrary channel'

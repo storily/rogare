@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::Voice
-  extend Rogare::Plugin
+class Rogare::Commands::Voice
+  extend Rogare::Command
 
   command 'voice', hidden: true
   aliases 'v' unless ENV['RACK_ENV'] == 'production'

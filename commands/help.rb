@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::Help
-  extend Rogare::Plugin
+class Rogare::Commands::Help
+  extend Rogare::Command
   extend Memoist
 
   command 'help', hidden: true
@@ -23,8 +23,8 @@ class Rogare::Plugins::Help
   end
 
   def command_list
-    Rogare::Plugins.to_a.map do |plugin|
-      one = Rogare::Plugin.allmine[plugin.inspect.to_sym]
+    Rogare::Commands.to_a.map do |command|
+      one = Rogare::Command.allmine[command.inspect.to_sym]
       next if one.nil?
       next if one[:hidden]
 

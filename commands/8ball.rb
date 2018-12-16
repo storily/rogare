@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::EightBall
-  extend Rogare::Plugin
+class Rogare::Commands::EightBall
+  extend Rogare::Command
 
   command '8ball'
   usage '`!% <derp>`'

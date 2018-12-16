@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::My
-  extend Rogare::Plugin
+class Rogare::Commands::My
+  extend Rogare::Command
 
   command 'my'
   usage [

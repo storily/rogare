@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Rogare::Plugins::Novel
-  extend Rogare::Plugin
+class Rogare::Commands::Novel
+  extend Rogare::Command
 
   command 'novel'
   usage [

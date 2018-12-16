@@ -3,7 +3,7 @@
 require './cli'
 
 logs '=====> Loading commands'
-Dir['./plugins/*.rb'].each do |p|
+Dir['./commands/*.rb'].each do |p|
   name = Pathname.new(p).basename('.rb').to_s
   if ENV['COMMANDS_WHITELIST']
     next unless ENV['COMMANDS_WHITELIST'].split(',').include? name
@@ -20,7 +20,7 @@ if ENV['RACK_ENV'] == 'production' || ENV['DEV_LOAD_WARS']
   threads << Thread.new do
     sleep 3
     logs '=====> Loading wordwars from Postgres'
-    wars = Rogare::Plugins::Wordwar.load_existing_wars
+    wars = Rogare::Commands::Wordwar.load_existing_wars
     logs "=====> Loaded #{wars.count} wordwars, now waiting on timers"
     wars.each(&:join)
   end
