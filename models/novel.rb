@@ -15,6 +15,11 @@ class Novel < Sequel::Model
     wc ? wc[:words] : 0
   end
 
+  def todaycount
+    count = Preparation::Todaycount[id: id]
+    (count && count[:words]) || 0
+  end
+
   def wordcount
     wordcount_at Time.now
   end

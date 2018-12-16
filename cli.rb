@@ -22,3 +22,10 @@ Dir['./models/*.rb'].each do |p|
   logs "     > #{Pathname.new(p).basename('.rb').to_s.camelize}"
   require p
 end
+
+logs '=====> Preparing statements'
+require './lib/preparation'
+Dir['./preparations/*.rb'].each do |p|
+  require p
+end
+Preparation.bake
