@@ -48,4 +48,26 @@ class User < Sequel::Model
       novels_dataset.where(id: id).first
     end
   end
+
+  def nano_today
+    return unless nano_user
+
+    res = Typhoeus.get "https://nanowrimo.org/participants/#{nano_user}/stats"
+    return unless res.code == 200
+
+    doc = Nokogiri::HTML res.body
+    doc.at_css('#novel_stats .stat:nth-child(2) .value').content.gsub(/[,\s]/, '').to_i
+  end
+
+  def nano_count
+    return unless nano_user
+
+    res = Typhoeus.get "https://nanowrimo.org/wordcount_api/wc/#{nano_user}"
+    return unless res.code == 200
+
+    doc = Nokogiri::XML(res.body)
+    return unless doc.css('error').empty?
+
+    doc.at_css('user_wordcount').content.to_i
+  end
 end

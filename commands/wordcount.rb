@@ -17,24 +17,6 @@ class Rogare::Commands::Wordcount
   ]
   handle_help
 
-  def nano_get_today(name)
-    res = Typhoeus.get "https://nanowrimo.org/participants/#{name}/stats"
-    return unless res.code == 200
-
-    doc = Nokogiri::HTML res.body
-    doc.at_css('#novel_stats .stat:nth-child(2) .value').content.gsub(/[,\s]/, '').to_i
-  end
-
-  def nano_get_count(name)
-    res = Typhoeus.get "https://nanowrimo.org/wordcount_api/wc/#{name}"
-    return unless res.code == 200
-
-    doc = Nokogiri::XML(res.body)
-    return unless doc.css('error').empty?
-
-    doc.at_css('user_wordcount').content.to_i
-  end
-
   match_command /set\s+today\s+(\d+)(?:\s+(?:for|to)\s+(\d+))?/, method: :set_today_count
   match_command /set\s+(\d+)(?:\s+(?:for|to)\s+(\d+))?/, method: :set_count
   match_command /add\s+(-?\d+)(?:\s+(?:for|to)\s+(\d+))?/, method: :add_count
@@ -143,9 +125,6 @@ class Rogare::Commands::Wordcount
     elsif db_wc.positive?
       data[:count] = db_wc
       data[:today] = novel.todaycount
-      # elsif novel[:type] == 'nano' # TODO: camp
-      #   data[:count] = nano_get_count(user.nano_user) || 0
-      #   data[:today] = nano_get_today(user.nano_user) if data[:count].positive?
     end
 
     goal = novel.current_goal
@@ -249,10 +228,7 @@ class Rogare::Commands::Wordcount
     end
 
     if count[:goal]
-      if count[:novel][:type] == 'nano'
-        deets << Rogare::Data.goal_format(count[:goal][:words]) unless count[:goal][:words] == 50_000
-        deets << 'nano has ended' if count[:days][:expired]
-      elsif count[:days] && count[:days][:expired]
+      if count[:days] && count[:days][:expired]
         deets << Rogare::Data.goal_format(count[:goal][:words])
         deets << "over #{count[:days][:total]} days"
         deets << 'expired'
