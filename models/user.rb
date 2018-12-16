@@ -14,7 +14,7 @@ class User < Sequel::Model
     return new_from_discord(discu)[:last_seen] unless discordian
     return discordian[:last_seen] unless Time.now - discordian[:last_seen] > 60 || discordian[:nick] != nick
 
-    discordian.last_seen = Sequel.function(:now)
+    discordian.last_seen = Time.now
     discordian.nick = nick
     discordian.save
 
