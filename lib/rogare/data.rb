@@ -5,27 +5,27 @@ module Rogare::Data
     extend Memoist
 
     def novels
-      Rogare.sql[:novels]
+      DB[:novels]
     end
 
     def names
-      Rogare.sql[:names_scored]
+      DB[:names_scored]
     end
 
     def wars
-      Rogare.sql[:wars]
+      DB[:wars]
     end
 
     def warmembers
-      Rogare.sql[:users_wars]
+      DB[:users_wars]
     end
 
     def wordcounts
-      Rogare.sql[:wordcounts]
+      DB[:wordcounts]
     end
 
     def goals
-      Rogare.sql[:goals]
+      DB[:goals]
     end
 
     def pga(*things)
@@ -33,25 +33,7 @@ module Rogare::Data
     end
 
     def kinds(*knds)
-      Sequel[pga(*knds)].cast(:'name_kind[]')
-    end
-
-    def enum_values(type)
-      Rogare.sql.select do
-        unnest.function(
-          enum_range.function(Sequel[nil].cast(type))
-        ).cast(:text).as(:value)
-      end
-    end
-
-    def all_kinds
-      Rogare.sql[:enum]
-            .with(:enum, enum_values(:name_kind))
-            .where do
-              (Sequel.function(:left, value, 1) !~ '-') &
-                (value !~ %w[first last])
-            end
-            .select_map(:value)
+      Name.to_kinds(knds)
     end
 
     def current_novels(user)
@@ -84,34 +66,15 @@ module Rogare::Data
     end
 
     def name_query(args)
-      last = args[:kinds].include? 'last'
-      args[:kinds] -= %w[last male female enby] if last
-
-      query = names.select(:name).order { random.function }.where(surname: last).limit(args[:n])
-      query = query.where { score >= args[:freq][0] } if args[:freq][0]
-      query = query.where { score <= args[:freq][1] } if args[:freq][1]
-
-      unless args[:kinds].empty?
-        castkinds = kinds(*args[:kinds].uniq)
-        query = query.where(Sequel[:kinds].pg_array.contains(castkinds))
-      end
-
-      # TODO: use args[:also] to do further filtering with fallback to non-also if there's too few results
-
-      query
+      Name.query(args)
     end
 
     def name_search(args)
-      name_query(args).all.map { |name| ucname name[:name] }
+      Name.search args
     end
 
     def ucname(name)
-      name.split(/(?<![[:alnum:]])/).map do |part|
-        (part[0..-2].capitalize + part[-1])
-          .gsub(/^(Ma?c|V[ao]n)(\w+)/) { |_s| "#{Regexp.last_match(1)}#{Regexp.last_match(2).capitalize}" }
-          .gsub(/^O([bcdfghklmnrst]\w+)/) { |_s| "O’#{Regexp.last_match(1).capitalize}" }
-          .gsub(/^O’Mac(\w+)/) { |_s| "O’Mac#{Regexp.last_match(1).capitalize}" }
-      end.join
+      Name.format name
     end
 
     def existing_wars
@@ -163,7 +126,7 @@ module Rogare::Data
       queries << Rogare::Data.names.where(surname: false).select { count('*') }.as(:firsts)
       queries << Rogare::Data.names.where(surname: true).select { count('*') }.as(:lasts)
 
-      stats = Rogare.sql.select { queries }.first
+      stats = DB.select { queries }.first
       total = stats.delete :total
       firsts = stats.delete :firsts
       lasts = stats.delete :lasts
@@ -222,6 +185,6 @@ module Rogare::Data
       date.strftime('%-d %b %Y')
     end
 
-    memoize :all_kinds, :goal_parser_impl
+    memoize :goal_parser_impl
   end
 end
