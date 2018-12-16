@@ -49,8 +49,8 @@ class Rogare::Plugins::Name
     args[:n] = 1 if args[:n] < 1
 
     if args[:full]
-      firsts = Rogare::Data.name_search(args_first_name(args))
-      lasts = Rogare::Data.name_search(args_last_name(args))
+      firsts = Name.search(args_first_name(args))
+      lasts = Name.search(args_last_name(args))
       diff = firsts.length - lasts.length
       get_more_lasts(args, diff).each { |n| lasts << n } if diff.positive?
 
@@ -64,7 +64,7 @@ class Rogare::Plugins::Name
 
       names = firsts.zip(lasts).map { |fl| "#{fl[0]} #{fl[1]}" }
     else
-      names = Rogare::Data.name_search(args)
+      names = Name.search(args)
     end
 
     names = ['No matching names yet :('] if names.empty?
@@ -88,11 +88,11 @@ class Rogare::Plugins::Name
   def get_some_lasts(args, amount)
     new_args = args_last_name args
     new_args[:n] = amount
-    Rogare::Data.name_search new_args
+    Name.search new_args
   end
 
   def get_more_lasts(args, amount)
-    Rogare::Data.name_search(
+    Name.search(
       n: amount,
       kinds: ['last'],
       full: false,

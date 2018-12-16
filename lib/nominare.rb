@@ -24,6 +24,6 @@ class Nominare < Sinatra::Application
   end
 
   get '/stats' do
-    Rogare::Data.name_stats.to_json
+    Name.stats.to_json
   end
 end

@@ -6,10 +6,6 @@ module Rogare::Data
       DB[:novels]
     end
 
-    def names
-      DB[:names_scored]
-    end
-
     def wars
       DB[:wars]
     end
@@ -63,18 +59,6 @@ module Rogare::Data
       Novel[id].wordcount = wc
     end
 
-    def name_query(args)
-      Name.query(args)
-    end
-
-    def name_search(args)
-      Name.search args
-    end
-
-    def ucname(name)
-      Name.format name
-    end
-
     def existing_wars
       wars.select_all(:wars)
           .select_append(Sequel[:users][:nick].as(:creator_nick))
@@ -111,30 +95,6 @@ module Rogare::Data
 
     def war_exists?(id)
       current_war(id).count.positive?
-    end
-
-    def name_stats
-      queries = Rogare::Data.all_kinds.map do |kind|
-        Rogare::Data.names.where(
-          Sequel.pg_array(:kinds).contains(Rogare::Data.kinds(kind))
-        ).select { count('*') }.as(kind)
-      end
-
-      queries << Rogare::Data.names.select { count('*') }.as(:total)
-      queries << Rogare::Data.names.where(surname: false).select { count('*') }.as(:firsts)
-      queries << Rogare::Data.names.where(surname: true).select { count('*') }.as(:lasts)
-
-      stats = DB.select { queries }.first
-      total = stats.delete :total
-      firsts = stats.delete :firsts
-      lasts = stats.delete :lasts
-
-      {
-        total: total,
-        firsts: firsts,
-        lasts: lasts,
-        kinds: stats
-      }
     end
 
     def goal_format(goal)

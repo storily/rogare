@@ -145,6 +145,6 @@ class Rogare::Plugins::Colour
     param = 1 if param < 1
     param = 10 if param > 10
 
-    m.reply COLOURS.sample(param).map { |c| Rogare::Data.ucname c }.join(', ')
+    m.reply COLOURS.sample(param).map(&:humanize).join(', ')
   end
 end
