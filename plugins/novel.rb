@@ -57,12 +57,7 @@ class Rogare::Plugins::Novel
   match_empty :show_novels
 
   def show_novels(m)
-    user = m.user.to_db
-    novels = Rogare::Data
-             .novels
-             .where(user_id: user[:id])
-             .reverse(:started)
-             .all
+    novels = m.user.to_db.novels_dataset.reverse(:started).all
 
     nmore = nil
     if novels.length > 8
@@ -77,7 +72,7 @@ class Rogare::Plugins::Novel
   end
 
   def show_novel(m, id)
-    novel = Rogare::Data.novels.where(id: id.to_i).first
+    novel = Novel[id]
 
     return m.reply 'No such novel' unless novel
 
@@ -87,29 +82,24 @@ class Rogare::Plugins::Novel
   def create_novel(m, name)
     user = m.user.to_db
 
-    id = Rogare::Data.novels.insert(
-      name: name.strip,
-      user_id: user[:id]
-    )
+    novel = Novel.new(name: name.strip)
+    user.add_novel novel
 
-    m.reply "New novel created: #{id}."
+    m.reply "New novel created: #{novel.id}."
   end
 
   def rename_novel(m, id, name)
-    user = m.user.to_db
-    novel = load_novel user, id
+    novel = m.user.to_db.load_novel id
 
     return m.reply 'No such novel' unless novel
 
-    name.strip!
-    Rogare::Data.novels.where(id: novel[:id]).update(name: name)
-
-    novel[:name] = name
+    novel.name = name.strip
+    novel.save
     m.reply format_novel(novel)
   end
 
   def parse_goal(line)
-    parser = Rogare::Data.goal_parser
+    parser = GoalTermsParser.new
     tree = parser.parse line.strip.downcase
 
     raise "Bad input: #{parser.failure_reason}" unless tree
@@ -119,8 +109,8 @@ class Rogare::Plugins::Novel
 
   def new_goal(m, id, line)
     user = m.user.to_db
-    novel = load_novel user, id
-    tz = TimeZone.new(user[:tz] || Rogare.tz)
+    novel = user.load_novel id
+    tz = TimeZone.new(user.tz)
 
     return m.reply 'No such novel' unless novel
 
@@ -133,8 +123,7 @@ class Rogare::Plugins::Novel
 
     return m.reply 'I need at least a word count' unless goal.words&.positive?
 
-    Rogare::Data.goals.insert({
-      novel_id: novel[:id],
+    goal = Goal.new({
       words: goal.words,
       name: goal.name,
       start: goal.start(tz),
@@ -142,14 +131,14 @@ class Rogare::Plugins::Novel
       repeat: goal.repeat,
       curve: goal.curve
     }.compact)
-
+    novel.add_goal goal
     m.reply format_novel(novel)
   end
 
   def edit_goal(m, id, line)
     user = m.user.to_db
-    novel = load_novel user, id
-    tz = TimeZone.new(user[:tz] || Rogare.tz)
+    novel = user.load_novel id
+    tz = TimeZone.new(user.tz)
 
     return m.reply 'No such novel' unless novel
 
@@ -159,65 +148,57 @@ class Rogare::Plugins::Novel
       return m.reply err
     end
 
-    current = Rogare::Data.current_goal(novel, goal.offset || 0)
-    update = {}
-    update[:words] = goal.words if goal.words && goal.words != current[:words]
-    update[:name] = goal.name if goal.name && goal.name != current[:name]
-    update[:start] = goal.start(tz) if goal.start && goal.start(tz) != current[:start]
-    update[:finish] = goal.finish(tz) if goal.finish(tz) && goal.finish(tz) != current[:finish]
-    update[:repeat] = goal.repeat if goal.repeat && goal.repeat != current[:repeat]
-    update[:curve] = goal.curve if goal.curve && goal.curve != current[:curve]
+    current = novel.current_goal(goal.offset || 0)
 
-    update[:name] = nil if goal.name == ''
-    update[:finish] = nil if goal.days&.zero?
+    current.words = goal.words if goal.words
+    current.name = goal.name if goal.name
+    current.start = goal.start(tz) if goal.start
+    current.finish = goal.finish(tz) if goal.finish(tz)
+    current.repeat = goal.repeat if goal.repeat
+    current.curve = goal.curve if goal.curve
 
-    Rogare::Data.goals.where(id: current[:id]).update(update) unless update.empty?
+    current.name = nil if goal.name == ''
+    current.finish = nil if goal.days&.zero?
+
+    current.save
 
     m.reply format_novel(novel)
   end
 
   def remove_goal(m, id, letter = nil)
-    user = m.user.to_db
-    novel = load_novel user, id
+    novel = m.user.to_db.load_novel id
 
     return m.reply 'No such novel' unless novel
 
     offset = letter ? (GoalTerms.letter_to_i(letter) - 1) : 0
-    goal = Rogare::Data.current_goal(novel, offset)
-
-    Rogare::Data.goals.where(id: goal[:id]).update(removed: Sequel.function(:now))
+    goal = novel.current_goal offset
+    goal.removed = Time.now
+    goal.save
 
     m.reply format_novel(novel)
   end
 
   def finish_novel(m, id)
-    user = m.user.to_db
-    novel = load_novel user, id
+    novel = m.user.to_db.load_novel id
 
     return m.reply 'No such novel' unless novel
     return m.reply 'Already marked done' if novel[:finished]
 
-    Rogare::Data.novels.where(id: novel[:id]).update(finished: true)
+    novel.finished = true
+    novel.save
 
-    novel[:finished] = true
     m.reply format_novel(novel)
   end
 
   def unfinish_novel(m, id)
-    user = m.user.to_db
-    novel = load_novel user, id
+    novel = m.user.to_db.load_novel id
 
     return m.reply 'No such novel' unless novel
     return m.reply 'Not marked done' unless novel[:finished]
 
-    Rogare::Data.novels.where(id: novel[:id]).update(finished: false)
-
-    novel[:finished] = false
+    novel.finished = false
+    novel.save
     m.reply format_novel(novel)
-  end
-
-  def load_novel(user, id)
-    Rogare::Data.load_novel user, id
   end
 
   def format_goal(goal, offset = nil)
@@ -237,8 +218,8 @@ class Rogare::Plugins::Novel
   end
 
   def format_novel(novel)
-    goals = Rogare::Data.current_goals(novel).all
-    words = Rogare::Data.novel_wordcount(novel[:id])
+    goals = novel.current_goals.all
+    words = novel.wordcount
 
     "#{novel[:finished] ? '📘' : '📖'} " \
     "#{novel[:id]}. “**#{Rogare::Data.encode_entities(novel[:name] || 'Untitled')}**”. " \

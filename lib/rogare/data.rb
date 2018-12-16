@@ -2,10 +2,6 @@
 
 module Rogare::Data
   class << self
-    def novels
-      DB[:novels]
-    end
-
     def wars
       DB[:wars]
     end
@@ -14,49 +10,13 @@ module Rogare::Data
       DB[:users_wars]
     end
 
-    def wordcounts
-      DB[:wordcounts]
-    end
-
-    def goals
-      DB[:goals]
-    end
-
     def pga(*things)
       Sequel.pg_array(things)
-    end
-
-    def kinds(*knds)
-      Name.to_kinds(knds)
-    end
-
-    def current_novels(user)
-      user.current_novels
     end
 
     def first_of(month, tz)
       tz_string = tz.current_period.offset.abbreviation
       DateTime.parse("#{Time.new.year}-#{month}-01 00:00:00 #{tz_string}").to_time
-    end
-
-    def load_novel(user, id)
-      user.load_novel id
-    end
-
-    def novel_wordcount_at(id, time)
-      Novel[id].wordcount_at(time)
-    end
-
-    def novel_wordcount(id)
-      novel_wordcount_at(id, Time.now)
-    end
-
-    def novel_todaycount(id)
-      Novel[id].todaycount
-    end
-
-    def set_novel_wordcount(id, wc)
-      Novel[id].wordcount = wc
     end
 
     def existing_wars
@@ -105,22 +65,6 @@ module Rogare::Data
       else
         "#{(goal / 1_000.0).round}k goal"
       end
-    end
-
-    def goal_parser
-      GoalTermsParser.new
-    end
-
-    def current_goals(novel)
-      goals.where do
-        (novel_id =~ novel[:id]) &
-          (removed =~ nil) &
-          ((finish > now.function) | (finish =~ nil))
-      end.order_by(:start, :id)
-    end
-
-    def current_goal(novel, offset = 0)
-      current_goals(novel).offset(offset).first
     end
 
     def encode_entities(raws)

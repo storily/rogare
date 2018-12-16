@@ -27,4 +27,15 @@ class Novel < Sequel::Model
   def wordcount=(wc)
     add_wordcount Wordcount.create(words: wc)
   end
+
+  def current_goals
+    goals_dataset.where do
+      (removed =~ nil) &
+        ((finish > now.function) | (finish =~ nil))
+    end.order_by(:start, :id)
+  end
+
+  def current_goal(offset = 0)
+    current_goals.offset(offset).first
+  end
 end

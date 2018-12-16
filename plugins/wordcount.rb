@@ -74,7 +74,7 @@ class Rogare::Plugins::Wordcount
   end
 
   def novel_count(m, id)
-    novel = Rogare::Data.novels.where(id: id.to_i).first
+    novel = Novel[id]
     return m.reply 'No such novel' unless novel
 
     count = get_novel_count novel
@@ -82,43 +82,39 @@ class Rogare::Plugins::Wordcount
   end
 
   def set_count(m, words, id = '')
-    user = m.user.to_db
-    novel = Rogare::Data.load_novel user, id
+    novel = m.user.to_db.load_novel id
 
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
     return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
 
-    Rogare::Data.set_novel_wordcount(novel[:id], words.strip.to_i)
+    novel.wordcount = words.strip.to_i
     own_count(m)
   end
 
   def set_today_count(m, words, id = '')
-    user = m.user.to_db
-    novel = Rogare::Data.load_novel user, id
+    novel = m.user.to_db.load_novel id
 
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
     return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
 
-    existing = Rogare::Data.novel_wordcount(novel[:id])
-    today = Rogare::Data.novel_todaycount(novel[:id])
+    existing = novel.wordcount
+    today = novel.todaycount
     gap = words.strip.to_i - today
 
-    Rogare::Data.set_novel_wordcount(novel[:id], existing + gap)
+    novel.wordcound = existing + gap
     own_count(m)
   end
 
   def add_count(m, words, id = '')
-    user = m.user.to_db
-    novel = Rogare::Data.load_novel user, id
+    novel = m.user.to_db.load_novel id
 
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
     return m.reply 'Can’t set wordcount of a finished novel' if novel[:finished]
 
-    existing = Rogare::Data.novel_wordcount(novel[:id])
-
+    existing = novel.wordcount
     new_words = existing + if words.start_with? '-'
                              words[1..-1].to_i * -1
                            else
@@ -127,12 +123,12 @@ class Rogare::Plugins::Wordcount
 
     return m.reply "Can’t remove more words than the novel has (#{existing})" if new_words.negative?
 
-    Rogare::Data.set_novel_wordcount(novel[:id], new_words)
+    novel.wordcount = new_words
     own_count(m)
   end
 
   def get_novel_count(novel, user = nil)
-    user ||= User.where(id: novel[:user_id]).first
+    user ||= novel.user
 
     data = {
       user: user,
@@ -140,28 +136,28 @@ class Rogare::Plugins::Wordcount
       count: 0
     }
 
-    db_wc = Rogare::Data.novel_wordcount(novel[:id])
+    db_wc = novel.wordcount
 
-    if user[:id] == 10 && user[:nick] =~ /\[\d+\]$/ # tamgar sets their count in their nick
-      data[:count] = user[:nick].split(/[\[\]]/).last.to_i
+    if user.id == 10 && user.nick =~ /\[\d+\]$/ # tamgar sets their count in their nick
+      data[:count] = user.nick.split(/[\[\]]/).last.to_i
     elsif db_wc.positive?
       data[:count] = db_wc
-      data[:today] = Rogare::Data.novel_todaycount(novel[:id])
-    elsif novel[:type] == 'nano' # TODO: camp
-      data[:count] = nano_get_count(user[:nano_user]) || 0
-      data[:today] = nano_get_today(user[:nano_user]) if data[:count].positive?
+      data[:today] = novel.todaycount
+      # elsif novel[:type] == 'nano' # TODO: camp
+      #   data[:count] = nano_get_count(user.nano_user) || 0
+      #   data[:today] = nano_get_today(user.nano_user) if data[:count].positive?
     end
 
-    goal = Rogare::Data.current_goal(novel)
+    goal = novel.current_goal
     data[:goal] = goal
 
     # no need to do any time calculations if there's no time limit
-    if goal && goal[:finish]
-      tz = TimeZone.new(user[:tz] || Rogare.tz)
+    if goal&.finish
+      tz = TimeZone.new(user.tz)
       now = tz.now
 
-      gstart = tz.local goal[:start].year, goal[:start].month, goal[:start].day
-      gfinish = tz.local(goal[:finish].year, goal[:finish].month, goal[:finish].day).end_of_day
+      gstart = tz.local goal.start.year, goal.start.month, goal.start.day
+      gfinish = tz.local(goal.finish.year, goal.finish.month, goal.finish.day).end_of_day
 
       totaldiff = gfinish - gstart.end_of_day
       days = (totaldiff / 1.day).to_i
@@ -175,7 +171,7 @@ class Rogare::Plugins::Wordcount
       data[:days] = {
         total: days,
         length: totaldiff,
-        finish: goal[:finish],
+        finish: goal.finish,
         left: timediff,
         gone: totaldiff - timediff,
         expired: !timediff.positive?
@@ -185,10 +181,10 @@ class Rogare::Plugins::Wordcount
         goal_secs = 1.day.to_i * data[:days][:total]
 
         nth = (data[:days][:gone] / 1.day.to_i).ceil
-        goal = goal[:words].to_f
+        goal = goal.words.to_f
 
         count_at_goal_start = if db_wc.positive?
-                                Rogare::Data.novel_wordcount_at novel[:id], gstart
+                                novel.wordcount_at gstart
                               else
                                 0
                               end
@@ -211,17 +207,17 @@ class Rogare::Plugins::Wordcount
 
   def get_counts(users)
     users.map do |user|
-      Rogare::Data.current_novels(user).map do |novel|
+      user.current_novels.map do |novel|
         get_novel_count novel, user
       end
     end
   end
 
   def display_novels(m, novels)
-    if rand > 0.5 && !novels.select { |n| n[:novel][:type] == 'nano' && n[:count] > 100_000 }.empty?
-      m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Monstrous].sample} Wordcount"
-      sleep 1
-    end
+    # if rand > 0.5 && !novels.select { |n| n[:novel][:type] == 'nano' && n[:count] > 100_000 }.empty?
+    #   m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Monstrous].sample} Wordcount"
+    #   sleep 1
+    # end
 
     m.reply novels.map { |n| format n }.join("\n")
   end
