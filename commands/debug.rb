@@ -81,7 +81,7 @@ class Rogare::Commands::Debug
     m.reply "I made my debut at #{Rogare.boot}, #{(Time.now - Rogare.boot).round} seconds ago"
   end
 
-  def cycle_game(m)
+  def cycle_game(_m)
     Rogare.discord.update_status('online', Rogare.game, nil)
   end
 

@@ -26,7 +26,7 @@ class Rogare::Commands::QuickCheck
     if defined? Rogare::Commands::Wordwar
       ww = Rogare::Commands::Wordwar.new
 
-      Rogare::Data.current_wars.each do |war|
+      War.all_current.each do |war|
         war[:end] = war[:start] + war[:seconds]
         ww.say_war_info m, war
       end

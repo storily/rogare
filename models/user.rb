@@ -2,6 +2,7 @@
 
 class User < Sequel::Model
   one_to_many :novels
+  many_to_many :wars, join_table: :wars_members, class: :War
 
   def self.from_discord(discu)
     where(discord_id: discu.id).first
@@ -30,6 +31,14 @@ class User < Sequel::Model
     }
 
     create(defaults.merge(extra))
+  end
+
+  def mid
+    "<@#{discord_id}>"
+  end
+
+  def nixnotif
+    Rogare.nixnotif nick
   end
 
   def current_novels
