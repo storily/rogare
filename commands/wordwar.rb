@@ -92,7 +92,7 @@ class Rogare::Commands::Wordwar
       war.save
       war.add_member user
     rescue StandardError => err
-      logs ([err.message]+err.backtrace).join($/)
+      logs [err.message, err.backtrace].flatten.join("\n")
       return m.reply 'Got an error, check your times and try again.'
     end
 
@@ -158,19 +158,19 @@ class Rogare::Commands::Wordwar
     m.reply "#{war.id}: #{war.creator.nixnotif}’s war, with: #{others}"
   end
 
-  def ex_join_war(m, _param)
+  def ex_join_war(m, id)
     user = m.user.to_db
     war = War[id.to_i]
     return m.reply 'No such wordwar' unless war&.current?
 
-    war.add_member user
-    war.channels = war.channels.push(m.channel.to_s).uniq
+    war.add_member! user
+    war.add_channel m.channel.to_s
     war.save
 
     m.reply "You're in!"
   end
 
-  def ex_leave_war(m, _param)
+  def ex_leave_war(m, id)
     user = m.user.to_db
     war = War[id.to_i]
     return m.reply 'No such wordwar' unless war&.current?
@@ -180,7 +180,7 @@ class Rogare::Commands::Wordwar
     m.reply "You're out."
   end
 
-  def ex_cancel_war(m, _param)
+  def ex_cancel_war(m, id)
     user = m.user.to_db
     war = War[id.to_i]
     return m.reply 'No such wordwar' unless war&.current?

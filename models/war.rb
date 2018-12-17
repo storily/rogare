@@ -61,8 +61,18 @@ class War < Sequel::Model
   end
 
   def cancel!(by_user)
-    add_canceller by_user
+    self.canceller = by_user
     self.cancelled = Time.now
     save
+  end
+
+  def add_member!(user)
+    return if members.include? user
+
+    add_member user
+  end
+
+  def add_channel(chan)
+    self.channels = channels.push(chan).uniq
   end
 end
