@@ -21,7 +21,8 @@ class Rogare::Commands::Debug
     '`!% name adjust <name> <+/-kind>` - File an adjustment for a name to be (+) or not be (-) a particular kind.',
 
     "\n**Admin commands:**",
-    '`!% status <status>` - Set bot’s status',
+    '`!% game` - Cycle the bot’s playing now status',
+    '`!% take a nap` - Voluntarily exit',
 
     '`!% name regen` - Regenerate the !name index.',
 
@@ -34,7 +35,8 @@ class Rogare::Commands::Debug
   handle_help
 
   match_command /uptime/, method: :uptime
-  match_command /status (.+)/, method: :status
+  match_command /game/, method: :cycle_game
+  match_command /take a nap/, method: :take_a_nap
 
   match_command /my id/, method: :my_id
   match_command /my name/, method: :my_name
@@ -79,9 +81,20 @@ class Rogare::Commands::Debug
     m.reply "I made my debut at #{Rogare.boot}, #{(Time.now - Rogare.boot).round} seconds ago"
   end
 
-  def status(m, param)
-    Rogare.discord.update_status(param, Rogare.game, nil)
-    m.reply "Status set to `#{param}`"
+  def cycle_game(m)
+    Rogare.discord.update_status('online', Rogare.game, nil)
+  end
+
+  def take_a_nap(m)
+    m.reply ['It’s been a privilege', 'See you soon', 'I’ll see you on the other side'].sample
+    sleep 1
+
+    logs 'Sending TERM to self'
+    Process.kill('TERM', Process.pid)
+
+    sleep 5
+    logs 'exeunt.'
+    Process.exit
   end
 
   def my_id(m)
