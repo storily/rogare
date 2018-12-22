@@ -66,7 +66,7 @@ class Rogare::Commands::Novel
       novels.first!(8)
     end
 
-    say = novels.map { |nov| format_novel nov }.join("\n")
+    say = novels.map { |nov| format_novel nov, true }.join("\n")
     say += "\nand #{nmore} more" if nmore
     # say += "(use `!novel all` to get them as PM)" if nmore && rand > 0.8
     m.reply say.strip
@@ -227,13 +227,14 @@ class Rogare::Commands::Novel
     "#{letter} #{details}".strip
   end
 
-  def format_novel(novel)
+  def format_novel(novel, own = false)
     goals = novel.current_goals.all
     past_goals = novel.past_goals.all
     words = novel.wordcount
 
     icon = novel.finished ? '📘' : '📖'
-    title = "#{novel.id}. “**#{encode_entities(novel.name || 'Untitled')}**”."
+    byline = (" by #{novel.user.nixnotif}" unless own)
+    title = "#{novel.id}. “**#{encode_entities(novel.name || 'Untitled')}**”#{byline}."
     details = [
       "Started _#{datef(novel.started)}_",
       ("**#{words}** words" if words.positive?),
