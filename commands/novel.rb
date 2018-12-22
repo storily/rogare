@@ -227,6 +227,8 @@ class Rogare::Commands::Novel
 
   def format_novel(novel)
     goals = novel.current_goals.all
+    past_goals = novel.past_goals.count
+    past_goals = nil if past_goals.zero?
     words = novel.wordcount
 
     icon = novel.finished ? '📘' : '📖'
@@ -249,6 +251,7 @@ class Rogare::Commands::Novel
     goals = if goals.length > 1
               "\n" + goals.map.with_index { |goal, i| format_goal(goal, i) }.join("\n") + "\n"
             end.to_s
+    past_goals = "…with **#{past_goals}** past goal#{past_goals > 1 ? 's' : ''}.\n" if past_goals
 
     # TODO: append number of past goals
     "#{icon} #{title} #{details} #{goals}#{past_goals}"

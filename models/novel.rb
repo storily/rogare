@@ -28,6 +28,18 @@ class Novel < Sequel::Model
     add_wordcount Wordcount.new(words: wc)
   end
 
+  def past_goals
+    tz = user.tz
+    goals_dataset.where do
+      (removed =~ nil) &
+        (finish !~ nil) &
+        (
+          timezone(tz, now.function) >
+          (timezone(tz, finish) + Sequel.lit("interval '1 day'"))
+        )
+    end.order_by(:start, :id)
+  end
+
   def current_goals
     tz = user.tz
     goals_dataset.where do
