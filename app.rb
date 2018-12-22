@@ -16,6 +16,15 @@ logs '=====> Preparing threads'
 require 'thwait'
 threads = []
 
+threads << Thread.new do
+  logs '=====> Spinning up goal repeater'
+  loop do
+    n = Goal.need_repeating.map(&:repeat_if_needed!).length
+    logs "=====> The goal repeater repeated #{n} goals! Nom nom nom" if n.positive?
+    sleep 10.minutes
+  end
+end
+
 if ENV['RACK_ENV'] == 'production' || ENV['DEV_LOAD_WARS']
   threads << Thread.new do
     sleep 3

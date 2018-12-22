@@ -9,11 +9,13 @@ class Goal < Sequel::Model
 
   def tz_finish
     return unless finish
+
     novel.user.date_in_tz(finish).end_of_day
   end
 
   def over?
     return unless tz_finish
+
     Time.now >= tz_finish
   end
 
@@ -33,5 +35,27 @@ class Goal < Sequel::Model
     else
       "#{(words / 1_000.0).round}k goal"
     end
+  end
+
+  def repeat_if_needed!
+    DB.transaction(isolation: :serializable) do
+      return if removed
+      return unless repeat
+      return unless over?
+
+      copy = to_hash.dup
+      %i[id created updated].each { |k| copy.delete k }
+      copy[:start] = finish.succ
+      copy[:finish] += (finish - start).days
+
+      follow = Goal.create(copy)
+      self.repeat = false
+      save
+      follow
+    end
+  end
+
+  def self.need_repeating
+    where { repeat & (removed =~ nil) }.all.select(&:over?)
   end
 end
