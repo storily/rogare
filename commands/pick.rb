@@ -11,7 +11,7 @@ class Rogare::Commands::Pick
   match_empty :help_message
 
   def execute(m, start, ending)
-    start, ending = [start, ending].map { |c| c.strip.upcase }.sort
+    start, ending = [start, ending].map(&:upcase).map { |c| c.to_i.positive? ? c.to_i : c }.sort
     m.reply((start..ending).to_a.sample)
   end
 end
