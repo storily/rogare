@@ -111,7 +111,7 @@ class Rogare::Commands::Novel
   def new_goal(m, id, line)
     user = m.user.to_db
     novel = user.load_novel id
-    tz = TimeZone.new(user.tz)
+    tz = user.timezone
 
     return m.reply 'No such novel' unless novel
 
@@ -139,7 +139,7 @@ class Rogare::Commands::Novel
   def edit_goal(m, id, line)
     user = m.user.to_db
     novel = user.load_novel id
-    tz = TimeZone.new(user.tz)
+    tz = user.timezone
 
     return m.reply 'No such novel' unless novel
 
@@ -205,29 +205,36 @@ class Rogare::Commands::Novel
   def format_goal(goal, offset = nil)
     goal_words = goal.format_words
 
-    if offset
-      goal_words = goal_words.sub('goal', '').strip
-      "#{GoalTerms.offset_to_s(offset)}: "
-    end.to_s + [
-      ("(“#{encode_entities(goal[:name])}”)" unless goal[:name].nil? || goal[:name].empty?),
+    letter = if offset
+               goal_words = goal_words.sub('goal', '').strip
+               "#{GoalTerms.offset_to_s(offset)}:"
+             end.to_s
+
+    details = [
+      ("(“#{encode_entities(goal.name)}”)" unless goal.name.nil? || goal.name.empty?),
       "**#{goal_words}**",
-      "starting _#{datef(goal[:start])}_",
-      ("ending _#{datef(goal[:finish])}_" if goal[:finish]),
-      ('repeating' if goal[:repeat]),
-      ("#{goal[:curve]} curve" if goal[:curve] != 'linear')
-    ].compact.join(', ') # TODO: strike if goal is achieved before finish line
+      "starting _#{datef(goal.start)}_",
+      ("ending _#{datef(goal.finish)}_" if goal.finish),
+      ('repeating' if goal.repeat),
+      ("#{goal.curve} curve" if goal.curve != 'linear')
+    ].compact.join(', ')
+
+    # strike if goal is achieved before finish line
+    details = "~~#{details}~~ (done! 🎉)" if goal.done? && !goal.over?
+
+    "#{letter} #{details}".strip
   end
 
   def format_novel(novel)
     goals = novel.current_goals.all
     words = novel.wordcount
 
-    "#{novel[:finished] ? '📘' : '📖'} " \
-    "#{novel[:id]}. “**#{encode_entities(novel[:name] || 'Untitled')}**”. " \
-    '' + [
-      "Started _#{datef(novel[:started])}_",
+    icon = novel.finished ? '📘' : '📖'
+    title = "#{novel.id}. “**#{encode_entities(novel.name || 'Untitled')}**”."
+    details = [
+      "Started _#{datef(novel.started)}_",
       ("**#{words}** words" if words.positive?),
-      (unless novel[:finished]
+      (unless novel.finished
          if goals.empty?
            nil
          elsif goals.length == 1
@@ -236,10 +243,14 @@ class Rogare::Commands::Novel
            "**#{goals.length}** current/future goals:"
          end
        end),
-      ('done' if novel[:finished])
-    ].compact.join(', ') + if goals.length > 1
-                             "\n" + goals.map.with_index { |goal, i| format_goal(goal, i) }.join("\n") + "\n"
-                           end.to_s
+      ('done' if novel.finished)
+    ].compact.join(', ')
+
+    goals = if goals.length > 1
+              "\n" + goals.map.with_index { |goal, i| format_goal(goal, i) }.join("\n") + "\n"
+            end.to_s
+
     # TODO: append number of past goals
+    "#{icon} #{title} #{details} #{goals}#{past_goals}"
   end
 end

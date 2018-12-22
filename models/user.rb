@@ -41,6 +41,18 @@ class User < Sequel::Model
     Rogare.nixnotif nick
   end
 
+  def timezone
+    TimeZone.new tz
+  end
+
+  def date_in_tz(date)
+    timezone.local date.year, date.month, date.day
+  end
+
+  def now
+    timezone.now
+  end
+
   def current_novels
     novels_dataset
       .where do
