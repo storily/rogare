@@ -7,7 +7,7 @@ class Goal < Sequel::Model
     if words < 1_000
       "#{words} words goal"
     elsif words < 10_000
-      "#{(gowordsal / 1_000.0).round(1)}k goal"
+      "#{(words / 1_000.0).round(1)}k goal"
     else
       "#{(words / 1_000.0).round}k goal"
     end
