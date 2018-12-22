@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Goal < Sequel::Model
+  plugin :timestamps, create: :created, update: :updated, update_on_create: true
+
   many_to_one :novel
 
   def tz_start

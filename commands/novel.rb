@@ -253,7 +253,6 @@ class Rogare::Commands::Novel
             end.to_s
     past_goals = "…with **#{past_goals}** past goal#{past_goals > 1 ? 's' : ''}.\n" if past_goals
 
-    # TODO: append number of past goals
     "#{icon} #{title} #{details} #{goals}#{past_goals}"
   end
 end

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class User < Sequel::Model
+  plugin :timestamps, create: :first_seen, update: :updated, update_on_create: true, allow_manual_update: true
+
   one_to_many :novels
   many_to_many :wars, join_table: :wars_members, class: :War
 
@@ -15,6 +17,8 @@ class User < Sequel::Model
     return new_from_discord(discu)[:last_seen] unless discordian
     return discordian[:last_seen] unless Time.now - discordian[:last_seen] > 60 || discordian[:nick] != nick
 
+    # keep same updated stamp unless we actually update something
+    discordian.updated = discordian.updated unless nick != discordian.nick
     discordian.last_seen = Time.now
     discordian.nick = nick
     discordian.save

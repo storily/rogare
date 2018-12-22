@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class Novel < Sequel::Model
-  many_to_one :user
+  plugin :timestamps, create: :created, update: :updated, update_on_create: true
 
+  many_to_one :user
   one_to_many :goals
   one_to_many :wordcounts
 
