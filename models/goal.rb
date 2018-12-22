@@ -4,6 +4,22 @@ class Goal < Sequel::Model
   plugin :timestamps, create: :created, update: :updated, update_on_create: true
 
   many_to_one :novel
+  one_to_one :child, key: :parent_id, class: self
+
+  def parent_dataset
+    return unless parent_id
+    self.where(id: parent_id)
+  end
+
+  def parent
+    parent_dataset&.first
+  end
+
+  def parent=(goal)
+    goal.save
+    self.parent_id = goal.id
+    save
+  end
 
   def tz_start
     novel.user.date_in_tz(start)
@@ -42,6 +58,7 @@ class Goal < Sequel::Model
   def repeat_if_needed!
     DB.transaction(isolation: :serializable) do
       return if removed
+      return if child
       return unless repeat
       return unless over?
 
@@ -49,6 +66,7 @@ class Goal < Sequel::Model
       %i[id created updated].each { |k| copy.delete k }
       copy[:start] = finish.succ
       copy[:finish] += (finish - start).days
+      copy[:parent_id] = id
 
       follow = Goal.create(copy)
       self.repeat = false

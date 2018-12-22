@@ -10,6 +10,7 @@ CREATE TABLE goals (
     repeat boolean DEFAULT false NOT NULL,
     removed timestamp with time zone,
     name text,
+    parent_id integer,
     CONSTRAINT goals_repeat_finish_presence CHECK (
 CASE
     WHEN repeat THEN (finish IS NOT NULL)
@@ -30,3 +31,4 @@ COMMENT ON COLUMN goals.curve IS 'The curve to be used for calculating words to 
 COMMENT ON COLUMN goals.repeat IS 'Whether the goal should be repeated when it reaches its finish';
 COMMENT ON COLUMN goals.removed IS 'If the goal was deleted, and when';
 COMMENT ON COLUMN goals.name IS 'An optional name for human-friendly disambiguation';
+COMMENT ON COLUMN goals.parent_id IS 'This is both to explicit the repeat parent/child relationships, and to disambiguate whether a goal should be considered past (“has a child”) in some odd timezone-of-database-server-related cases';

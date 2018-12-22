@@ -32,24 +32,32 @@ class Novel < Sequel::Model
   def past_goals
     tz = user.tz
     goals_dataset.where do
-      (removed =~ nil) &
-        (finish !~ nil) &
-        (
-          timezone(tz, now.function) >
-          (timezone(tz, finish) + Sequel.lit("interval '1 day'"))
-        )
+      # always exclude removed
+      (removed =~ nil) & (
+        # either it's in the past
+        (timezone(tz, now.function) >
+          (timezone(tz, finish) + Sequel.lit("interval '1 day'"))) |
+        # or it's already got a child
+        (Goal.where(parent_id: id).exists)
+      )
     end.order_by(:start, :id)
   end
 
   def current_goals
     tz = user.tz
-    goals_dataset.where do
+    goals_dataset
+    .exclude { Goal.where(parent_id: id).exists } # exclude when it's got a child
+    .where do
+      # always exclude removed
       (removed =~ nil) &
+        # either it never finishes
         ((finish =~ nil) | (
+          # or it's still current
           timezone(tz, now.function) <
           (timezone(tz, finish) + Sequel.lit("interval '1 day'"))
         ))
-    end.order_by(:start, :id)
+    end
+    .order_by(:start, :id)
   end
 
   def current_goal(offset = 0)

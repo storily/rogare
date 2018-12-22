@@ -1,5 +1,7 @@
 ALTER TABLE ONLY goals
     ADD CONSTRAINT goals_novel_id_fkey FOREIGN KEY (novel_id) REFERENCES novels(id);
+ALTER TABLE ONLY goals
+    ADD CONSTRAINT goals_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES goals(id);
 
 ALTER TABLE ONLY novels
     ADD CONSTRAINT nanos_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
