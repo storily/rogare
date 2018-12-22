@@ -29,9 +29,13 @@ class Novel < Sequel::Model
   end
 
   def current_goals
+    tz = user.tz
     goals_dataset.where do
       (removed =~ nil) &
-        ((finish > now.function) | (finish =~ nil))
+        ((finish =~ nil) | (
+          timezone(tz, now.function) <
+          (timezone(tz, finish) + Sequel.lit("interval '1 day'"))
+        ))
     end.order_by(:start, :id)
   end
 
