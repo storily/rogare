@@ -140,8 +140,6 @@ class Rogare::Commands::Wordcount
       timetarget = goal.tz_finish
       timediff = timetarget - user.now
 
-      # TODO: repeats
-
       data[:days] = {
         total: days,
         length: totaldiff,
