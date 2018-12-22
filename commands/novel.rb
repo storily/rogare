@@ -208,7 +208,7 @@ class Rogare::Commands::Novel
 
     letter = if offset
                goal_words = goal_words.sub('goal', '').strip
-               "#{GoalTerms.offset_to_s(offset)}:"
+               offset == :past ? 'past:' : "#{GoalTerms.offset_to_s(offset)}:"
              end.to_s
 
     details = [
@@ -229,8 +229,7 @@ class Rogare::Commands::Novel
 
   def format_novel(novel)
     goals = novel.current_goals.all
-    past_goals = novel.past_goals.count
-    past_goals = nil if past_goals.zero?
+    past_goals = novel.past_goals.all
     words = novel.wordcount
 
     icon = novel.finished ? '📘' : '📖'
@@ -253,7 +252,17 @@ class Rogare::Commands::Novel
     goals = if goals.length > 1
               "\n" + goals.map.with_index { |goal, i| format_goal(goal, i) }.join("\n") + "\n"
             end.to_s
-    past_goals = "…with **#{past_goals}** past goal#{past_goals > 1 ? 's' : ''}.\n" if past_goals
+
+    if past_goals.length == 1
+      past_goals = format_goal(past_goals.first, :past) + "\n"
+    elsif past_goals.length > 1
+      more_goals = past_goals.length - 1
+      more_goals = nil if more_goals.zero?
+      past_goals = "#{format_goal(past_goals.first, :past)}\n" +
+                   ("…with **#{more_goals}** more past goal#{more_goals > 1 ? 's' : ''}.\n" if more_goals)
+    else
+      past_goals = nil
+    end
 
     "#{icon} #{title} #{details} #{goals}#{past_goals}"
   end
