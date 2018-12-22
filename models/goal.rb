@@ -8,7 +8,8 @@ class Goal < Sequel::Model
 
   def parent_dataset
     return unless parent_id
-    self.where(id: parent_id)
+
+    where(id: parent_id)
   end
 
   def parent

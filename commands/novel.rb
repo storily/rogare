@@ -204,6 +204,7 @@ class Rogare::Commands::Novel
 
   def format_goal(goal, offset = nil)
     goal_words = goal.format_words
+    wc = goal.wordcount
 
     letter = if offset
                goal_words = goal_words.sub('goal', '').strip
@@ -213,6 +214,7 @@ class Rogare::Commands::Novel
     details = [
       ("(“#{encode_entities(goal.name)}”)" unless goal.name.nil? || goal.name.empty?),
       "**#{goal_words}**",
+      ("#{wc} written" unless wc.zero?),
       "starting _#{datef(goal.start)}_",
       ("ending _#{datef(goal.finish)}_" if goal.finish),
       ('repeating' if goal.repeat),
