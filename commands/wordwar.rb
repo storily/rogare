@@ -103,11 +103,11 @@ class Rogare::Commands::Wordwar
             "Your new wordwar will start in #{togo} and last #{dur}. " \
             "Others can join it with: `#{Rogare.prefix}ww join #{war.id}`"
 
-    self.class.start_war_timer(war).join
   end
 
   def dur_display(*args)
     self.class.dur_display(*args)
+    war.start_timer.join
   end
 
   def say_war_info(m, war)
@@ -191,73 +191,6 @@ class Rogare::Commands::Wordwar
   end
 
   class << self
-    def start_war_timer(war)
-      Thread.new do
-        next if war.cancelled
-
-        reply = ->(msg) { war.broadcast msg }
-
-        starting = lambda { |time, &block|
-          war.refresh
-          next unless war.current?
-
-          members = war.members.map(&:mid).join(', ')
-          extra = ' ' + block.call unless block.nil?
-          reply.call "Wordwar #{war.id} is starting #{time}! #{members}#{extra}"
-        }
-
-        ending = lambda {
-          war.refresh
-          next if war.cancelled
-
-          members = war.members.map(&:mid).join(', ')
-          reply.call "Wordwar #{war.id} has ended! #{members}"
-        }
-
-        if war.til_start.positive?
-          # We're before the start of the war
-
-          if war.til_start > 35
-            # If we're at least 35 seconds before the start, we have
-            # time to send a reminder. Otherwise, skip sending it.
-            sleep war.til_start - 30
-            starting.call('in 30 seconds') { '— Be ready: tell us your starting wordcount.' }
-            sleep 30
-          else
-            # In any case, we sleep until the beginning
-            sleep war.til_start
-          end
-
-          starting.call('now') { "(for #{dur_display(war.end, war.start).first})" }
-          war.start!
-          sleep war.seconds
-          ending.call
-          war.finish!
-        elsif war.til_finish.negative? && !war.ended
-          # We're after the END of the war, but the war is not marked
-          # as ended, so it must be that the war ended as the bot was
-          # restarting! Oh no. That means we're probably a bit late.
-          ending.call
-          war.finish!
-        else
-          # We're AFTER the start of the war. Probably because the
-          # bot restarted while a war was running.
-
-          unless war.started
-            # The war is not marked as started but it is started, so
-            # the bot probably restarted at the exact moment the war
-            # was supposed to start. That means we're probably late.
-            starting.call 'just now'
-            war.start!
-          end
-
-          sleep war.til_finish
-          ending.call
-          war.finish!
-        end
-      end
-    end
-
     def dur_display(time, now = Time.now)
       diff = time - now
       minutes = diff / 60.0
@@ -276,12 +209,6 @@ class Rogare::Commands::Wordwar
        else
          "#{secs.round}s"
        end, neg]
-    end
-
-    def load_existing_wars
-      War.all_existing.map do |war|
-        start_war_timer(war)
-      end
     end
   end
 end

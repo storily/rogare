@@ -15,6 +15,10 @@ class War < Sequel::Model
     end
   end
 
+  def self.start_timers_for_existing
+    all_existing.map(&:start_timer)
+  end
+
   def finish
     start + seconds.seconds
   end
@@ -74,5 +78,70 @@ class War < Sequel::Model
 
   def add_channel(chan)
     self.channels = channels.push(chan).uniq
+  end
+
+  def start_timer
+    Thread.new do
+      next if cancelled
+
+      reply = ->(msg) { broadcast msg }
+
+      starting = lambda { |time, &block|
+        refresh
+        next unless current?
+
+        extra = '' + (block.call unless block.nil?)
+        reply.call "Wordwar #{id} is starting #{time}! #{members.map(&:mid).join(', ')}#{extra}"
+      }
+
+      ending = lambda {
+        refresh
+        next if cancelled
+
+        reply.call "Wordwar #{id} has ended! #{members.map(&:mid).join(', ')}"
+      }
+
+      if til_start.positive?
+        # We're before the start of the war
+
+        if til_start > 35
+          # If we're at least 35 seconds before the start, we have
+          # time to send a reminder. Otherwise, skip sending it.
+          sleep til_start - 30
+          starting.call('in 30 seconds') { '— Be ready: tell us your starting wordcount.' }
+          sleep 30
+        else
+          # In any case, we sleep until the beginning
+          sleep til_start
+        end
+
+        starting.call('now') { "(for #{dur_display(finish, start).first})" }
+        start!
+        sleep seconds
+        ending.call
+        finish!
+      elsif til_finish.negative? && !ended
+        # We're after the END of the war, but the war is not marked
+        # as ended, so it must be that the war ended as the bot was
+        # restarting! Oh no. That means we're probably a bit late.
+        ending.call
+        finish!
+      else
+        # We're AFTER the start of the war. Probably because the
+        # bot restarted while a war was running.
+
+        unless started
+          # The war is not marked as started but it is started, so
+          # the bot probably restarted at the exact moment the war
+          # was supposed to start. That means we're probably late.
+          starting.call 'just now'
+          start!
+        end
+
+        sleep til_finish
+        ending.call
+        finish!
+      end
+    end
   end
 end

@@ -20,7 +20,7 @@ if ENV['RACK_ENV'] == 'production' || ENV['DEV_LOAD_WARS']
   threads << Thread.new do
     sleep 3
     logs '=====> Loading wordwars from Postgres'
-    wars = Rogare::Commands::Wordwar.load_existing_wars
+    wars = War.start_timers_for_existing
     logs "=====> Loaded #{wars.count} wordwars, now waiting on timers"
     wars.each(&:join)
   end
