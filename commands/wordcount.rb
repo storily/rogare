@@ -3,6 +3,7 @@
 class Rogare::Commands::Wordcount
   extend Rogare::Command
   extend Memoist
+  include Rogare::Utilities
 
   command 'wc'
   aliases 'count'
@@ -229,21 +230,21 @@ class Rogare::Commands::Wordcount
 
     if count[:goal]
       if count[:days] && count[:days][:expired]
-        deets << Rogare::Data.goal_format(count[:goal][:words])
+        deets << count[:goal].format_words
         deets << "over #{count[:days][:total]} days"
         deets << 'expired'
       elsif count[:target]
-        deets << Rogare::Data.goal_format(count[:goal][:words])
+        deets << count[:goal].format_words
         days = (count[:days][:left] / 1.day.to_i).floor
         deets << (days == 1 ? 'one day left' : "#{days} days left")
       else
-        deets << Rogare::Data.goal_format(count[:goal][:words])
+        deets << count[:goal].format_words
       end
     end
 
     name = count[:novel][:name]
     name = name[0, 35] + '…' if name && name.length > 40
-    name = " _“#{Rogare::Data.encode_entities name}”_" if name
+    name = " _“#{encode_entities name}”_" if name
 
     "[#{count[:novel][:id]}] #{count[:user][:nick]}:#{name} — **#{count[:count]}** (#{deets.join(', ')})"
   end

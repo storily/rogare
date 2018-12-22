@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class War < Sequel::Model
+  include Rogare::Utilities
+
   many_to_one :creator, class: :User
   many_to_one :canceller, class: :User
   many_to_many :members, join_table: :wars_members, right_key: :user_id, class: :User

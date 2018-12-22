@@ -2,6 +2,7 @@
 
 class Rogare::Commands::Novel
   extend Rogare::Command
+  include Rogare::Utilities
 
   command 'novel'
   usage [
@@ -202,16 +203,16 @@ class Rogare::Commands::Novel
   end
 
   def format_goal(goal, offset = nil)
-    goal_words = Rogare::Data.goal_format(goal[:words])
+    goal_words = goal.format_words
 
     if offset
       goal_words = goal_words.sub('goal', '').strip
       "#{GoalTerms.offset_to_s(offset)}: "
     end.to_s + [
-      ("(“#{Rogare::Data.encode_entities(goal[:name])}”)" unless goal[:name].nil? || goal[:name].empty?),
+      ("(“#{encode_entities(goal[:name])}”)" unless goal[:name].nil? || goal[:name].empty?),
       "**#{goal_words}**",
-      "starting _#{Rogare::Data.datef(goal[:start])}_",
-      ("ending _#{Rogare::Data.datef(goal[:finish])}_" if goal[:finish]),
+      "starting _#{datef(goal[:start])}_",
+      ("ending _#{datef(goal[:finish])}_" if goal[:finish]),
       ('repeating' if goal[:repeat]),
       ("#{goal[:curve]} curve" if goal[:curve] != 'linear')
     ].compact.join(', ') # TODO: strike if goal is achieved before finish line
@@ -222,9 +223,9 @@ class Rogare::Commands::Novel
     words = novel.wordcount
 
     "#{novel[:finished] ? '📘' : '📖'} " \
-    "#{novel[:id]}. “**#{Rogare::Data.encode_entities(novel[:name] || 'Untitled')}**”. " \
+    "#{novel[:id]}. “**#{encode_entities(novel[:name] || 'Untitled')}**”. " \
     '' + [
-      "Started _#{Rogare::Data.datef(novel[:started])}_",
+      "Started _#{datef(novel[:started])}_",
       ("**#{words}** words" if words.positive?),
       (unless novel[:finished]
          if goals.empty?

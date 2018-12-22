@@ -2,6 +2,7 @@
 
 class Rogare::Commands::Wordwar
   extend Rogare::Command
+  include Rogare::Utilities
 
   command 'wordwar'
   aliases 'war', 'ww'
@@ -103,10 +104,6 @@ class Rogare::Commands::Wordwar
             "Your new wordwar will start in #{togo} and last #{dur}. " \
             "Others can join it with: `#{Rogare.prefix}ww join #{war.id}`"
 
-  end
-
-  def dur_display(*args)
-    self.class.dur_display(*args)
     war.start_timer.join
   end
 
@@ -188,27 +185,5 @@ class Rogare::Commands::Wordwar
     war.cancel! user
 
     m.reply "Wordwar #{war.id} cancelled."
-  end
-
-  class << self
-    def dur_display(time, now = Time.now)
-      diff = time - now
-      minutes = diff / 60.0
-      secs = (minutes - minutes.to_i).abs * 60.0
-
-      neg = false
-      if minutes.negative?
-        minutes = minutes.abs
-        neg = true
-      end
-
-      [if minutes >= 5
-         "#{minutes.round}m"
-       elsif minutes >= 1
-         "#{minutes.floor}m #{secs.round}s"
-       else
-         "#{secs.round}s"
-       end, neg]
-    end
   end
 end
