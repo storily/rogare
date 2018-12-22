@@ -133,18 +133,12 @@ class Rogare::Commands::Wordcount
 
     # no need to do any time calculations if there's no time limit
     if goal&.finish
-      tz = TimeZone.new(user.tz)
-      now = tz.now
-
-      gstart = tz.local goal.start.year, goal.start.month, goal.start.day
-      gfinish = tz.local(goal.finish.year, goal.finish.month, goal.finish.day).end_of_day
-
-      totaldiff = gfinish - gstart.end_of_day
+      totaldiff = goal.tz_finish - goal.tz_start.end_of_day
       days = (totaldiff / 1.day).to_i
       totaldiff = days.days
 
-      timetarget = gfinish
-      timediff = timetarget - now
+      timetarget = goal.tz_finish
+      timediff = timetarget - user.now
 
       # TODO: repeats
 
@@ -164,7 +158,7 @@ class Rogare::Commands::Wordcount
         goal = goal.words.to_f
 
         count_at_goal_start = if db_wc.positive?
-                                novel.wordcount_at gstart
+                                novel.wordcount_at goal.tz_start
                               else
                                 0
                               end
