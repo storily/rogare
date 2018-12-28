@@ -86,7 +86,7 @@ class Rogare::Commands::Wordcount
     today = novel.todaycount
     gap = words.strip.to_i - today
 
-    novel.wordcound = existing + gap
+    novel.wordcount = existing + gap
     own_count(m)
   end
 
