@@ -112,7 +112,7 @@ class Rogare::Commands::Wordcount
     return m.reply 'You don’t have a novel yet' unless novel
     return m.reply 'Can’t set wordcount of a finished novel' if novel.finished
 
-    existing = novel.wordcount_at((user.tz.now - 1.day).end_of_day)
+    existing = novel.wordcount_at((user.timezone.now - 1.day).end_of_day)
     new_words = existing + if words.start_with? '-'
                              words[1..-1].to_i * -1
                            else
