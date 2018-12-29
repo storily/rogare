@@ -29,6 +29,10 @@ class Novel < Sequel::Model
     add_wordcount Wordcount.new(words: wc)
   end
 
+  def wordcount_yesterday=(wc)
+    add_wordcount Wordcount.new(words: wc, as_at: (user.tz.now - 1.day).end_of_day)
+  end
+
   def past_goals
     tz = user.tz
     goals_dataset.where do
