@@ -12,7 +12,7 @@ class Rogare::Commands::Wordcount
     '`!% set <words>` or `!% add <words>` - Set or increment your word count.',
     '`!% (set|add) <words> (for|to) <novel ID>` - Set the word count for a particular novel.',
     '`!% set today <words> [for <novel ID>]` - Set the word count for today.',
-    '`!% (set|add) yesterday <words> (for|to) <novel ID>` - Set the word count for yesterday.',
+    '`!% (set|add) yesterday <words> (for|to) <novel ID>` - Set the word count for yesterday (🤯).',
     '`!% add <words> to <novel ID>` - Set the word count for a particular novel.',
     'To register your nano name against your discord user: `!my nano <nanoname>`',
     'To set your goal: `!novel goal set <count>`. To set your timezone: `!my tz <timezone>`.'
