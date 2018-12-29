@@ -33,7 +33,7 @@ class Novel < Sequel::Model
     yesterday = (user.timezone.now - 1.day).end_of_day
 
     existing = Wordcount.where(novel_id: id, as_at: yesterday).first
-    existing.delete if existing
+    existing&.delete
 
     add_wordcount Wordcount.new(words: wc, as_at: yesterday)
   end
