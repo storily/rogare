@@ -75,7 +75,7 @@ class Rogare::Commands::Wordcount
     return m.reply 'Can’t set wordcount of a finished novel' if novel.finished
 
     novel.wordcount = words.strip.to_i
-    own_count(m)
+    novel_count(m, novel.id)
   end
 
   def set_count_yesterday(m, words, id = '')
@@ -86,7 +86,7 @@ class Rogare::Commands::Wordcount
     return m.reply 'Can’t set wordcount of a finished novel' if novel.finished
 
     novel.wordcount_yesterday = words.strip.to_i
-    own_count(m)
+    novel_count(m, novel.id)
   end
 
   def set_today_count(m, words, id = '')
@@ -101,7 +101,7 @@ class Rogare::Commands::Wordcount
     gap = words.strip.to_i - today
 
     novel.wordcount = existing + gap
-    own_count(m)
+    novel_count(m, novel.id)
   end
 
   def add_count_yesterday(m, words, id = '')
@@ -122,7 +122,7 @@ class Rogare::Commands::Wordcount
     return m.reply "Can’t remove more words than the novel had (#{existing})" if new_words.negative?
 
     novel.wordcount_yesterday = new_words
-    own_count(m)
+    novel_count(m, novel.id)
   end
 
   def add_count(m, words, id = '')
@@ -142,7 +142,7 @@ class Rogare::Commands::Wordcount
     return m.reply "Can’t remove more words than the novel has (#{existing})" if new_words.negative?
 
     novel.wordcount = new_words
-    own_count(m)
+    novel_count(m, novel.id)
   end
 
   def get_novel_count(novel, user = nil)
