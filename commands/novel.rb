@@ -60,16 +60,7 @@ class Rogare::Commands::Novel
   def show_novels(m)
     novels = m.user.to_db.novels_dataset.reverse(:started).all
 
-    nmore = nil
-    if novels.length > 8
-      nmore = novels.length - 8
-      novels.first!(8)
-    end
-
-    say = novels.map { |nov| format_novel nov, true }.join("\n")
-    say += "\nand #{nmore} more" if nmore
-    # say += "(use `!novel all` to get them as PM)" if nmore && rand > 0.8
-    m.reply say.strip
+    m.reply(novels.map { |nov| format_novel nov, true }.join("\n").strip)
   end
 
   def show_novel(m, id)
