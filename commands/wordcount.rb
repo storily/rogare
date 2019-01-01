@@ -269,10 +269,16 @@ class Rogare::Commands::Wordcount
       end
     end
 
-    name = count[:novel][:name]
-    name = name[0, 35] + '…' if name && name.length > 40
+    name = count[:novel].name
+    name = name[0, 45] + '…' if name && name.length > 50
     name = " _“#{encode_entities name}”_" if name
 
-    "[#{count[:novel][:id]}] #{count[:user][:nick]}:#{name} — **#{count[:count]}** (#{deets.join(', ')})"
+    [
+      "[#{count[:novel].id}]",
+      "#{count[:user].nixnotif}:#{name}",
+      "—",
+      "**#{count[:count].zero? ? 'no words yet' : count[:count]}**",
+      ("(#{deets.join(', ')})" unless deets.empty?),
+    ].compact.join(' ')
   end
 end
