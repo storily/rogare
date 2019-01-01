@@ -8,7 +8,7 @@ class Rogare::Commands::Wordcount
   command 'wc'
   aliases 'count'
   usage [
-    '`!%`, `!% <id>`, `!% <nanoname>`, or `!% <@nick>` (to see others’ counts)',
+    '`!%`, `!% <id>`, `!% <partial name>`, `!% @nick`, or `!% <partial title>` — Show count',
     '`!% set <words>` or `!% add <words>` - Set or increment your word count.',
     '`!% (set|add) <words> (for|to) <novel ID>` - Set the word count for a particular novel.',
     '`!% set today <words> [for <novel ID>]` - Set the word count for today.',
@@ -26,12 +26,14 @@ class Rogare::Commands::Wordcount
   match_command /add\s+(-?\d+)(?:\s+(?:for|to)\s+(\d+))?/, method: :add_count
 
   match_command /(set|add)\s+.+/, method: :help_message
-  match_command /(\d+)/, method: :novel_count
+  match_command /(\d+)$/, method: :novel_count
+  match_command /(\s+)$/, method: :own_count
   match_command /(.+)/, method: :other_counts
   match_empty :own_count
 
   def own_count(m)
-    novels = get_counts([m.user.to_db]).first
+    user = m.user.to_db
+    novels = user.current_novels.map { |novel| get_novel_count novel, user }
 
     return m.reply 'Something is very wrong' unless novels
     return m.reply 'You have no current novel' if novels.empty?
@@ -40,23 +42,32 @@ class Rogare::Commands::Wordcount
   end
 
   def other_counts(m, param = '')
-    names = param.strip.split.uniq.compact
-    return own_count(m) if names.empty?
+    lookup = param.strip.gsub(/\s+/, ' ')
+    return own_count(m) if lookup.empty?
 
-    users = get_counts(names.map do |name|
-      if /^<@!?\d+>$/.match?(name)
-        # Exact match from @mention / mid
-        Rogare.from_discord_mid(name).to_db
-      else
-        # Case-insensitive match from nick
-        User.where { nick =~ /^#{name}$/i }.first
-      end
-    end.compact)
+    users = if /^<@!?\d+>$/.match?(lookup)
+              # Exact match from @mention / mid
+              [Rogare.from_discord_mid(lookup).to_db]
+            else
+              # Case-insensitive match from nick or nano
+              User.where { (nick =~ /#{lookup}/i) || (nanoname =~ /#{lookup}/i) }.first(5)
+            end
 
-    return m.reply 'No valid users found' unless users
-    return m.reply 'No current novels found' if users.select { |n| n.length.positive? }.empty?
+    novels = users.flat_map { |user| user.current_novels.all }
 
-    display_novels m, users.flatten(1)
+    # Case-insensitive match from novel name
+    if novels.length < 10
+      novels.push(*Novel.where do
+        (started <= Sequel.function(:now)) &
+          (finished =~ false) &
+          (name =~ /#{lookup}/i)
+      end.first(10))
+    end
+
+    novels = novels.compact.uniq.first(10)
+    return m.reply 'Nothing there 😕' if novels.empty?
+
+    display_novels m, (novels.map { |novel| get_novel_count novel })
   end
 
   def novel_count(m, id)
@@ -212,21 +223,13 @@ class Rogare::Commands::Wordcount
     data
   end
 
-  def get_counts(users)
-    users.map do |user|
-      user.current_novels.map do |novel|
-        get_novel_count novel, user
-      end
-    end
-  end
-
   def display_novels(m, novels)
     # if rand > 0.5 && !novels.select { |n| n[:novel][:type] == 'nano' && n[:count] > 100_000 }.empty?
     #   m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Monstrous].sample} Wordcount"
     #   sleep 1
     # end
 
-    m.reply novels.map { |n| format n }.join("\n")
+    m.reply novels.map { |n| format n }.uniq.join("\n")
   end
 
   def format(count)
@@ -271,14 +274,13 @@ class Rogare::Commands::Wordcount
 
     name = count[:novel].name
     name = name[0, 45] + '…' if name && name.length > 50
-    name = " _“#{encode_entities name}”_" if name
+    name = " _“#{encode_entities name}”_ —" if name
 
     [
       "[#{count[:novel].id}]",
       "#{count[:user].nixnotif}:#{name}",
-      "—",
       "**#{count[:count].zero? ? 'no words yet' : count[:count]}**",
-      ("(#{deets.join(', ')})" unless deets.empty?),
+      ("(#{deets.join(', ')})" unless deets.empty?)
     ].compact.join(' ')
   end
 end

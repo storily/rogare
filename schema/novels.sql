@@ -9,6 +9,8 @@ CREATE TABLE novels (
 );
 
 CREATE INDEX novels_user_id_index ON novels USING btree (user_id);
+CREATE INDEX novels_started_index ON novels USING btree (started);
+CREATE INDEX novels_finished_started_index ON novels USING btree (finished, started);
 
 COMMENT ON COLUMN novels.started IS 'When the novel was actually started';
 COMMENT ON COLUMN novels.name IS 'Aka title';
