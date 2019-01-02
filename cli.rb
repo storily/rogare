@@ -20,7 +20,6 @@ end
 
 logs '=====> Loading sequel'
 DB = Rogare.sql
-Sequel::Database.extension :pg_comment
 Sequel::Model.plugin :eager_each
 Sequel::Model.plugin :pg_auto_constraint_validations
 Sequel::Model.plugin :prepared_statements

@@ -94,6 +94,7 @@ module Rogare
     def sql
       db = Sequel.connect ENV['DATABASE_URL'], search_path: [ENV['DB_SCHEMA'] || 'public']
       db.extension :pg_array
+      db.extension :pg_comment
       Sequel.extension :pg_array_ops
       db.logger = Logger.new($stdout) unless ENV['RACK_ENV'] == 'production'
       db
