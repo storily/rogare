@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 require 'dotenv/tasks'
-require 'rubocop/rake_task'
 
-RuboCop::RakeTask.new(:lint)
-
-task fix: 'lint:auto_correct'
+unless ENV['RACK_ENV'] == 'production'
+  require 'rubocop/rake_task'
+  RuboCop::RakeTask.new(:lint)
+  task fix: 'lint:auto_correct'
+end
 
 task :console do
   require 'pry'
