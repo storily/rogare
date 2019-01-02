@@ -4,4 +4,4 @@ cache: bundler
 rvm:
   - 2.5.3
 script:
-  - rake lint
+  - bundle exec rake lint
