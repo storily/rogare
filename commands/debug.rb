@@ -6,7 +6,7 @@ class Rogare::Commands::Debug
   command 'debug'
   aliases 'show'
   usage [
-    'All commands are restricted to #bot-testing, and some are admin-restricted.',
+    'All commands are restricted to #boating, and some are admin-restricted.',
     '**Public commands:**',
     '`!% uptime` - Show uptime, boot time, host, and version info',
 
@@ -56,8 +56,8 @@ class Rogare::Commands::Debug
   match_command /wc set user (.+) (.+)/, method: :wc_set_user
 
   before_handler do |method, m|
-    unless m.channel.name == 'bot-testing'
-      m.reply('Debug in bot-testing only please')
+    unless m.channel.name == 'boating'
+      m.reply('Debug in #boating only please')
       next :stop
     end
 
