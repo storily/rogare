@@ -22,6 +22,7 @@ gem 'puma', '~>3.12', require: false
 gem 'rake', '~>12.3'
 gem 'rubocop', '~> 0.60.0', require: false, group: %i[development test]
 gem 'sequel', '~>5.10'
+gem 'sequel-pg-comment', '~>2.0', require: false
 gem 'sequel_pg', '~>1.11', require: 'sequel', platforms: :ruby # no windows :(
 gem 'sinatra', '~>2.0', require: 'sinatra/base'
 gem 'treetop', '~>1.6'
