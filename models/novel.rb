@@ -17,8 +17,12 @@ class Novel < Sequel::Model
   end
 
   def todaycount
-    count = Preparation::Todaycount[id: id]
-    (count && count[:words]) || 0
+    tz = user.timezone
+
+    first_light = wordcount_at((tz.now - 1.day).end_of_day)
+    this_light = wordcount
+
+    this_light - first_light
   end
 
   def wordcount
