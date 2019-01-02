@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-Sequel::Database.extension :pg_comment
-
 Sequel.migration do
   change do
     create_table(:wars) do
@@ -21,14 +19,14 @@ Sequel.migration do
       Boolean :ended, null: false, default: false
     end
 
-    comment_on :column, :wars__start, 'When this war is slated to start'
-    comment_on :column, :wars__seconds, 'How long the war will run for'
-    comment_on :column, :wars__creator_id, 'Who created this war. Note the creator may leave the war.'
-    comment_on :column, :wars__cancelled, 'If the war is cancelled, and when that was done'
-    comment_on :column, :wars__canceller_id, 'If the war was cancelled by a known user, who that is'
-    comment_on :column, :wars__channels, 'What channels this war should broadcast to'
-    comment_on :column, :wars__started, 'If this war was announced as having started'
-    comment_on :column, :wars__ended, 'If this war was announced as having ended'
+    comment_on :column, %i[wars start], 'When this war is slated to start'
+    comment_on :column, %i[wars seconds], 'How long the war will run for'
+    comment_on :column, %i[wars creator_id], 'Who created this war. Note the creator may leave the war.'
+    comment_on :column, %i[wars cancelled], 'If the war is cancelled, and when that was done'
+    comment_on :column, %i[wars canceller_id], 'If the war was cancelled by a known user, who that is'
+    comment_on :column, %i[wars channels], 'What channels this war should broadcast to'
+    comment_on :column, %i[wars started], 'If this war was announced as having started'
+    comment_on :column, %i[wars ended], 'If this war was announced as having ended'
 
     create_table(:wars_members) do
       Integer :user_id, null: false

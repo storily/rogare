@@ -22,8 +22,9 @@ namespace :db do
 
     version = args[:version].to_i if args[:version]
 
+    Sequel::Database.extension :pg_comment
     Sequel.extension :migration
-    Sequel.connect(ENV['DATABASE_URL']) do |db|
+    Sequel.connect(ENV['DATABASE_URL'], search_path: [ENV['DB_SCHEMA'] || 'public']) do |db|
       Sequel::Migrator.run(db, 'migrations', target: version)
     end
   end
@@ -37,9 +38,11 @@ namespace :db do
               .sort
               .last(2)
               .first
+              .to_i
 
+    Sequel::Database.extension :pg_comment
     Sequel.extension :migration
-    Sequel.connect(ENV['DATABASE_URL']) do |db|
+    Sequel.connect(ENV['DATABASE_URL'], search_path: [ENV['DB_SCHEMA'] || 'public']) do |db|
       Sequel::Migrator.run(db, 'migrations', target: version)
       Sequel::Migrator.run(db, 'migrations')
     end

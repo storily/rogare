@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-Sequel::Database.extension :pg_comment
-
 Sequel.migration do
   change do
     create_table(:wordcounts) do
@@ -21,8 +19,8 @@ Sequel.migration do
       index :novel_id, type: 'btree'
     end
 
-    comment_on :column, :wordcount__words, 'The absolute number of words in the novel at the recorded moment'
-    comment_on :column, :wordcount__as_at, 'The moment when the amount of words was recorded'
-    comment_on :column, :wordcount__created, 'The moment when this record was created'
+    comment_on :column, %i[wordcounts words], 'The absolute number of words in the novel at the recorded moment'
+    comment_on :column, %i[wordcounts as_at], 'The moment when the amount of words was recorded'
+    comment_on :column, %i[wordcounts created], 'The moment when this record was created'
   end
 end

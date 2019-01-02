@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-Sequel::Database.extension :pg_comment
-
 Sequel.migration do
   change do
     create_table(:goals) do
@@ -9,7 +7,7 @@ Sequel.migration do
 
       column :created, 'timestamp with time zone', null: false, default: Sequel.lit('CURRENT_TIMESTAMP')
       column :updated, 'timestamp with time zone', null: false, default: Sequel.lit('CURRENT_TIMESTAMP')
-      column :removed, 'timestamp with time zone', null: false, default: Sequel.lit('CURRENT_TIMESTAMP')
+      column :removed, 'timestamp with time zone'
 
       Integer :novel_id, null: false
       Integer :parent_id
@@ -42,24 +40,24 @@ Sequel.migration do
       end
     end
 
-    comment_on :column, :goals__removed, 'If the goal was deleted, and when'
-    comment_on :column, :goals__parent_id, %(
+    comment_on :column, %i[goals removed], 'If the goal was deleted, and when'
+    comment_on :column, %i[goals parent_id], %(
       This is both to explicit the repeat parent/child relationships, and to
       disambiguate whether a goal should be considered past (“has a child”) in
       some odd timezone-of-database-server-related cases
     )
 
-    comment_on :column, :goals__name, 'An optional name for human-friendly disambiguation'
-    comment_on :column, :goals__words, 'Wordcount to reach, counting from the moment the goal starts'
+    comment_on :column, %i[goals name], 'An optional name for human-friendly disambiguation'
+    comment_on :column, %i[goals words], 'Wordcount to reach, counting from the moment the goal starts'
 
-    comment_on :column, :goals__start, %(
+    comment_on :column, %i[goals start], %(
       A date, re-interpreted in application code to mean the right thing in the
       user’s current timezone
     )
 
-    comment_on :column, :goals__finish, 'Similarly to start. A goal finishes on the end of its finish day'
+    comment_on :column, %i[goals finish], 'Similarly to start. A goal finishes on the end of its finish day'
 
-    comment_on :column, :goals__curve, 'The curve to be used for calculating words to go at a date'
-    comment_on :column, :goals__repeat, 'Whether the goal should be repeated when it reaches its finish'
+    comment_on :column, %i[goals curve], 'The curve to be used for calculating words to go at a date'
+    comment_on :column, %i[goals repeat], 'Whether the goal should be repeated when it reaches its finish'
   end
 end

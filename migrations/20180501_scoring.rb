@@ -69,8 +69,6 @@ Sequel.migration do
       IMMUTABLE
       COST 10;
 
-      DROP MATERIALIZED VIEW names_scored_raw CASCADE;
-
       CREATE MATERIALIZED VIEW names_scored_raw AS (
         SELECT
           name, surname,

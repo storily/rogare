@@ -1,3 +1,12 @@
+GIT
+  remote: git://github.com/mr-dxdy/sequel-pg-comment.git
+  revision: 08eb743119555b6882fc51d8735a50c6ecff371d
+  branch: schema
+  specs:
+    sequel-pg-comment (2.0.1.3.g08eb743)
+      git-version-bump (~> 0.10)
+      sequel
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -107,9 +116,6 @@ GEM
       unicode-display_width (~> 1.4.0)
     ruby-progressbar (1.10.0)
     sequel (5.15.0)
-    sequel-pg-comment (2.0.1)
-      git-version-bump (~> 0.10)
-      sequel
     sequel_pg (1.11.0)
       pg (>= 0.18.0)
       sequel (>= 4.38.0)
@@ -164,7 +170,7 @@ DEPENDENCIES
   rake (~> 12.3)
   rubocop (~> 0.60.0)
   sequel (~> 5.10)
-  sequel-pg-comment (~> 2.0)
+  sequel-pg-comment!
   sequel_pg (~> 1.11)
   sinatra (~> 2.0)
   treetop (~> 1.6)

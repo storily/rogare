@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-Sequel::Database.extension :pg_comment
-
 Sequel.migration do
   change do
     create_table(:novels) do
@@ -19,8 +17,8 @@ Sequel.migration do
       index %i[finished started], type: 'btree'
     end
 
-    comment_on :column, :novels__started, 'When the novel was actually started'
-    comment_on :column, :novels__name, 'Aka title'
-    comment_on :column, :novels__finished, 'Novels marked finished cannot be updated'
+    comment_on :column, %i[novels started], 'When the novel was actually started'
+    comment_on :column, %i[novels name], 'Aka title'
+    comment_on :column, %i[novels finished], 'Novels marked finished cannot be updated'
   end
 end
