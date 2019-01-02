@@ -5,6 +5,8 @@ require 'rubocop/rake_task'
 
 RuboCop::RakeTask.new(:lint)
 
+task fix: 'lint:auto_correct'
+
 task :console do
   require 'pry'
   require './cli'
