@@ -71,8 +71,11 @@ module Rogare::Command
     Rogare.discord.remove_handler my[:discord_handler] if my[:discord_handler]
     my[:discord_handler] = Rogare.discord.message(contains: my[:common_pattern]) do |event|
       message = event.message.content.strip
+      server = event.channel.server
+      chan = [server ? server.name : 'PM', event.channel.name].join '/'
+
       # add channel to logs
-      logs "---> Discord message: ‘#{event.message.content}’ from #{event.author.username} (#{event.author.id})"
+      logs "---> Discord message: ‘#{message}’ from #{event.author.username} (#{event.author.id}) in ##{chan}"
       logs "---> Handling by #{self}"
 
       pattern = my[:patterns].find { |pat| pat[0] =~ event.message.content }
