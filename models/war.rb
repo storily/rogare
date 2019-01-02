@@ -6,6 +6,7 @@ class War < Sequel::Model
 
   many_to_one :creator, class: :User
   many_to_one :canceller, class: :User
+  one_to_many :memberships, class: :WarMember, key: :war_id
   many_to_many :members, join_table: :wars_members, right_key: :user_id, class: :User
 
   def self.all_existing
