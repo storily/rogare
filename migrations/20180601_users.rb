@@ -13,7 +13,7 @@ Sequel.migration do
       String :nick
       String :tz, null: false, default: 'Pacific/Auckland'
 
-      index :discord_id, unique: true, type: 'btree'
+      unique :discord_id
       index :nano_user, type: 'btree'
       index :nick, type: 'btree'
     end

@@ -14,7 +14,7 @@ Sequel.migration do
         words >= 0
       end
 
-      index %i[novel_id as_at], type: 'btree', unique: true
+      unique %i[novel_id as_at]
       index :as_at, type: 'btree'
       index :novel_id, type: 'btree'
     end
