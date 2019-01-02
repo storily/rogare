@@ -34,8 +34,8 @@ Sequel.migration do
       Integer :user_id, null: false
       Integer :war_id, null: false
 
-      primary_key [:user_id, :war_id]
-      index [:war_id, :user_id], type: 'btree'
+      primary_key %i[user_id war_id]
+      index %i[war_id user_id], type: 'btree'
     end
   end
 end

@@ -63,3 +63,8 @@ Style/Documentation:
 Style/IdenticalConditionalBranches:
   Enabled: false
   # buggy when the difference is sleep / side-effects
+
+Style/NumericPredicate:
+  Exclude:
+    - migrations/**/*
+    # `words > 0` in Sequel DSL can’t be converted to `words.positive?`, thanks
