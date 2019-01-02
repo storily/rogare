@@ -76,4 +76,10 @@ class Novel < Sequel::Model
   def current_goal(offset = 0)
     current_goals.offset(offset).first
   end
+
+  def last_update
+    at_last_count = wordcounts_dataset.select(:created).reverse(:created).first[:created]
+    at_last_goal = goals_dataset.select(:updated).reverse(:updated).first[:updated]
+    [at_last_count, at_last_goal, updated].max
+  end
 end

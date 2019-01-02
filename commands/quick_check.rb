@@ -13,7 +13,11 @@ class Rogare::Commands::QuickCheck
 
     if defined? Rogare::Commands::Wordcount
       wc = Rogare::Commands::Wordcount.new
-      novels = wc.get_counts([m.user.to_db]).first
+      user = m.user.to_db
+      novels = user.current_novels
+                   .map { |novel| wc.get_novel_count novel, user }
+                   .sort { |a, b| [a[:count], a[:novel].last_update] <=> [b[:count], b[:novel].last_update] }
+                   .first(3)
 
       if novels.empty?
         m.reply 'You have no current novels!'
