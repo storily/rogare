@@ -23,7 +23,8 @@ class Rogare::Commands::Help
   end
 
   def command_list
-    Rogare::Commands.to_a.map do |command|
+    Rogare::Commands.constants.map do |cmd|
+      command = Rogare::Commands.const_get cmd
       one = Rogare::Command.allmine[command.inspect.to_sym]
       next if one.nil?
       next if one[:hidden]
