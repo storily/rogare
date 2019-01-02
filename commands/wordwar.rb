@@ -82,7 +82,7 @@ class Rogare::Commands::Wordwar
 
     begin
       war = War.new(
-        start: time,
+        start: timeat,
         seconds: duration,
         channels: [m.channel.to_s]
       )
