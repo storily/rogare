@@ -26,8 +26,8 @@ namespace :db do
     Sequel::Database.extension :pg_comment
     Sequel.extension :migration
     Sequel.connect(ENV['DATABASE_URL'],
-      loggers: [Logger.new($stdout)],
-      search_path: [ENV['DB_SCHEMA'] || 'public']) do |db|
+                   loggers: [Logger.new($stdout)],
+                   search_path: [ENV['DB_SCHEMA'] || 'public']) do |db|
       Sequel::Migrator.run(db, 'migrations', target: version)
     end
     puts "\e[47m\e[1;35m==> Done running migrations. \e[0m"
@@ -48,8 +48,8 @@ namespace :db do
     Sequel::Database.extension :pg_comment
     Sequel.extension :migration
     Sequel.connect(ENV['DATABASE_URL'],
-      loggers: [Logger.new($stdout)],
-      search_path: [ENV['DB_SCHEMA'] || 'public']) do |db|
+                   loggers: [Logger.new($stdout)],
+                   search_path: [ENV['DB_SCHEMA'] || 'public']) do |db|
       puts "\e[47m\e[1;35m==> Undoing to #{version}. \e[0m"
       Sequel::Migrator.run(db, 'migrations', target: version)
       puts "\e[47m\e[1;35m==> Migrating to latest. \e[0m"
