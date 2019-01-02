@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
+ENV['RACK_ENV'] ||= 'development'
 require './lib/logs'
 
-logs '=====> Bootstrapping'
+logs "=====> Bootstrapping in #{ENV['RACK_ENV']}"
 require 'bundler'
-Bundler.require :default, (ENV['RACK_ENV'] || 'production').to_sym
+Bundler.require :default, ENV['RACK_ENV'].to_sym
 
 logs '=====> Loading framework'
 require './lib/rogare'
