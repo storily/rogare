@@ -44,11 +44,11 @@ module Rogare::Command
     match_command /help$/, method: :help_message
     h = my # Not useless! Will break if you remove
     define_method :help_message do |m|
-      next m.reply 'No help message :(' if h[:usage].empty?
+      h[:usage][0] ||= 'No help message :('
 
-      m.reply h[:usage].map do |line|
+      m.reply(h[:usage].map do |line|
         line.gsub('!%', "#{Rogare.prefix}#{h[:command]}")
-      end.join("\n")
+      end.join("\n"))
     end
   end
 
