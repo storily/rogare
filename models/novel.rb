@@ -78,8 +78,8 @@ class Novel < Sequel::Model
   end
 
   def last_update
-    at_last_count = wordcounts_dataset.select(:created).reverse(:created).first[:created]
-    at_last_goal = goals_dataset.select(:updated).reverse(:updated).first[:updated]
-    [at_last_count, at_last_goal, updated].max
+    at_last_count = wordcounts_dataset.select(:created).reverse(:created).first&.created
+    at_last_goal = goals_dataset.select(:updated).reverse(:updated).first&.updated
+    [at_last_count, at_last_goal, updated].compact.max
   end
 end
