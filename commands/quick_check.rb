@@ -16,8 +16,8 @@ class Rogare::Commands::QuickCheck
       user = m.user.to_db
       novels = user.current_novels
                    .map { |novel| wc.get_novel_count novel, user }
-                   .sort { |a, b| [a[:count], a[:novel].last_update] <=> [b[:count], b[:novel].last_update] }
-                   .first(3)
+                   .sort { |a, b| [b[:novel].last_update, b[:count]] <=> [a[:novel].last_update, a[:count]] }
+                   .first(5)
 
       if novels.empty?
         m.reply 'You have no current novels!'
