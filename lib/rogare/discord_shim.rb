@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class DiscordMessageShim
+  extend Memoist
+
   def initialize(event, pattern, plug)
     @event = event
     @pattern = pattern[0]
@@ -42,6 +44,8 @@ class DiscordMessageShim
   def channel
     DiscordChannelShim.new @event.channel
   end
+
+  memoize :user, :channel
 end
 
 class DiscordChannelShim
