@@ -38,7 +38,9 @@ class DiscordMessageShim
   end
 
   def user
-    User.from_discord @event.message.author
+    Rogare.user_cache.getset(@event.message.author.id) do
+      User.create_from_discord(@event.message.author)
+    end
   end
 
   def channel

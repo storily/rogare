@@ -68,6 +68,21 @@ module Rogare
       ].sample
     end
 
+    # Extremely short-lived global cache for initial user lookups.
+    # Idea is to avoid doing two lookups on the same message for seen!
+    # and for passing to commands. These will occur within the same
+    # second, and we want to keep the cache otherwise fresh, so two
+    # messages two seconds apart should reasonably do two lookups (e.g.
+    # if one mutates the user record, the next should see that.)
+    # The “default” maximum of 100 entries in the cache is unlikely to
+    # ever be reached (≈ 100 messages per second) and because it’s LRU,
+    # will not matter anyway (traffic would need to be a lot higher, maybe
+    # in the 10,000s per second, for it to do two lookups for a message.)
+    @@user_cache = LruRedux::TTL::ThreadSafeCache.new(100, 1)
+    def user_cache
+      @@user_cache
+    end
+
     def discord
       bot = Discordrb::Bot.new token: ENV['DISCORD_TOKEN']
       puts "This bot's discord invite URL is #{bot.invite_url}."
@@ -79,8 +94,9 @@ module Rogare
       end
 
       bot.message do |event|
-        # FIXME: likely could be a single query?
-        User.create_from_discord(event.author).seen!
+        user_cache.getset(event.author.id) do
+          User.create_from_discord(event.author)
+        end.seen!
       end
 
       bot
