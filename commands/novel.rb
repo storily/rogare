@@ -58,7 +58,7 @@ class Rogare::Commands::Novel
   match_empty :show_novels
 
   def show_novels(m)
-    novels = m.user.to_db.novels_dataset.reverse(:started).all
+    novels = m.user.novels_dataset.reverse(:started).all
 
     m.reply(novels.map { |nov| format_novel nov, true }.join("\n").strip)
   end
@@ -72,16 +72,14 @@ class Rogare::Commands::Novel
   end
 
   def create_novel(m, name)
-    user = m.user.to_db
-
     novel = Novel.new(name: name.strip)
-    user.add_novel novel
+    m.user.add_novel novel
 
     m.reply "New novel created: #{novel.id}."
   end
 
   def rename_novel(m, id, name)
-    novel = m.user.to_db.load_novel id
+    novel = m.user.load_novel id
 
     return m.reply 'No such novel' unless novel
 
@@ -100,9 +98,8 @@ class Rogare::Commands::Novel
   end
 
   def new_goal(m, id, line)
-    user = m.user.to_db
-    novel = user.load_novel id
-    tz = user.timezone
+    novel = m.user.load_novel id
+    tz = m.user.timezone
 
     return m.reply 'No such novel' unless novel
 
@@ -128,9 +125,8 @@ class Rogare::Commands::Novel
   end
 
   def edit_goal(m, id, line)
-    user = m.user.to_db
-    novel = user.load_novel id
-    tz = user.timezone
+    novel = m.user.load_novel id
+    tz = m.user.timezone
 
     return m.reply 'No such novel' unless novel
 
@@ -158,7 +154,7 @@ class Rogare::Commands::Novel
   end
 
   def remove_goal(m, id, letter = nil)
-    novel = m.user.to_db.load_novel id
+    novel = m.user.load_novel id
 
     return m.reply 'No such novel' unless novel
 
@@ -171,7 +167,7 @@ class Rogare::Commands::Novel
   end
 
   def finish_novel(m, id)
-    novel = m.user.to_db.load_novel id
+    novel = m.user.load_novel id
 
     return m.reply 'No such novel' unless novel
     return m.reply 'Already marked done' if novel[:finished]
@@ -183,7 +179,7 @@ class Rogare::Commands::Novel
   end
 
   def unfinish_novel(m, id)
-    novel = m.user.to_db.load_novel id
+    novel = m.user.load_novel id
 
     return m.reply 'No such novel' unless novel
     return m.reply 'Not marked done' unless novel[:finished]

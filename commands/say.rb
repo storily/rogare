@@ -22,7 +22,7 @@ class Rogare::Commands::Say
       return
     end
 
-    # k = "nick:#{m.user.id}:sayquota"
+    # k = "nick:#{m.user.discord.id}:sayquota"
     # quota = @@redis.get(k).to_i
     # @@redis.set(k, 0, ex: 60 * 60) if quota.zero?
     # @@redis.incr(k)

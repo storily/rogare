@@ -7,35 +7,44 @@ class User < Sequel::Model
   one_to_many :war_memberships, class: :WarMember, key: :user_id
   many_to_many :wars, join_table: :wars_members, class: :War
 
+  @discord = nil
+  attr_accessor :discord
+
   def self.from_discord(discu)
-    where(discord_id: discu.id).first
+    u = where(discord_id: discu.id).first
+    u.discord = discu
+    u
   end
 
-  def self.seen_on_discord(discu)
-    nick = discu.nick || discu.username
-    discordian = from_discord(discu)
+  def self.create_from_discord(discu)
+    u = from_discord discu
+    return u if u
 
-    return new_from_discord(discu)[:last_seen] unless discordian
-    return discordian[:last_seen] unless Time.now - discordian[:last_seen] > 60 || discordian[:nick] != nick
+    u = create(discord_id: discu.id)
+    u.discord = discu
+    u
+  end
+
+  def seen!
+    return self unless Time.now - last_seen > 60 || nick != discord_nick
 
     # keep same updated stamp unless we actually update something
-    discordian.updated = discordian.updated unless nick != discordian.nick
-    discordian.last_seen = Time.now
-    discordian.nick = nick
-    discordian.save
+    self.updated = updated unless nick != discord_nick
+    self.last_seen = Time.now
+    self.nick = nick
+    save
 
-    discordian.last_seen
+    self
   end
 
-  def self.new_from_discord(discu, extra = {})
-    defaults = {
-      discord_id: discu.id,
-      nick: discu.nick || discu.username,
-      first_seen: Sequel.function(:now),
-      last_seen: Sequel.function(:now)
-    }
+  def discord_nick
+    (@discord.nick if @discord.is_a? Discordrb::Member) ||
+      @discord.username ||
+      '?'
+  end
 
-    create(defaults.merge(extra))
+  def send(message)
+    @discord.pm message
   end
 
   def mid

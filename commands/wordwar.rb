@@ -34,8 +34,6 @@ class Rogare::Commands::Wordwar
   match_empty :ex_list_wars
 
   def execute(m, param)
-    user = m.user.to_db
-
     param.sub!(/#.+$/, '')
     time, durstr = param.strip.split(/for/i).map(&:strip)
 
@@ -89,9 +87,9 @@ class Rogare::Commands::Wordwar
 
       raise 'War is in the past???' unless war.future?
 
-      war.creator = user
+      war.creator = m.user
       war.save
-      war.add_member user
+      war.add_member m.user
     rescue StandardError => err
       logs [err.message, err.backtrace].flatten.join("\n")
       return m.reply 'Got an error, check your times and try again.'
@@ -156,11 +154,10 @@ class Rogare::Commands::Wordwar
   end
 
   def ex_join_war(m, id)
-    user = m.user.to_db
     war = War[id.to_i]
     return m.reply 'No such wordwar' unless war&.current?
 
-    war.add_member! user
+    war.add_member! m.user
     war.add_channel m.channel.to_s
     war.save
 
@@ -168,21 +165,19 @@ class Rogare::Commands::Wordwar
   end
 
   def ex_leave_war(m, id)
-    user = m.user.to_db
     war = War[id.to_i]
     return m.reply 'No such wordwar' unless war&.current?
 
-    war.remove_member user
+    war.remove_member m.user
 
     m.reply "You're out."
   end
 
   def ex_cancel_war(m, id)
-    user = m.user.to_db
     war = War[id.to_i]
     return m.reply 'No such wordwar' unless war&.current?
 
-    war.cancel! user
+    war.cancel! m.user
 
     m.reply "Wordwar #{war.id} cancelled."
   end

@@ -68,7 +68,7 @@ class Rogare::Commands::Debug
       kind_info kind_map
     ].include? method
 
-    is_admin = m.user.inner.roles.find { |r| (r.permissions.bits & 3) == 3 }
+    is_admin = m.user.discord.roles.find { |r| (r.permissions.bits & 3) == 3 }
     unless is_admin
       m.reply('Not authorised')
       next :stop
@@ -98,15 +98,15 @@ class Rogare::Commands::Debug
   end
 
   def my_id(m)
-    m.reply m.user.id
+    m.reply m.user.discord.id
   end
 
   def my_name(m)
-    m.reply m.user.nick
+    m.reply m.user.discord_nick
   end
 
   def my_user(m)
-    m.reply "`#{m.user.to_db.inspect}`"
+    m.reply "`#{m.user.to_h.inspect}`"
   end
 
   def user_info(m, mid)
@@ -208,13 +208,12 @@ class Rogare::Commands::Debug
 
   def wc_set_user(m, user, nano)
     du = Rogare.from_discord_mid user
-    du ||= Rogare.discord.users.find { |_i, u| u.name == user }[1]
+    du ||= User.from_discord(Rogare.discord.users.find { |_i, u| u.name == user }[1])
     return m.reply('No such user') unless du
 
-    u = User.from_discord du
-    u.nano_user = nano
-    u.save
+    du.nano_user = nano
+    du.save
 
-    m.reply "User `#{du.id}` nanouser set to `#{nano}`"
+    m.reply "User `#{du.discord.id}` nanouser set to `#{nano}`"
   end
 end

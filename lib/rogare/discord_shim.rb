@@ -36,45 +36,11 @@ class DiscordMessageShim
   end
 
   def user
-    DiscordUserShim.new @event.message.author
+    User.from_discord @event.message.author
   end
 
   def channel
     DiscordChannelShim.new @event.channel
-  end
-end
-
-class DiscordUserShim
-  def initialize(member)
-    @member = member
-  end
-
-  def inner
-    @member
-  end
-
-  def id
-    @member.id
-  end
-
-  # Mentionable ID
-  def mid
-    "<@#{id}>"
-  end
-
-  def nick
-    n = nil
-    n ||= @member.nick if @member.is_a? Discordrb::Member
-    n ||= @member.username
-    n || '?'
-  end
-
-  def send(message)
-    @member.pm message
-  end
-
-  def to_db
-    User.from_discord self
   end
 end
 
@@ -96,7 +62,7 @@ class DiscordChannelShim
   def users
     case type
     when :public
-      @chan.server.members.map { |u| DiscordUserShim.new u }
+      @chan.server.members.map { |u| User.from_discord u }
     else
       []
     end

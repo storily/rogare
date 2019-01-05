@@ -79,7 +79,8 @@ module Rogare
       end
 
       bot.message do |event|
-        User.seen_on_discord(event.author)
+        # FIXME: likely could be a single query?
+        User.create_from_discord(event.author).seen!
       end
 
       bot
@@ -105,7 +106,7 @@ module Rogare
       du = discord.users[id]
       return unless du
 
-      DiscordUserShim.new(du)
+      User.create_from_discord(du)
     end
 
     def nixnotif(nick)

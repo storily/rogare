@@ -16,26 +16,23 @@ class Rogare::Commands::My
   match_empty :show
 
   def show(m)
-    user = m.user.to_db
-
     m.reply [
-      "**#{user.nick}**, first seen _#{user.first_seen.strftime('%Y-%m-%d')}_",
-      ("Nano user: `#{user.nano_user}`" if user.nano_user),
-      "Timezone: **#{user.tz}**"
+      "**#{m.user.nick}**, first seen _#{m.user.first_seen.strftime('%Y-%m-%d')}_",
+      ("Nano user: `#{m.user.nano_user}`" if m.user.nano_user),
+      "Timezone: **#{m.user.tz}**"
     ].compact.join("\n")
   end
 
   def set_nano(m, name)
     name = name.strip.split.join('-')
-    user = m.user.to_db
 
-    user.nano_user = name
-    unless user.nano_user_valid?
+    m.user.nano_user = name
+    unless m.user.nano_user_valid?
       m.reply "No such nano name (`#{name}`) found on the nano website"
       return
     end
 
-    user.save
+    m.user.save
     m.reply "Your nano name has been set to #{name}."
   end
 
@@ -47,9 +44,8 @@ class Rogare::Commands::My
       return m.reply 'That’s not a valid timezone.'
     end
 
-    user = m.user.to_db
-    user.tz = tz
-    user.save
+    m.user.tz = tz
+    m.user.save
     m.reply "Your timezone has been set to #{tz}."
   end
 end

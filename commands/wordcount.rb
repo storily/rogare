@@ -32,8 +32,7 @@ class Rogare::Commands::Wordcount
   match_empty :own_count
 
   def own_count(m)
-    user = m.user.to_db
-    novels = user.current_novels.map { |novel| get_novel_count novel, user }
+    novels = m.user.current_novels.map { |novel| get_novel_count novel, m.user }
 
     return m.reply 'Something is very wrong' unless novels
     return m.reply 'You have no current novel' if novels.empty?
@@ -47,7 +46,7 @@ class Rogare::Commands::Wordcount
 
     users = if /^<@!?\d+>$/.match?(lookup)
               # Exact match from @mention / mid
-              [Rogare.from_discord_mid(lookup).to_db]
+              [Rogare.from_discord_mid(lookup)]
             else
               # Case-insensitive match from nick or nano
               User.where { (nick =~ /#{lookup}/i) || (nanoname =~ /#{lookup}/i) }.first(5)
@@ -79,7 +78,7 @@ class Rogare::Commands::Wordcount
   end
 
   def set_count(m, words, id = '')
-    novel = m.user.to_db.load_novel id
+    novel = m.user.load_novel id
 
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
@@ -90,7 +89,7 @@ class Rogare::Commands::Wordcount
   end
 
   def set_count_yesterday(m, words, id = '')
-    novel = m.user.to_db.load_novel id
+    novel = m.user.load_novel id
 
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
@@ -101,7 +100,7 @@ class Rogare::Commands::Wordcount
   end
 
   def set_today_count(m, words, id = '')
-    novel = m.user.to_db.load_novel id
+    novel = m.user.load_novel id
 
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
@@ -116,14 +115,13 @@ class Rogare::Commands::Wordcount
   end
 
   def add_count_yesterday(m, words, id = '')
-    user = m.user.to_db
-    novel = user.load_novel id
+    novel = m.user.load_novel id
 
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
     return m.reply 'Can’t set wordcount of a finished novel' if novel.finished
 
-    existing = novel.wordcount_at(user.timezone.now.beginning_of_day)
+    existing = novel.wordcount_at(m.user.timezone.now.beginning_of_day)
     new_words = existing + if words.start_with? '-'
                              words[1..-1].to_i * -1
                            else
@@ -137,7 +135,7 @@ class Rogare::Commands::Wordcount
   end
 
   def add_count(m, words, id = '')
-    novel = m.user.to_db.load_novel id
+    novel = m.user.load_novel id
 
     return m.reply 'No such novel' if id && !novel
     return m.reply 'You don’t have a novel yet' unless novel
