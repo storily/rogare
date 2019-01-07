@@ -192,12 +192,12 @@ class Rogare::Commands::Wordwar
     types = %w[words lines pages minutes]
     data = id.split(' ')
     check = begin
-              Integer(data[1], 10)
+              data[1].to_i
             rescue StandardError
               nil
             end
     war = War[data[0].to_i]
-    data[2] = 'words' if data[2].nil?
+    data[2] ||= 'words'
 
     return m.reply 'No such wordwar' unless war&.exists?
     return m.reply 'It\'s not over yet' unless war&.finished?
