@@ -97,7 +97,7 @@ class War < Sequel::Model
     member.save
   end
 
-  def format_totals(id)
+  def totals
     memberships_dataset.eager(:user)
     members.map do |m|
       "#{m.user.mid}: **#{m.total}** #{m.total_type} (**" \

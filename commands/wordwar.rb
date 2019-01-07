@@ -215,7 +215,7 @@ class Rogare::Commands::Wordwar
     return m.reply 'No such wordwar' unless war&.exists?
     return m.reply 'It\'s not over yet' unless war.finished?
 
-    members = war.format_totals(id.to_i)
+    members = war.totals
 
     m.reply "**Statistics for war #{id.to_i}:**\n\n" +
             members.join("\n")
