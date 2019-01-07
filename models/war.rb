@@ -35,8 +35,12 @@ class War < Sequel::Model
     finish - Time.now
   end
 
+  def exists?
+    !cancelled
+  end
+
   def current?
-    !cancelled && finish > Time.now
+    exists? && finish > Time.now
   end
 
   def future?
@@ -82,6 +86,22 @@ class War < Sequel::Model
 
   def add_channel(chan)
     self.channels = channels.push(chan).uniq
+  end
+
+  def add_total(user, total, type)
+    add_member! user
+
+    member = WarMember[user_id: user.id, war_id: id]
+    member.total = total
+    member.total_type = type
+    member.save
+  end
+
+  def totals
+    memberships_dataset.eager(:user).map do |m|
+      "#{m.user.mid}: **#{m.total}** #{m.total_type} (**" \
+        "#{(m.total.to_f / (seconds / 60)).round(2)}** #{m.total_type} per minute)"
+    end
   end
 
   def start_timer
