@@ -11,6 +11,8 @@ class Rogare::Commands::Wordwar
     'Or: `!% at [wall time e.g. 12:35] for [duration]`',
     'Or even (defaulting to a 15 minute run): `!% at/in [time]`',
     'And then everyone should: `!% join [wordwar ID]`',
+    'And add their total at the end with `!% total [ID] [total]`',
+    'Then get the summary with `!% summary [ID]`',
     'Also say `!%` alone to get a list of current/scheduled ones',
     'To get some details about a war: `!% info [ID]` or `!% members [ID]`.'
   ]
