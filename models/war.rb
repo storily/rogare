@@ -94,19 +94,19 @@ class War < Sequel::Model
 
   def add_total(user, total, type)
     add_member! user
-    
-    WarMember.where(user_id: user.id, war_id: self.id).update(total: total, total_type: type)
+
+    WarMember.where(user_id: user.id, war_id: id).update(total: total, total_type: type)
   end
-  
-  def get_totals(id)
-    return memberships_dataset.eager(:user)
+
+  def get_totals(_id)
+    memberships_dataset.eager(:user)
   end
 
   def format_totals(id)
     members = get_totals(id)
     members.map do |m|
-      "#{m.user.mid}: **#{m.total}** #{m.total_type} (**" +
-      "#{(m.total.to_f / (self.seconds / 60)).round(2)}** #{m.total_type} per minute)"
+      "#{m.user.mid}: **#{m.total}** #{m.total_type} (**" \
+        "#{(m.total.to_f / (seconds / 60)).round(2)}** #{m.total_type} per minute)"
     end
   end
 

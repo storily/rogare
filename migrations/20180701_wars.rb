@@ -28,7 +28,7 @@ Sequel.migration do
     comment_on :column, %i[wars started], 'If this war was announced as having started'
     comment_on :column, %i[wars ended], 'If this war was announced as having ended'
 
-    enum types: [:words, :lines, :pages, :minutes]
+    enum types: %i[words lines pages minutes]
 
     create_table(:wars_members) do
       Integer :user_id, null: false

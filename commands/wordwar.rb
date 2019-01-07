@@ -189,23 +189,25 @@ class Rogare::Commands::Wordwar
   end
 
   def ex_total_war(m, id)
-    types = ['words', 'lines', 'pages', 'minutes']
+    types = %w[words lines pages minutes]
     data = id.split(' ')
-    check = Integer(data[1], 10) rescue nil
+    check = begin
+              Integer(data[1], 10)
+            rescue StandardError
+              nil
+            end
     war = War[data[0].to_i]
-    if data[2] == nil then
-      data[2] = 'words'
-    end
-    
+    data[2] = 'words' if data[2].nil?
+
     return m.reply 'No such wordwar' unless war&.exists?
     return m.reply 'It\'s not over yet' unless war&.finished?
-    return m.reply 'That\'s not a valid total' unless !check.nil?
+    return m.reply 'That\'s not a valid total' if check.nil?
     return m.reply 'That\'s not a valid type' unless types.include? data[2]
 
     war.add_total(m.user, data[1].to_i, data[2])
     war.save
 
-    m.reply "Got it!"
+    m.reply 'Got it!'
   end
 
   def ex_war_summary(m, id)
@@ -217,6 +219,6 @@ class Rogare::Commands::Wordwar
     members = war.format_totals(id.to_i)
 
     m.reply "**Statistics for war #{id.to_i}:**\n\n" +
-      members.join("\n")
+            members.join("\n")
   end
 end
