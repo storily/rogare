@@ -200,12 +200,11 @@ class Rogare::Commands::Wordwar
     data[2] ||= 'words'
 
     return m.reply 'No such wordwar' unless war&.exists?
-    return m.reply 'It\'s not over yet' unless war&.finished?
+    return m.reply 'It\'s not over yet' unless war.finished?
     return m.reply 'That\'s not a valid total' if check.nil?
     return m.reply 'That\'s not a valid type' unless types.include? data[2]
 
     war.add_total(m.user, data[1].to_i, data[2])
-    war.save
 
     m.reply 'Got it!'
   end
@@ -214,7 +213,7 @@ class Rogare::Commands::Wordwar
     war = War[id.to_i]
 
     return m.reply 'No such wordwar' unless war&.exists?
-    return m.reply 'It\'s not over yet' unless war&.finished?
+    return m.reply 'It\'s not over yet' unless war.finished?
 
     members = war.format_totals(id.to_i)
 

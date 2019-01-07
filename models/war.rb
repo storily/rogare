@@ -47,10 +47,6 @@ class War < Sequel::Model
     current? && start > Time.now
   end
 
-  def finished?
-    exists? && finish < Time.now
-  end
-
   def others
     members.reject { |u| u == creator }
   end
@@ -101,12 +97,8 @@ class War < Sequel::Model
     member.save
   end
 
-  def get_totals(_id)
-    memberships_dataset.eager(:user)
-  end
-
   def format_totals(id)
-    members = get_totals(id)
+    memberships_dataset.eager(:user)
     members.map do |m|
       "#{m.user.mid}: **#{m.total}** #{m.total_type} (**" \
         "#{(m.total.to_f / (seconds / 60)).round(2)}** #{m.total_type} per minute)"
