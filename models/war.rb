@@ -98,8 +98,7 @@ class War < Sequel::Model
   end
 
   def totals
-    memberships_dataset.eager(:user)
-    members.map do |m|
+    memberships_dataset.eager(:user).map do |m|
       "#{m.user.mid}: **#{m.total}** #{m.total_type} (**" \
         "#{(m.total.to_f / (seconds / 60)).round(2)}** #{m.total_type} per minute)"
     end
