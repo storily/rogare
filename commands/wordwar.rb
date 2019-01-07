@@ -19,14 +19,18 @@ class Rogare::Commands::Wordwar
   match_command /join(.*)/, method: :ex_join_war
   match_command /leave(.*)/, method: :ex_leave_war
   match_command /cancel(.*)/, method: :ex_cancel_war
+  match_command /total(.*)/, method: :ex_total_war
   match_command /info(.*)/, method: :ex_war_info
+  match_command /summary(.*)/, method: :ex_war_summary
   match_command /members(.*)/, method: :ex_war_members
 
   # Often people type it the other way
   match_command /(\d+)\s+join/, method: :ex_join_war
   match_command /(\d+)\s+leave/, method: :ex_leave_war
   match_command /(\d+)\s+cancel/, method: :ex_cancel_war
+  match_command /(\d+)\s+total/, method: :ex_total_war
   match_command /(\d+)\s+info/, method: :ex_war_info
+  match_command /(\d+)\s+summary/, method: :ex_war_summary
   match_command /(\d+)\s+members/, method: :ex_war_members
 
   match_command /((?:\d+:\d+|in|at).+)/
@@ -180,5 +184,37 @@ class Rogare::Commands::Wordwar
     war.cancel! m.user
 
     m.reply "Wordwar #{war.id} cancelled."
+  end
+
+  def ex_total_war(m, id)
+    types = ['words', 'lines', 'pages', 'minutes']
+    data = id.split(' ')
+    check = Integer(data[1], 10) rescue nil
+    war = War[data[0].to_i]
+    if data[2] == nil then
+      data[2] = 'words'
+    end
+    
+    return m.reply 'No such wordwar' unless war&.exists?
+    return m.reply 'It\'s not over yet' unless war&.finished?
+    return m.reply 'That\'s not a valid total' unless !check.nil?
+    return m.reply 'That\'s not a valid type' unless types.include? data[2]
+
+    war.add_total(m.user, data[1].to_i, data[2])
+    war.save
+
+    m.reply "Got it!"
+  end
+
+  def ex_war_summary(m, id)
+    war = War[id.to_i]
+
+    return m.reply 'No such wordwar' unless war&.exists?
+    return m.reply 'It\'s not over yet' unless war&.finished?
+
+    members = war.format_totals(id.to_i)
+
+    m.reply "**Statistics for war #{id.to_i}:**\n\n" +
+      members.join("\n")
   end
 end
