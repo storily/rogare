@@ -95,7 +95,10 @@ class War < Sequel::Model
   def add_total(user, total, type)
     add_member! user
 
-    WarMember.where(user_id: user.id, war_id: id).update(total: total, total_type: type)
+    member = WarMember[user_id: user.id, war_id: id]
+    member.total = total
+    member.total_type = type
+    member.save
   end
 
   def get_totals(_id)
