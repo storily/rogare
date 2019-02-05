@@ -3,6 +3,13 @@
 require 'rack/protection'
 
 class Nominare < Sinatra::Application
+  register Sinatra::Cors
+
+  set :allow_origin, 'http://localhost:8000 https://cogitare.nz https://dicere.cogitare.nz'
+  set :allow_methods, 'GET,HEAD'
+  set :allow_headers, 'content-type,if-modified-since'
+  set :expose_headers, 'location,link'
+
   use Rack::Protection, except: %i[session_hijacking remote_token]
 
   before do
