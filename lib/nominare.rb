@@ -37,10 +37,6 @@ class Nominare < Sinatra::Application
   end
 
   get '/random' do
-    redirect '/random/1'
-  end
-
-  get '/random' do
     n = params['n'].to_i
     n = 5 if n < 1
     n = 100 if n > 100
