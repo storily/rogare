@@ -20,6 +20,7 @@ class Nominare < Sinatra::Application
     { endpoints: {
       '/random?n=N' => 'Returns N (1 <= N <= 100) names at random.',
       '/search?q=...' => 'Perform a search and return some random names from it.',
+      '/details?name=...' => 'Returns details and scoring for a particular name.',
       '/kinds.png' => 'Map of rough regions described by the kinds values. ' \
         'Hand-made and may not reflect current availability.',
       '/stats' => 'Totals and subtotals about the *scored* dataset ' \
@@ -79,5 +80,21 @@ class Nominare < Sinatra::Application
     end
 
     names.to_json
+  end
+
+  get '/details' do
+    name = params['name'] || ''
+    name = name.strip.downcase
+    halt 400 if name.empty?
+
+    details = {}
+    Name.where(name: name).each do |info|
+      key = info.surname ? :last : :first
+      kinds = info.kinds.gsub(/[\{\}]/, '').split(',')
+      kinds -= %w[first last]
+      details[key] ||= { sources: info.sources, kinds: kinds, score: info.score }
+    end
+
+    details.to_json
   end
 end
