@@ -92,7 +92,13 @@ class Nominare < Sinatra::Application
       key = info.surname ? :last : :first
       kinds = info.kinds.gsub(/[\{\}]/, '').split(',')
       kinds -= %w[first last]
-      details[key] ||= { name: name, sources: info.sources, kinds: kinds, score: info.score }
+
+      details[key] = {
+        name: Name.format(name),
+        kinds: kinds,
+        sources: info.sources,
+        score: info.score
+      }
     end
 
     details.to_json
