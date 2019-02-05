@@ -13,10 +13,8 @@ Dir['./commands/*.rb'].each do |p|
 end
 
 logs '=====> Preparing threads'
-require 'thwait'
-threads = []
 
-threads << Thread.new do
+Rogare.spinoff(:goals) do
   logs '=====> Spinning up goal repeater'
   loop do
     n = Goal.need_repeating.map(&:repeat_if_needed!).length
@@ -26,7 +24,7 @@ threads << Thread.new do
 end
 
 if ENV['RACK_ENV'] == 'production' || ENV['DEV_LOAD_WARS']
-  threads << Thread.new do
+  Rogare.spinoff(:wars) do
     sleep 3
     logs '=====> Loading wordwars from Postgres'
     wars = War.start_timers_for_existing
@@ -36,21 +34,21 @@ if ENV['RACK_ENV'] == 'production' || ENV['DEV_LOAD_WARS']
 end
 
 if ENV['RACK_ENV'] == 'production'
-  threads << Thread.new do
+  Rogare.spinoff(:debug) do
     logs '=====> Preparing live debug port'
     binding.remote_pry
   end
 end
 
-threads << Thread.new do
+Rogare.spinoff(:discord) do
   logs '=====> Starting Discord'
   Rogare.discord.run
 end
 
-threads << Thread.new do
+Rogare.spinoff(:nominare) do
   logs '=====> Starting Nominare'
   require './lib/nominare'
   Nominare.run!
 end
 
-ThreadsWait.all_waits(*threads)
+Rogare.spinall!

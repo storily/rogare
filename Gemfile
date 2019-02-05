@@ -30,3 +30,7 @@ gem 'sinatra-cors', '~>1.1', require: 'sinatra/cors'
 gem 'treetop', '~>1.6'
 gem 'typhoeus', '~>0.6.9'
 gem 'tzinfo', '~>1.2'
+
+group :development do
+  gem 'tty-prompt', '~>0.18'
+end

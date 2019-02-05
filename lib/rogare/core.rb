@@ -9,6 +9,16 @@ module Rogare
       @@boot
     end
 
+    @@threads = []
+    def spinoff(_thing, &block)
+      @@threads << Thread.new(&block)
+    end
+
+    def spinall!
+      require 'thwait'
+      ThreadsWait.all_waits(*@@threads)
+    end
+
     def prefix
       if ENV['RACK_ENV'] == 'production'
         '!'
