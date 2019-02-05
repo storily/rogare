@@ -73,6 +73,63 @@ class Name < Sequel::Model(:names_scored)
       }
     end
 
+    def parse_word(args, word)
+      if word.is_a? Integer
+        args[:n] = word
+      elsif /^\d+%$/.match?(word)
+        args[:freq] = [word.to_i, nil]
+      elsif /^(males?|m[ae]n|boys?|lads?|guys?)$/i.match?(word)
+        args[:kinds] << 'male'
+      elsif /^(females?|wom[ae]n|girls?|lass(i?es)?|gals?)$/i.match?(word)
+        args[:kinds] << 'female'
+      elsif /^(enby|nb|enbie)s?$/i.match?(word)
+        args[:kinds] << 'enby'
+      elsif /^(common)$/i.match?(word)
+        args[:freq] = [50, nil]
+      elsif /^(rare|weird|funny|evil|bad)$/i.match?(word)
+        args[:freq] = [nil, 20]
+      elsif /^(all|both)$/i.match?(word)
+        args[:freq] = [nil, nil]
+      elsif /^(first|given)$/i.match?(word)
+        args[:full] = false
+        args[:kinds] << 'first'
+      elsif /^(last(name)?|family|surname)$/i.match?(word)
+        args[:full] = false
+        args[:kinds] << 'last'
+      elsif /^(afram|african-?american)$/i.match?(word)
+        args[:kinds] << 'afram'
+      elsif /^(english|western|occidental)$/i.match?(word)
+        args[:kinds] << 'english'
+      elsif /^(indian)$/i.match?(word)
+        args[:kinds] << 'indian'
+      elsif /^(latin|spanish|portuguese|mexican|hispanic)$/i.match?(word)
+        args[:kinds] << 'latin'
+      elsif /^(french|français)$/i.match?(word)
+        args[:kinds] << 'french'
+      elsif /^(m[aā]ori|(te)?-?reo)$/i.match?(word)
+        args[:kinds] << 'maori'
+      elsif /^(maghreb|algerian|morroccan|tunis|north-?african)$/i.match?(word)
+        args[:kinds] << 'maghreb'
+      elsif /^(mideast|arabic|hebrew|egyptian|middle-?east)$/i.match?(word)
+        args[:kinds] << 'mideast'
+      elsif /^(easteuro|russian?|eastern|east(ern)?-?europe|siberi(an|e)|east)$/i.match?(word)
+        args[:kinds] << 'easteuro'
+      elsif /^(pacific)$/i.match?(word)
+        args[:kinds] << 'pacific'
+        args[:also] << 'maori'
+      elsif /^((poly|mela|micro)(nesian?)?|hawaii|samoa)$/i.match?(word)
+        args[:kinds] << 'pacific'
+      elsif /^(amerindian|american-?indian|native-?american|cherokee|navajo|sioux|apache)$/i.match?(word)
+        args[:kinds] << 'amerindian'
+      elsif /^(aborigin(al|e)?|native-?australian)$/i.match?(word)
+        args[:kinds] << 'aboriginal'
+      elsif /^(full)$/i.match?(word)
+        args[:full] = true
+      else
+        args[:also] << word
+      end
+    end
+
     private
 
     def enum_values(type)
