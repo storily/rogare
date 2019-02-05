@@ -110,6 +110,7 @@ GEM
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
+    roman-numerals (0.3.0)
     rubocop (0.63.1)
       jaro_winkler (~> 1.5.1)
       parallel (~> 1.10)
@@ -189,6 +190,7 @@ DEPENDENCIES
   pry-remote (~> 0.1.8)
   puma (~> 3.12)
   rake (~> 12.3)
+  roman-numerals (~> 0.3.0)
   rubocop (~> 0.62)
   sequel (~> 5.10)
   sequel-pg-comment!

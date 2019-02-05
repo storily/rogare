@@ -74,6 +74,30 @@ class Name < Sequel::Model(:names_scored)
           p.gsub!(/^O’Mac(\w+)/) { |_s| "O’Mac#{Regexp.last_match(1).capitalize}" }
         end
 
+        begin
+          rn = RomanNumerals.to_decimal(p.upcase)
+          raise ArgumentError, 'not a roman number' if rn.zero?
+          raise ArgumentError, 'not a roman number' unless RomanNumerals.to_roman(rn) == p.upcase
+
+          p.upcase!
+          if rand < 0.2
+            o = case rn % 100
+                when 11, 12, 13 then 'th'
+                else
+                  case rn % 10
+                  when 1 then 'st'
+                  when 2 then 'nd'
+                  when 3 then 'rd'
+                  else 'th'
+                  end
+                end
+
+            p = "the #{rn}#{o}"
+          end
+        rescue ArgumentError => e
+          e.inspect # do nothing
+        end
+
         p
       end.join
     end

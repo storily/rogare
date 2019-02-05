@@ -21,6 +21,7 @@ gem 'pry', require: false
 gem 'pry-remote', '~>0.1.8'
 gem 'puma', '~>3.12', require: false
 gem 'rake', '~>12.3'
+gem 'roman-numerals', '~>0.3.0'
 gem 'rubocop', '~> 0.62', require: false, group: %i[development test]
 gem 'sequel', '~>5.10'
 gem 'sequel-pg-comment', github: 'mr-dxdy/sequel-pg-comment', branch: 'remove_git-version-bump'
