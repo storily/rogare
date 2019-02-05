@@ -19,6 +19,9 @@ class Name < Sequel::Model(:names_scored)
     end
 
     def query(args)
+      args[:kinds] ||= []
+      args[:freq] ||= []
+
       last = args[:kinds].include? 'last'
       args[:kinds] -= %w[last male female enby] if last
 
@@ -38,6 +41,26 @@ class Name < Sequel::Model(:names_scored)
 
     def search(args)
       query(args).all.map { |name| format name[:name] }
+    end
+
+    def fulls(args)
+      args[:kinds] ||= []
+      args[:freq] ||= []
+
+      firsts = search(args_first_name(args))
+      lasts = search(args_last_name(args))
+      diff = firsts.length - lasts.length
+      get_more_lasts(args, diff).each { |n| lasts << n } if diff.positive?
+
+      lasts.map! do |name|
+        next name if rand > 0.1 || name.include?('-')
+
+        another = get_some_lasts args, 1
+        another = get_more_lasts args, 1 if another == name
+        [name, another].flatten
+      end
+
+      firsts.zip(lasts)
     end
 
     def format(name)
@@ -138,6 +161,36 @@ class Name < Sequel::Model(:names_scored)
           enum_range.function(Sequel[nil].cast(type))
         ).cast(:text).as(:value)
       end
+    end
+
+    def amend_args(args, plus, minus)
+      new_args = args.clone
+      new_args[:kinds] = args[:kinds] - [minus] + [plus]
+      new_args
+    end
+
+    def args_first_name(args)
+      amend_args(args, 'first', 'last')
+    end
+
+    def args_last_name(args)
+      amend_args(args, 'last', 'first')
+    end
+
+    def get_some_lasts(args, amount)
+      new_args = args_last_name args
+      new_args[:n] = amount
+      Name.search new_args
+    end
+
+    def get_more_lasts(args, amount)
+      Name.search(
+        n: amount,
+        kinds: ['last'],
+        full: false,
+        freq: args[:freq],
+        also: args[:kinds] - ['first']
+      )
     end
   end
 end
