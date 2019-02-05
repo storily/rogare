@@ -40,7 +40,7 @@ class Name < Sequel::Model(:names_scored)
     end
 
     def search(args)
-      query(args).all.map { |name| format name[:name] }
+      query(args).all.map { |name| format name[:name], name[:surname] }
     end
 
     def fulls(args)
@@ -63,12 +63,18 @@ class Name < Sequel::Model(:names_scored)
       firsts.zip(lasts)
     end
 
-    def format(name)
+    def format(name, surname = false)
       name.split(/(?<![[:alnum:]])/).map do |part|
-        (part[0..-2].capitalize + part[-1])
-          .gsub(/^(Ma?c|V[ao]n)(\w+)/) { |_s| "#{Regexp.last_match(1)}#{Regexp.last_match(2).capitalize}" }
-          .gsub(/^O([bcdfghklmnrst]\w+)/) { |_s| "O’#{Regexp.last_match(1).capitalize}" }
-          .gsub(/^O’Mac(\w+)/) { |_s| "O’Mac#{Regexp.last_match(1).capitalize}" }
+        p = part[0..-2].capitalize + part[-1]
+
+        p.gsub!(/^(Ma?c|V[ao]n)(\w+)/) { |_s| "#{Regexp.last_match(1)}#{Regexp.last_match(2).capitalize}" }
+
+        if surname
+          p.gsub!(/^O([bcdfghklmnrst]\w+)/) { |_s| "O’#{Regexp.last_match(1).capitalize}" }
+          p.gsub!(/^O’Mac(\w+)/) { |_s| "O’Mac#{Regexp.last_match(1).capitalize}" }
+        end
+
+        p
       end.join
     end
 
