@@ -78,6 +78,7 @@ class Name < Sequel::Model(:names_scored)
           rn = RomanNumerals.to_decimal(p.upcase)
           raise ArgumentError, 'not a roman number' if rn.zero?
           raise ArgumentError, 'not a roman number' unless RomanNumerals.to_roman(rn) == p.upcase
+          raise ArgumentError, 'roman number too large' if rn >= 20
 
           p.upcase!
           if rand < 0.2
