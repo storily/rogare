@@ -30,8 +30,10 @@ class Rogare::Commands::Dice
 
     if dice.empty?
       m.reply 'dunno how to roll that!'
+    elsif dice.length < 2
+      m.reply dice.first
     else
-      m.reply "#{dice.join(' ')} (#{dice.sum} total)"
+      m.reply "#{dice.map { |n| "`#{n}`" }.join(' ')} → `#{dice.sum}`"
     end
   end
 end
