@@ -17,7 +17,6 @@ class Rogare::Commands::Dice
     dice = param.split.map do |die|
       bits = die_regex.match die
       next unless bits
-      logs bits.inspect
 
       amount = (bits[:amount] || 1).to_i
       sides = (bits[:sides] || 6).to_i
