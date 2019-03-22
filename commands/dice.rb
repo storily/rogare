@@ -25,11 +25,11 @@ class Rogare::Commands::Dice
       next if amount.zero?
       next 0 if sides.zero?
 
-      amount.times.map { rand(sides + 1) + 1 + offset }
+      Array.new(amount).map { rand(sides + 1) + 1 + offset }
     end.compact.flatten
 
     if dice.empty?
-      m.reply "dunno how to roll that!"
+      m.reply 'dunno how to roll that!'
     else
       m.reply "#{dice.join(' ')} (#{dice.sum} total)"
     end
