@@ -5,7 +5,10 @@ class Rogare::Commands::Dice
 
   command 'dice'
   aliases 'roll'
-  usage '`!% 3d6` or `!% 4d5 d20` or even `!% 2d12o24` (each roll offset by 24)'
+  usage [
+    '`!% 3d6` or `!% 4d5 d20` or even `!% 2d12o24` (each roll offset by 24)',
+    'No spaces between letters and numbers! `!% 2 d5` will not roll two dice!'
+  ]
   handle_help
 
   match_command /(.+)/
