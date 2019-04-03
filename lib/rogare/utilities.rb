@@ -17,22 +17,26 @@ module Rogare::Utilities
   end
 
   def dur_display(time, now = Time.now)
-    diff = time - now
-    minutes = diff / 60.0
-    secs = (minutes - minutes.to_i).abs * 60.0
-
+    secs = (time - now).round
     neg = false
-    if minutes.negative?
-      minutes = minutes.abs
+    if secs.negative?
+      secs = secs.abs
       neg = true
     end
 
-    [if minutes >= 5
-       "#{minutes.round}m"
+    hours = secs / 1.hour
+    secs -= hours.hour.to_i
+    minutes = secs / 1.minute
+    secs -= minutes.minute.to_i
+
+    [if hours >= 1
+       "#{hours}h #{minutes}m"
+     elsif minutes >= 5
+       "#{minutes}m"
      elsif minutes >= 1
-       "#{minutes.floor}m #{secs.round}s"
+       "#{minutes}m #{secs}s"
      else
-       "#{secs.round}s"
+       "#{secs}s"
      end, neg]
   end
 end
