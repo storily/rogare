@@ -64,13 +64,21 @@ class Rogare::Commands::Wordwar
     if timeat < timenow && time.to_i < 13
       # This is if someone entered 12-hour PM time,
       # and it parsed as AM time, e.g. 9:00.
-      timeat += 12 * 60 * 60
+      timeat += 12.hour
     end
 
     if timeat < timenow
       # If time is still in the past, something is wrong
       m.reply "#{time} is in the past, what???"
       return
+    end
+
+    if time.to_i < 13 && timeat.hour < 13 && timenow.hour > 12 &&
+       (timeat > timenow.midnight + 1.day) &&
+       (timeat - 12.hour > timenow)
+      # This is if someone entered 12-hour PM time,
+      # and it parsed as AM time the NEXT day.
+      timeat -= 12.hour
     end
 
     if timeat > timenow + 36 * 60 * 60
@@ -101,7 +109,7 @@ class Rogare::Commands::Wordwar
       return m.reply 'Got an error, check your times and try again.'
     end
 
-    togo = dur_display(timeat, timenow)
+    togo, = dur_display(timeat, timenow)
     dur, = dur_display(timeat + duration, timeat)
 
     m.reply 'Got it! ' \
