@@ -81,7 +81,12 @@ class War < Sequel::Model
   def add_member!(user)
     return if members.include? user
 
-    add_member user
+    begin
+      add_member user
+    rescue Sequel::UniqueConstraintViolation
+      return
+      # it's good actually
+    end
   end
 
   def add_channel(chan)
@@ -91,10 +96,8 @@ class War < Sequel::Model
   def add_total(user, total, type)
     add_member! user
 
-    member = WarMember[user_id: user.id, war_id: id]
-    member.total = total
-    member.total_type = type
-    member.save
+    WarMember[user_id: user.id, war_id: id]
+      .save_total!(total, type)
   end
 
   def totals

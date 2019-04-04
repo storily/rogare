@@ -25,6 +25,7 @@ namespace :db do
     version = args[:version].to_i if args[:version]
 
     Sequel::Database.extension :pg_comment
+    Sequel::Database.extension :pg_enum
     Sequel.extension :migration
     Sequel.connect(ENV['DATABASE_URL'],
                    loggers: [Logger.new($stdout)],
