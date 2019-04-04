@@ -11,8 +11,8 @@ class Rogare::Commands::Wordwar
     'Or: `!% at [wall time e.g. 12:35] for [duration]`',
     'Or even (defaulting to a 15 minute run): `!% at/in [time]`',
     'And then everyone should: `!% join [wordwar ID]`',
-    'And add their total at the end with `!% total [ID] [total]`',
-    'Then get the summary with `!% summary [ID]`',
+    # 'And add their total at the end with `!% total [ID] [total]`',
+    # 'Then get the summary with `!% summary [ID]`',
     'Also say `!%` alone to get a list of current/scheduled ones',
     'To get some details about a war: `!% info [ID]` or `!% members [ID]`.'
   ]
@@ -21,7 +21,8 @@ class Rogare::Commands::Wordwar
   match_command /join(.*)/, method: :ex_join_war
   match_command /leave(.*)/, method: :ex_leave_war
   match_command /cancel(.*)/, method: :ex_cancel_war
-  match_command /total(.*)/, method: :ex_total_war
+  match_command /total\s+(\d+)\s+(.*)/, method: :ex_total_war
+  match_command /words\s+(\d+k?)/, method: :ex_words_war
   match_command /info(.*)/, method: :ex_war_info
   match_command /summary(.*)/, method: :ex_war_summary
   match_command /members(.*)/, method: :ex_war_members
@@ -30,7 +31,8 @@ class Rogare::Commands::Wordwar
   match_command /(\d+)\s+join/, method: :ex_join_war
   match_command /(\d+)\s+leave/, method: :ex_leave_war
   match_command /(\d+)\s+cancel/, method: :ex_cancel_war
-  match_command /(\d+)\s+total/, method: :ex_total_war
+  match_command /(\d+)\s+total\s+(.*)/, method: :ex_total_war
+  match_command /(\d+)\s+words\s+(\d+k?)/, method: :ex_words_war
   match_command /(\d+)\s+info/, method: :ex_war_info
   match_command /(\d+)\s+summary/, method: :ex_war_summary
   match_command /(\d+)\s+members/, method: :ex_war_members
@@ -196,36 +198,59 @@ class Rogare::Commands::Wordwar
     m.reply "Wordwar #{war.id} cancelled."
   end
 
-  def ex_total_war(m, id)
+  def ex_total_war(m, id, param)
     types = %w[words lines pages minutes]
-    data = id.split(' ')
-    check = begin
-              data[1].to_i
-            rescue StandardError
-              nil
-            end
-    war = War[data[0].to_i]
-    data[2] ||= 'words'
+    data = param.split(' ')
+    war = War[id]
+
+    total = data[0].to_i
+    type = data[1] ||= 'words'
 
     return m.reply 'No such wordwar' unless war&.exists?
-    return m.reply 'It\'s not over yet' if war.current?
-    return m.reply 'That\'s not a valid total' if check.nil?
-    return m.reply 'That\'s not a valid type' unless types.include? data[2]
+    return m.reply 'It’s not over yet' if war.current?
+    return m.reply 'That’s not a valid total' if total.zero?
+    return m.reply 'That’s not a valid type' unless types.include? type
 
-    war.add_total(m.user, data[1].to_i, data[2])
-
+    war.add_total(m.user, total, type)
     m.reply 'Got it!'
   end
 
+  def ex_words_war(m, id, words = nil)
+    if words
+      war = War[id]
+      member = WarMember[war_id: id, user_id: m.user.id]
+
+      return m.reply 'No such wordwar' unless war&.exists?
+      return m.reply 'Not a member of that war' unless member&.exists?
+    else
+      words = id
+      war, member = m.user.latest_war
+    end
+
+    words = if words.end_with? 'k'
+              words.to_i * 1000
+            else
+              words.to_i
+            end
+
+    if war.ended
+      member.save_ending! words
+      m.reply "You finished war #{war.id} with " \
+        "(#{member.ending} - #{member.starting}) = " \
+        "**#{member.total}** #{member.total_type}."
+    else
+      member.save_starting! words
+      m.reply "You’re starting war #{war.id} with **#{member.starting}** #{member.total_type}."
+    end
+  end
+
   def ex_war_summary(m, id)
-    war = War[id.to_i]
+    war = War[id.to_i] || m.user.latest_war
 
     return m.reply 'No such wordwar' unless war&.exists?
-    return m.reply 'It\'s not over yet' if war.current?
+    return m.reply 'It’s not over yet' if war.current?
 
-    members = war.totals
-
-    m.reply "**Statistics for war #{id.to_i}:**\n\n" +
-            members.join("\n")
+    m.reply "**Statistics for war #{id.to_i}:**\n" +
+            war.totals.join("\n")
   end
 end

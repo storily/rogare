@@ -6,8 +6,22 @@ class WarMember < Sequel::Model(:wars_members)
   many_to_one :war, class: :War
   many_to_one :user, class: :User
 
+  def total
+    ending - starting
+  end
+
+  def save_starting!(n)
+    self.starting = n
+    save
+  end
+
+  def save_ending!(n)
+    self.ending = n
+    save
+  end
+
   def save_total!(total, type)
-    self.total = total
+    self.ending = starting + total
     self.total_type = type
     save
   end

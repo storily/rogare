@@ -109,4 +109,20 @@ class User < Sequel::Model
 
     doc.at_css('user_wordcount').content.to_i
   end
+
+  def latest_war
+    # "Of all the wars of which I am a member, pick the latest one that's
+    # either currently running, or has ended in the last 10 minutes,
+    # or is starting in the next minute, preferring the ones that start later."
+    war = wars_dataset.where do
+      (start + Sequel.cast(concat(seconds, ' secs'), :interval) >
+        (now.function - Sequel.cast(concat(10, ' minutes'), :interval))) |
+        ((started =~ false) & (start >
+          (now.function - Sequel.cast(concat(1, ' minute'), :interval)))) |
+        ((started =~ true) & (ended =~ false))
+    end.reverse(:start).first
+
+    # Then return the membership object too.
+    [war, WarMember[war_id: war.id, user_id: id]]
+  end
 end

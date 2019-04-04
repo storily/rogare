@@ -101,7 +101,9 @@ class War < Sequel::Model
   end
 
   def totals
-    memberships_dataset.eager(:user).map do |m|
+    memberships_dataset.eager(:user)
+                       .reject { |m| m.total.zero? }
+                       .map do |m|
       "#{m.user.mid}: **#{m.total}** #{m.total_type} (**" \
         "#{(m.total.to_f / (seconds / 60)).round(2)}** #{m.total_type} per minute)"
     end
@@ -126,6 +128,7 @@ class War < Sequel::Model
         next if cancelled
 
         reply.call "Wordwar #{id} has ended! #{members.map(&:mid).join(', ')}"
+        reply.call "Tell us your ending worcount with `!ww words N`, then get a summary with `!ww summary #{id}`!`"
       }
 
       if til_start.positive?
@@ -135,20 +138,20 @@ class War < Sequel::Model
           # If we're over an hour before the start,
           # sleep til 20 minutes before, then send an extra reminder.
           sleep til_start - 20.minute
-          starting.call('in 20 minutes') { '— Just to let you know' }
+          starting.call('in 20 minutes')
         elsif til_start > 20.minute && (start - created) > 1.hour
           # The war was created more than an hour before its start,
           # but we're between 1 hour and 20 minutes from its start,
           # which probably means we restarted in the meantime.
           sleep til_start - 20.minute
-          starting.call('in 20 minutes') { '— Just to let you know' }
+          starting.call('in 20 minutes')
         end
 
         if til_start > 35
           # If we're at least 35 seconds before the start, we have
           # time to send a reminder. Otherwise, skip sending it.
           sleep til_start - 30
-          starting.call('in 30 seconds') { '— Be ready: tell us your starting wordcount.' }
+          starting.call('in 30 seconds') { '— Be ready: tell us your starting wordcount with `!ww words N`.' }
           sleep 30
         else
           # In any case, we sleep until the beginning
