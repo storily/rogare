@@ -131,6 +131,13 @@ class War < Sequel::Model
       if til_start.positive?
         # We're before the start of the war
 
+        if til_start > 1.hour
+          # If we're over an hour before the start,
+          # sleep til 20 minutes before, then send an extra reminder.
+          sleep til_start - 20.minute
+          starting.call('in 20 minutes') { '— Just to let you know' }
+        end
+
         if til_start > 35
           # If we're at least 35 seconds before the start, we have
           # time to send a reminder. Otherwise, skip sending it.
