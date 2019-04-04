@@ -136,6 +136,12 @@ class War < Sequel::Model
           # sleep til 20 minutes before, then send an extra reminder.
           sleep til_start - 20.minute
           starting.call('in 20 minutes') { '— Just to let you know' }
+        elsif til_start > 20.minute && (start - created) > 1.hour
+          # The war was created more than an hour before its start,
+          # but we're between 1 hour and 20 minutes from its start,
+          # which probably means we restarted in the meantime.
+          sleep til_start - 20.minute
+          starting.call('in 20 minutes') { '— Just to let you know' }
         end
 
         if til_start > 35
