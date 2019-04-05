@@ -15,7 +15,7 @@ class Rogare::Commands::Dice
   match_empty :help_message
 
   def execute(m, param)
-    die_regex = /(?<amount>\d+)?d(?<sides>\d+)(?:o(?<offset>\d+))?/
+    die_regex = /(?<amount>\d+)?d(?<sides>\d+)(?:o(?<offset>-?\d+))?/
 
     dice = param.split.map do |die|
       bits = die_regex.match die
