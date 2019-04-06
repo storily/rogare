@@ -6,7 +6,7 @@ class Rogare::Commands::Dice
   command 'dice'
   aliases 'roll'
   usage [
-    '`!% 3d6` or `!% 4d5 d20` or even `!% 2d12o24` (each roll offset by 24)',
+    '`!% 3d6` or `!% 4d5 d20` or even `!% 2d12-8`/`!% d7+8` (each roll offset by +/-8)',
     'No spaces between letters and numbers! `!% 2 d5` will not roll two dice!'
   ]
   handle_help
@@ -15,7 +15,7 @@ class Rogare::Commands::Dice
   match_empty :help_message
 
   def execute(m, param)
-    die_regex = /(?<amount>\d+)?d(?<sides>\d+)(?:o(?<offset>-?\d+))?/
+    die_regex = /(?<amount>\d+)?d(?<sides>\d+)(?<offset>[-+]?\d+)?/
 
     dice = param.split.map do |die|
       bits = die_regex.match die
