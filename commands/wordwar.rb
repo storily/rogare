@@ -75,7 +75,13 @@ class Rogare::Commands::Wordwar
 
     if timeat < timenow
       # If time is still in the past, something is wrong
-      m.reply "#{time} is in the past, what???"
+      m.reply [
+        "#{time} is in the past, what???",
+        'I can’t time-travel _that_ far',
+        'Historical AUs go in your draft, not in your wars!',
+        'If I found a way to travel back in time, I would use it to tell you off.',
+        'hmmmmmmmmm. no.'
+      ].sample
       return
     end
 
@@ -89,9 +95,22 @@ class Rogare::Commands::Wordwar
 
     if timeat > timenow + 22.hour
       if sudo
-        m.reply 'Sudo mode, hope you know what you’re doing'
+        m.reply [
+          'With a bit of luck this isn’t a mistake.',
+          'My checking code is off to make itself a sandwich, hope you know what you’re doing.',
+          'Roses are nominally red, violets are sometimes blue, errors are whatever you make them to be, baby.',
+          '_sparkles mischievously_',
+          'Oh hey, you found my dangerous side. Let’s go for a ride.'
+        ].sample
       else
-        m.reply 'Cannot schedule more than 22 hours in the future, sorry'
+        m.reply [
+          'Cannot schedule more than 22 hours in the future, sorry',
+          'Nope',
+          'No can do',
+          'Try with more bang!',
+          'You’re asking the imp… er. Well, the improbable, at least.',
+          'meenie minie moe… for you this will be no!'
+        ].sample
         return
       end
     end
