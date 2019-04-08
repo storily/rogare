@@ -67,7 +67,7 @@ class Rogare::Commands::Wordwar
       return
     end
 
-    if timeat < timenow && time.to_i < 13
+    if timeat < timenow && time.slice(0, 2).to_i < 13
       # This is if someone entered 12-hour PM time,
       # and it parsed as AM time, e.g. 9:00.
       timeat += 12.hour
@@ -85,7 +85,7 @@ class Rogare::Commands::Wordwar
       return
     end
 
-    if time.to_i < 13 && timeat.hour < 13 && timenow.hour > 12 &&
+    if time.slice(0, 2).to_i < 13 && timeat.hour < 13 && timenow.hour > 12 &&
        (timeat > timenow.midnight + 1.day) &&
        (timeat - 12.hour > timenow)
       # This is if someone entered 12-hour PM time,
