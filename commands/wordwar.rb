@@ -219,13 +219,13 @@ class Rogare::Commands::Wordwar
     if words
       war = War[id]
       member = WarMember[war_id: id, user_id: m.user.id]
-
-      return m.reply 'No such wordwar' unless war&.exists?
-      return m.reply 'Not a member of that war' unless member&.exists?
     else
       words = id
       war, member = m.user.latest_war
     end
+
+    return m.reply 'No such wordwar' unless war&.exists?
+    return m.reply 'Not a member of that war' unless member&.exists?
 
     words = if words.end_with? 'k'
               words.to_i * 1000
@@ -245,7 +245,7 @@ class Rogare::Commands::Wordwar
   end
 
   def ex_war_summary(m, id)
-    war = War[id.to_i] || m.user.latest_war
+    war = War[id.to_i] || m.user.latest_war & [0]
 
     return m.reply 'No such wordwar' unless war&.exists?
     return m.reply 'It’s not over yet' if war.current?
