@@ -45,11 +45,15 @@ class Rogare::Commands::Wordwar
     param.sub!(/#.+$/, '')
     time, durstr = param.strip.split(/for/i).map(&:strip)
 
+    sudo = time =~ /!$/ || (!durstr.nil? && durstr =~ /!$/)
+    time.sub!(/!$/, '')
+    durstr&.sub!(/!$/, '')
+
     atmode = time =~ /^at/i
     time = time.sub(/^at/i, '').strip if time.downcase.start_with? 'at'
     durstr = '15 minutes' if durstr.nil? || durstr.empty?
 
-    # TODO: timezones
+    # TODO: timezones for 'at XXXX'
     timenow = Time.now
 
     time = time.match(/(\d{1,2})(\d{2})/)[1..2].join(':') if atmode && /^\d{3,4}$/.match?(time)
@@ -83,9 +87,13 @@ class Rogare::Commands::Wordwar
       timeat -= 12.hour
     end
 
-    if timeat > timenow + 36 * 60 * 60
-      m.reply 'Cannot schedule more than 36 hours in the future, sorry'
-      return
+    if timeat > timenow + 22.hour
+      if sudo
+        m.reply 'Sudo mode, hope you know what you’re doing'
+      else
+        m.reply 'Cannot schedule more than 22 hours in the future, sorry'
+        return
+      end
     end
 
     duration = ChronicDuration.parse("#{durstr} minutes")
