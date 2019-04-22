@@ -12,8 +12,6 @@ class Rogare::Commands::Motivate
 
   def execute(m, _param)
     m.reply [
-      'Wake up. Kick ass. Repeat.',
-      'You’re gonna make it happen!',
       'One day you will find the right words.', # Jack Kerouac
       'Write. If it’s good, you’ll find out. If it’s not, throw it out of the window.', # William Faulkner
       'Reality cannot destroy you.', # Ray Bradbury
@@ -21,9 +19,17 @@ class Rogare::Commands::Motivate
       'Write to keep civilisation from destroying itself.', # Albert Camus (adapted)
       'Mmmm… I love deadlines. I like the whooshing sound they make as they fly by.', # Douglas Adams
       'Take a chance. It may be bad, but it’s the only way you can do anything really good.', # Faulkner again
-      'Your words are magic. Recharge! Then cast again',
       'Someone is sitting in the shade today because they planted a tree a long time ago… ' \
-        'and then worked hard to keep it alive.' # With faint apologies to Warren Buffet
+        'and then worked hard to keep it alive.', # With faint apologies to Warren Buffet
+
+      # by Félix
+      'Wake up. Kick ass. Repeat.',
+      'You’re gonna make it happen!',
+      'Your words are magic. Recharge! Then cast again',
+
+      # by Star
+      'Imagine signing a copy of your own book. Now finish writing it.',
+      'Someone out there _needs_ your story.'
     ].sample
   end
 end
