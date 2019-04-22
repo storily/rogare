@@ -28,6 +28,7 @@ gem 'sequel-pg-comment', github: 'mr-dxdy/sequel-pg-comment', branch: 'remove_gi
 gem 'sequel_pg', '~>1.11', require: 'sequel', platforms: :ruby # no windows :(
 gem 'sinatra', '~>2.0', require: 'sinatra/base'
 gem 'sinatra-cors', '~>1.1', require: 'sinatra/cors'
+gem 'sparkr', '~> 0.4.1'
 gem 'treetop', '~>1.6'
 gem 'typhoeus', '~>0.6.9'
 gem 'tzinfo', '~>1.2'
