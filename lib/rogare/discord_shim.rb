@@ -14,9 +14,12 @@ class DiscordMessageShim
     @event
   end
 
+  def message
+    @event.message.content
+  end
+
   def params
-    msg = @event.message.content
-    groups = msg.match(@pattern).captures
+    groups = message.match(@pattern).captures
     if groups.empty?
       [self, param]
     else
@@ -25,8 +28,7 @@ class DiscordMessageShim
   end
 
   def param
-    msg = @event.message.content
-    msg.sub(/^\s*!#{@plug[:command]}/i, '')
+    message.sub(/^\s*#{Rogare.prefix}#{@plug[:command]}/i, '')
   end
 
   def reply(message)

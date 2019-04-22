@@ -4,6 +4,7 @@ class User < Sequel::Model
   plugin :timestamps, create: :first_seen, update: :updated, update_on_create: true, allow_manual_update: true
 
   one_to_many :novels
+  one_to_many :suggestions, class: :Suggestion, key: :user_id
   one_to_many :war_memberships, class: :WarMember, key: :user_id
   many_to_many :wars, join_table: :wars_members, class: :War
 

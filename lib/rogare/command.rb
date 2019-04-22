@@ -63,7 +63,7 @@ module Rogare::Command
     opts[:method] ||= :execute
 
     logs '       matching: ' + pattern.inspect
-    my[:patterns] << [/^\s*#{Rogare.prefix}#{pattern}/, opts]
+    my[:patterns] << [/^\s*#{Rogare.prefix}#{pattern}/m, opts]
     my[:common_pattern] = Regexp.union(my[:patterns].map { |pat| pat[0] })
 
     Rogare.discord.remove_handler my[:discord_handler] if my[:discord_handler]
