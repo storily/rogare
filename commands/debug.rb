@@ -64,7 +64,7 @@ class Rogare::Commands::Debug
     next if %i[
       uptime help_message
       my_id my_name my_user
-      user_info name_info name_adjust
+      user_info name_info name_stats name_adjust
       kind_info kind_map
     ].include? method
 
