@@ -74,7 +74,8 @@ module Rogare
         'Scribe of Solitude',
         'Dashen',
         'Presscalibur',
-        'Civilization VI: Gathering Dust'
+        'Civilization VI: Gathering Dust',
+        'mind games'
       ].sample
     end
 
