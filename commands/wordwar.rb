@@ -308,11 +308,11 @@ class Rogare::Commands::Wordwar
 
     time = user
            .wars_dataset
-           .where { ended & (seconds < 1.day.to_i) }
+           .where { ended & (seconds < 6.hours.to_i) }
            .sum(:seconds)
 
     counted_time = counted_wars
-                   .where { ended & (seconds < 1.day.to_i) }
+                   .where { ended & (seconds < 6.hours.to_i) }
                    .sum(:seconds)
 
     sum = war_counts.sum
