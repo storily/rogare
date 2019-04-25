@@ -309,21 +309,21 @@ class Rogare::Commands::Wordwar
     time = user
            .wars_dataset
            .where { ended & (seconds < 6.hours.to_i) }
-           .sum(:seconds)
+           .sum(:seconds) / 1.minute.to_f
 
     counted_time = counted_wars
                    .where { ended & (seconds < 6.hours.to_i) }
-                   .sum(:seconds)
+                   .sum(:seconds) / 1.minute.to_f
 
     sum = war_counts.sum
-    wpm = sum / counted_time.to_f
+    wpm = sum / counted_time
     avg = sum / war_counts.length
     spark = sum.positive? ? Sparkr.sparkline(war_counts.first(50)) : '(none yet)'
 
     m.reply [
       "Last #{[war_counts.length, 50].min} wars: #{spark}\n",
       "(**#{sum}** words written in wars, avg **#{avg}** per,",
-      "**#{time}** minutes, of which **#{counted_time}** were counted,",
+      "**#{time.round}** minutes, of which **#{counted_time.round}** were counted,",
       "**#{format('%.2f', wpm)}** wpm)"
     ].join(' ')
   end
