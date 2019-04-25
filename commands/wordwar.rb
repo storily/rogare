@@ -265,6 +265,8 @@ class Rogare::Commands::Wordwar
       m.reply "You finished war #{war.id} with " \
         "(#{member.ending} - #{member.starting}) = " \
         "**#{member.total}** #{member.total_type}."
+
+      ex_war_summary(m, war.id) unless war.memberships_dataset.where(ending: 0).count.positive?
     else
       member.save_starting! words
       m.reply "You’re starting war #{war.id} with **#{member.starting}** #{member.total_type}."
