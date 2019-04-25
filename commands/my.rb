@@ -21,6 +21,8 @@ class Rogare::Commands::My
       ("Nano user: `#{m.user.nano_user}`" if m.user.nano_user),
       "Timezone: **#{m.user.tz}**"
     ].compact.join("\n")
+
+    Rogare::Commands::Wordwar.new.ex_war_stats(m) if defined? Rogare::Commands::Wordwar
   end
 
   def set_nano(m, name)
