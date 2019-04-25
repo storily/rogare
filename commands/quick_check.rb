@@ -43,9 +43,10 @@ class Rogare::Commands::QuickCheck
                     .map { |w| w[:ending] - w[:starting] }
 
       if war_counts.length > 2
-        avg = war_counts.sum / war_counts.length
+        sum = war_counts.sum
+        avg = sum / war_counts.length
         spark = Sparkr.sparkline(war_counts)
-        m.reply "Last #{war_counts.length} wars: #{spark} (avg #{avg} words per war)"
+        m.reply "Last #{war_counts.length} wars: #{spark} (#{sum} words written in wars, avg #{avg} per)"
       end
     end
 
