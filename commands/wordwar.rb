@@ -303,6 +303,8 @@ class Rogare::Commands::Wordwar
 
     war_counts = counted_wars.map { |w| w[:ending] - w[:starting] }
 
+    return m.reply 'You have no counted wars' if war_counts.empty?
+
     time = user
            .wars_dataset
            .where { ended & (seconds < 1.day.to_i) }
