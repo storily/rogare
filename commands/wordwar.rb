@@ -286,8 +286,9 @@ class Rogare::Commands::Wordwar
 
   def ex_war_stats(m, user = nil)
     if user && !user.strip.empty?
+      user.strip!
       discu = Rogare.from_discord_mid user
-      discu ||= User.where(nick: user).first
+      discu ||= User.where { nick =~ /#{user}/i }.first
       return m.reply 'No such user' unless discu
 
       user = discu
