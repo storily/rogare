@@ -24,6 +24,7 @@ class Rogare::Commands::Wordwar
   match_command /total\s+(\d+)\s+(.*)/, method: :ex_total_war
   match_command /words\s+(\d+k?)/, method: :ex_words_war
   match_command /info(.*)/, method: :ex_war_info
+  match_command /stats(.*)/, method: :ex_war_stats
   match_command /summary(.*)/, method: :ex_war_summary
   match_command /members(.*)/, method: :ex_war_members
 
@@ -281,5 +282,45 @@ class Rogare::Commands::Wordwar
 
     m.reply "**Statistics for war #{id.to_i}:**\n" +
             war.totals.join("\n")
+  end
+
+  def ex_war_stats(m, user = nil)
+    if user && !user.strip.empty?
+      discu = Rogare.from_discord_mid user
+      discu ||= User.where(nick: user).first
+      return m.reply 'No such user' unless discu
+
+      user = discu
+    else
+      user = m.user
+    end
+
+    counted_wars = user
+                   .war_memberships_dataset
+                   .where { (ending - starting) >= 1 }
+                   .join(:wars, id: :war_id)
+                   .reverse(:created)
+
+    war_counts = counted_wars.map { |w| w[:ending] - w[:starting] }
+
+    time = user
+           .wars_dataset
+           .where { ended & (seconds < 1.day.to_i) }
+           .sum(:seconds)
+
+    counted_time = counted_wars
+                   .where { ended & (seconds < 1.day.to_i) }
+                   .sum(:seconds)
+
+    sum = war_counts.sum
+    wpm = sum / counted_time.to_f
+    avg = sum / war_counts.length
+    spark = sum.positive? ? Sparkr.sparkline(war_counts.first(50)) : '(none yet)'
+
+    m.reply [
+      "Last #{[war_counts.length, 50].min} wars: #{spark}",
+      "(**#{sum}** words written in wars, avg **#{avg}** per,",
+      "**#{time}** minutes, **#{format('%.2f', wpm)}** wpm)"
+    ].join(' ')
   end
 end

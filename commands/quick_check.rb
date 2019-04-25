@@ -34,20 +34,7 @@ class Rogare::Commands::QuickCheck
         ww.say_war_info m, war
       end
 
-      war_counts = m.user
-                    .war_memberships_dataset
-                    .where { (ending - starting) >= 1 }
-                    .join(:wars, id: :war_id)
-                    .reverse(:created)
-                    .limit(50)
-                    .map { |w| w[:ending] - w[:starting] }
-
-      if war_counts.length > 2
-        sum = war_counts.sum
-        avg = sum / war_counts.length
-        spark = Sparkr.sparkline(war_counts)
-        m.reply "Last #{war_counts.length} wars: #{spark} (#{sum} words written in wars, avg #{avg} per)"
-      end
+      ww.ex_war_stats(m)
     end
 
     m.reply 'You’re doing great!' if great && rand > 0.95
