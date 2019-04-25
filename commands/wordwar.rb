@@ -321,9 +321,10 @@ class Rogare::Commands::Wordwar
     spark = sum.positive? ? Sparkr.sparkline(war_counts.first(50)) : '(none yet)'
 
     m.reply [
-      "Last #{[war_counts.length, 50].min} wars: #{spark}",
+      "Last #{[war_counts.length, 50].min} wars: #{spark}\n",
       "(**#{sum}** words written in wars, avg **#{avg}** per,",
-      "**#{time}** minutes, **#{format('%.2f', wpm)}** wpm)"
+      "**#{time}** minutes, of which **#{counted_time}** were counted,",
+      "**#{format('%.2f', wpm)}** wpm)"
     ].join(' ')
   end
 end
