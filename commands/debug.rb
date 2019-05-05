@@ -143,7 +143,7 @@ class Rogare::Commands::Debug
       "(**#{ng}** total, with **#{nm}** male, **#{nf}** female, and **#{ne}** explicitely enby) " \
       "and surnames (**#{ns}** total)." \
       "\nKinds: " +
-      stats[:kinds].map { |k, v| "**#{v}** #{k.sub('latin', 'iberian/latinx')}" }.join(', ') + '.'
+            stats[:kinds].map { |k, v| "**#{v}** #{k.sub('latin', 'iberian/latinx')}" }.join(', ') + '.'
   end
 
   def kind_map(m)
