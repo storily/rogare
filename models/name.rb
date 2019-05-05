@@ -156,22 +156,22 @@ class Name < Sequel::Model(:names_scored)
         args[:kinds] << 'english'
       elsif /^(indian)$/i.match?(word)
         args[:kinds] << 'indian'
-      elsif /^(latin|spanish|portuguese|mexican|hispanic)$/i.match?(word)
+      elsif /^(latin(a|o|x)?|spa(in|nish)|portuguese|mex(ic(o|an))?|hispanic|iber(ian)?)$/i.match?(word)
         args[:kinds] << 'latin'
-      elsif /^(french|français)$/i.match?(word)
+      elsif /^(french|fran[cç](e|ais))$/i.match?(word)
         args[:kinds] << 'french'
       elsif /^(m[aā]ori|(te)?-?reo)$/i.match?(word)
         args[:kinds] << 'maori'
-      elsif /^(maghreb|algerian|morroccan|tunis|north-?african)$/i.match?(word)
+      elsif /^(maghreb|algerian|morr?occ?(o|an)|tunis(ia)?|north-?african)$/i.match?(word)
         args[:kinds] << 'maghreb'
-      elsif /^(mideast|arabic|hebrew|egyptian|middle-?east)$/i.match?(word)
+      elsif /^(mideast|arab(ic|ia)?|hebrew|jew(ish)?|egypt(ian)?|middle-?east)$/i.match?(word)
         args[:kinds] << 'mideast'
       elsif /^(easteuro|russian?|eastern|east(ern)?-?europe|siberi(an|e)|east)$/i.match?(word)
         args[:kinds] << 'easteuro'
-      elsif /^(pacific)$/i.match?(word)
+      elsif /^(pacifi[ck]a?)$/i.match?(word)
         args[:kinds] << 'pacific'
         args[:also] << 'maori'
-      elsif /^((poly|mela|micro)(nesian?)?|hawaii|samoa)$/i.match?(word)
+      elsif /^((poly|mela|micro)(nesian?)?|hawa(i|ii|ï)(an)?|samoan?)$/i.match?(word)
         args[:kinds] << 'pacific'
       elsif /^(amerindian|american-?indian|native-?american|cherokee|navajo|sioux|apache)$/i.match?(word)
         args[:kinds] << 'amerindian'
