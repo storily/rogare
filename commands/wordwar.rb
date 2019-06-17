@@ -134,8 +134,8 @@ class Rogare::Commands::Wordwar
       war.creator = m.user
       war.save
       war.add_member m.user
-    rescue StandardError => err
-      logs [err.message, err.backtrace].flatten.join("\n")
+    rescue StandardError => e
+      logs [e.message, e.backtrace].flatten.join("\n")
       return m.reply 'Got an error, check your times and try again.'
     end
 

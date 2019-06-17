@@ -106,8 +106,8 @@ class Rogare::Commands::Novel
     begin
       goal = parse_goal line
       goal.default_start!
-    rescue StandardError => err
-      return m.reply err
+    rescue StandardError => e
+      return m.reply e
     end
 
     return m.reply 'I need at least a word count' unless goal.words&.positive?
@@ -132,8 +132,8 @@ class Rogare::Commands::Novel
 
     begin
       goal = parse_goal line
-    rescue StandardError => err
-      return m.reply err
+    rescue StandardError => e
+      return m.reply e
     end
 
     current = novel.current_goal(goal.offset || 0)

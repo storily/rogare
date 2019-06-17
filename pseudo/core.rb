@@ -20,7 +20,7 @@ module Rogare
       @bot
     end
 
-    def spinoff(thing, &block)
+    def spinoff(_thing, &block)
       @@threads << Thread.new(&block)
     end
   end
