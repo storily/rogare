@@ -21,8 +21,6 @@ module Rogare
     end
 
     def spinoff(thing, &block)
-      return if thing == :nominare
-
       @@threads << Thread.new(&block)
     end
   end

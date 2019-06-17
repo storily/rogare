@@ -45,10 +45,4 @@ Rogare.spinoff(:discord) do
   Rogare.discord.run
 end
 
-Rogare.spinoff(:nominare) do
-  logs '=====> Starting Nominare'
-  require './lib/nominare'
-  Nominare.run!
-end
-
 Rogare.spinall!

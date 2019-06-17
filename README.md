@@ -52,13 +52,3 @@ After creating a migration, run it with `rake db:migrate`, then immediately run
 
 Use `rake console` to get a shell with most of the same context as the app. Note
 that commands are not loaded automatically.
-
-## Name frequency compute thing
-
-Names are loaded in postgres (all-lowercase). Then two views are materialised
-that compute the score of each unique name. The score is then log-normalised to
-give a smoother distribution for querying.
-
-This uses the [`anyarray_uniq`](https://github.com/JDBurnZ/postgresql-anyarray/blob/master/stable/anyarray_uniq.sql) function from JDBurnZ, and the [`array_cat_agg`](https://stackoverflow.com/a/22677955/231788) aggregate from Craig Ringer.
-
-The compute was kept as two views instead of inlining to ease inspection.
