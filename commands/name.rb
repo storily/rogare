@@ -28,18 +28,18 @@ class Rogare::Commands::Name
 
   def execute(m, param = nil)
     names = if param.empty? || param.strip.empty?
-      Nominare.random
-    else
-      Nominare.search param
-    end
+              Nominare.random
+            else
+              Nominare.search param
+            end
 
     names = [names] unless names.is_a? Array
     names.map! do |name|
       last = if name['last'].is_a? Array
-        name['last'].join('-')
-      else
-        name['last']
-      end
+               name['last'].join('-')
+             else
+               name['last']
+             end
 
       [name['first'], last].compact.join(' ').gsub(/\s+/, "\u00a0")
     end

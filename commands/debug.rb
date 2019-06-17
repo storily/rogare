@@ -146,37 +146,6 @@ class Rogare::Commands::Debug
     m.reply(Nominare.url + '/kinds.png')
   end
 
-  =begin
-  def name_adjust(m, name, adjustment)
-    adjustment.sub!(/^\+/, '')
-
-    origs = Name.where(name: name.downcase).all
-    return m.reply "No such name in db: `#{name}`" if origs.empty?
-
-    surname = origs.any? { |n| n[:surname] }
-
-    info = {
-      name: name,
-      kinds: Name.to_kinds([adjustment]),
-      source: m.user.nick
-    }
-
-    DB[:names].insert(info)
-    DB[:names].insert(info.merge(surname: true)) if surname
-
-    m.reply "Adjustment to `#{name}` added. Ask an admin to regenerate indexes. " \
-            '(Admins, do that with: `!debug name regen`.)'
-  end
-
-  def name_regen(m)
-    m.reply 'Refreshing name scores'
-    DB['REFRESH MATERIALIZED VIEW names_scored_raw;'].all
-    m.reply 'Refreshing name index'
-    DB['REFRESH MATERIALIZED VIEW names_scored;'].all
-    m.reply 'Refreshing done'
-  end
-  =end
-
   def chan_name(m)
     m.reply m.channel.to_s
   end
