@@ -9,6 +9,7 @@ Bundler.require :default, ENV['RACK_ENV'].to_sym
 
 logs '=====> Loading framework'
 require './lib/rogare'
+require './lib/nominare'
 
 logs '=====> Loading goal parser'
 require './lib/goalterms/classes'

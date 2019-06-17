@@ -17,6 +17,8 @@ Discord bot.
 
 - `DICERE_URL=` Point to the Dicere API url.
 
+- `NOMINARE_URL=` Point to the Nominare API url.
+
 - `DATABASE_URL=` Points to a Postgres server (defaults to a local server).
 
 - `DB_SCHEMA=` The database schema to use (for namespacing inside a single Postgres instance, defaults to `public`).

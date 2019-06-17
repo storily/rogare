@@ -18,13 +18,13 @@ class Rogare::Commands::Debug
     '`!% name info <name>` - Show !name name db info (quite verbose)',
     '`!% name stats` - Show !name kind list and stats',
     '`!% kind map` - Show !name kind map',
-    '`!% name adjust <name> <+/-kind>` - File an adjustment for a name to be (+) or not be (-) a particular kind.',
+    # '`!% name adjust <name> <+/-kind>` - File an adjustment for a name to be (+) or not be (-) a particular kind.',
 
     "\n**Admin commands:**",
     '`!% game` - Cycle the bot’s playing now status',
     '`!% take a nap` - Voluntarily exit',
 
-    '`!% name regen` - Regenerate the !name index.',
+    # '`!% name regen` - Regenerate the !name index.',
 
     '`!% chan name` - Show this channel’s internal name',
     '`!% chan find <name>` - Find a channel from name or internals',
@@ -46,8 +46,8 @@ class Rogare::Commands::Debug
   match_command /name info ([[:alnum:]]+)/, method: :name_info
   match_command /name stats/, method: :name_stats
   match_command /kind map/, method: :kind_map
-  match_command /name adjust ([[:alnum:]]+) ([+\-]\w+)/, method: :name_adjust
-  match_command /name regen/, method: :name_regen
+  # match_command /name adjust ([[:alnum:]]+) ([+\-]\w+)/, method: :name_adjust
+  # match_command /name regen/, method: :name_regen
 
   match_command /chan name/, method: :chan_name
   match_command /chan find (.+)/, method: :chan_find
@@ -121,35 +121,32 @@ class Rogare::Commands::Debug
   end
 
   def name_info(m, name)
-    m.debugly(
-      *Name.where(name: name.downcase).all,
-      '------------------------------------------------',
-      *DB[:names].where(name: name.downcase).select(:name, :kinds, :source, :surname).distinct.all
-    )
+    m.debugly(Nominare.details(name))
   end
 
   def name_stats(m)
-    stats = Name.stats
+    stats = Nominare.stats
 
-    nt = stats[:total]
-    ng = stats[:firsts]
-    ns = stats[:lasts]
+    nt = stats['total']
+    ng = stats['firsts']
+    ns = stats['lasts']
 
-    nm = stats[:kinds].delete :male
-    nf = stats[:kinds].delete :female
-    ne = stats[:kinds].delete :enby
+    nm = stats['kinds'].delete 'male'
+    nf = stats['kinds'].delete 'female'
+    ne = stats['kinds'].delete 'enby'
 
     m.reply "**#{nt}** unique given names " \
       "(**#{ng}** total, with **#{nm}** male, **#{nf}** female, and **#{ne}** explicitely enby) " \
       "and surnames (**#{ns}** total)." \
       "\nKinds: " +
-            stats[:kinds].map { |k, v| "**#{v}** #{k.sub('latin', 'iberian/latinx')}" }.join(', ') + '.'
+            stats['kinds'].map { |k, v| "**#{v}** #{k.sub('latin', 'iberian/latinx')}" }.join(', ') + '.'
   end
 
   def kind_map(m)
-    m.reply 'https://nominare.cogitare.nz/kinds.png'
+    m.reply(Nominare.url + '/kinds.png')
   end
 
+  =begin
   def name_adjust(m, name, adjustment)
     adjustment.sub!(/^\+/, '')
 
@@ -178,6 +175,7 @@ class Rogare::Commands::Debug
     DB['REFRESH MATERIALIZED VIEW names_scored;'].all
     m.reply 'Refreshing done'
   end
+  =end
 
   def chan_name(m)
     m.reply m.channel.to_s

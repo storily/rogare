@@ -16,7 +16,7 @@ class Rogare::Commands::Name
     'Anything else will be interpreted as a _kind_.',
     'Names are categorised by _kind_, which is sort of a rough origin/ethinicity thing. ' \
     'You can find the list of kinds by running `!debug name stats`, which also shows ' \
-    'much data there is for each as not all ‘kinds’ will have data yet.',
+    'how much data there is for each as not all ‘kinds’ will have data yet.',
     'A map showing rough areas for each _kind_ can be found with `!debug kind map`.',
     'There are also lots of aliases. Try to experiment! All keywords should be one word, ' \
     'hyphens may be there for multi-word keywords.'
@@ -27,38 +27,23 @@ class Rogare::Commands::Name
   match_empty :execute
 
   def execute(m, param = nil)
-    param ||= ''
-    args = { kinds: [], full: true, freq: [nil, nil], also: [] }
+    names = if param.empty? || param.strip.empty?
+      Nominare.random
+    else
+      Nominare.search param
+    end
 
-    args[:n] = NumbersInWords.in_numbers(param.strip)
-
-    words = param.strip.split(' ')
-    words.map! do |word|
-      if word.to_i.to_s == word
-        word.to_i
+    names = [names] unless names.is_a? Array
+    names.map! do |name|
+      last = if name['last'].is_a? Array
+        name['last'].join('-')
       else
-        word.downcase
+        name['last']
       end
+
+      [name['first'], last].compact.join(' ').gsub(/\s+/, "\u00a0")
     end
 
-    words.each do |word|
-      Name.parse_word(args, word)
-    end
-
-    args[:n] = 100 if args[:n] > 100
-    args[:n] = 1 if args[:n] < 1
-
-    names = if args[:full]
-              Name.fulls(args).map do |fl|
-                first, last = fl
-                last = last.join('-') if last.is_a? Array
-                [first, last].join(' ')
-              end
-            else
-              Name.search(args)
-            end
-
-    names = ['No matching names yet :('] if names.empty?
-    m.reply names.join ', '
+    m.reply names.join(', ')
   end
 end
