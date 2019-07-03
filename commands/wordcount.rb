@@ -72,7 +72,7 @@ class Rogare::Commands::Wordcount
     display_novels m, [count]
   end
 
-  def get_novel_count(novel, user = nil)
+  def get_project_count(novel, user = nil)
     user ||= novel.user
 
     data = {
@@ -145,8 +145,8 @@ class Rogare::Commands::Wordcount
 
   def get_counts(users)
     users.map do |user|
-      user.current_novels.map do |novel|
-        get_novel_count novel, user
+      user.current_projects.map do |novel|
+        get_project_count novel, user
       end
     end
   end

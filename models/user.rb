@@ -69,20 +69,17 @@ class User < Sequel::Model
   end
 
   def current_novels
-    novels_dataset
-      .where do
-        (started <= Sequel.function(:now)) &
-          (finished =~ false)
-      end
-      .reverse(:started)
+    potential_novels.where(participating: true)
   end
 
-  def load_novel(id)
-    if id.nil? || id.empty?
-      current_novels.first
-    else
-      novels_dataset.where(id: id).first
-    end
+  def potential_novels
+    synced_novels_dataset
+      .where(participating: false)
+      .where do
+        (start - '30 days'.cast(:interval) < now.function) &
+          (finish + '30 days'.cast(:interval) > now.function)
+      end
+      .reverse(:started)
   end
 
   def nano_user_valid?
