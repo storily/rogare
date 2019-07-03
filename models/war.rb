@@ -59,7 +59,7 @@ class War < Sequel::Model
   end
 
   def broadcast(msg)
-    discord_channels.each { |chan| chan.send msg }
+    discord_channels.each { |chan| chan.send_msg msg }
   end
 
   def start!

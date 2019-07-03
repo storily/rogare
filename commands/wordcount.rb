@@ -188,25 +188,35 @@ class Rogare::Commands::Wordcount
 
     if count[:goal]
       if count[:novel][:type] == 'nano'
-        deets << Rogare::Data.goal_format(count[:goal][:words]) unless count[:goal][:words] == 50_000
+        deets << goal_format(count[:goal][:words]) unless count[:goal][:words] == 50_000
         deets << 'nano has ended' if count[:days][:expired]
       elsif count[:days] && count[:days][:expired]
-        deets << Rogare::Data.goal_format(count[:goal][:words])
+        deets << goal_format(count[:goal][:words])
         deets << "over #{count[:days][:total]} days"
         deets << 'expired'
       elsif count[:target]
-        deets << Rogare::Data.goal_format(count[:goal][:words])
+        deets << goal_format(count[:goal][:words])
         days = (count[:days][:left] / 1.day.to_i).floor
         deets << (days == 1 ? 'one day left' : "#{days} days left")
       else
-        deets << Rogare::Data.goal_format(count[:goal][:words])
+        deets << goal_format(count[:goal][:words])
       end
     end
 
     name = count[:novel][:name]
     name = name[0, 35] + '…' if name && name.length > 40
-    name = " _“#{Rogare::Data.encode_entities name}”_" if name
+    name = " _“#{name}”_" if name
 
     "[#{count[:novel][:id]}] #{count[:user][:nick]}:#{name} — **#{count[:count]}** (#{deets.join(', ')})"
   end
+
+	def goal_format(goal)
+		if goal < 1_000
+			"#{goal} words goal"
+		elsif goal < 10_000
+			"#{(goal / 1_000.0).round(1)}k goal"
+		else
+			"#{(goal / 1_000.0).round}k goal"
+		end
+	end
 end

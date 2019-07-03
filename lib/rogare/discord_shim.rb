@@ -61,7 +61,7 @@ class DiscordChannelShim
     @chan
   end
 
-  def send(msg)
+  def send_msg(msg)
     return if @chan.voice?
 
     @chan.send msg

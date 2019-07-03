@@ -36,6 +36,6 @@ class Rogare::Commands::Say
     #
     # m.reply "You're approaching your quota of #{max} !say per hour!" if quota >= (max * 0.8).floor
 
-    channel.send message
+    channel.send_msg message
   end
 end

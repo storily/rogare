@@ -44,7 +44,7 @@ class User < Sequel::Model
       '?'
   end
 
-  def send(message)
+  def send_msg(message)
     @discord.pm message
   end
 
