@@ -1,5 +1,5 @@
 GIT
-  remote: git://github.com/mr-dxdy/sequel-pg-comment.git
+  remote: https://github.com/mr-dxdy/sequel-pg-comment.git
   revision: 88f91b550e4133b5fc865dfe2ce8692652f3163f
   branch: remove_git-version-bump
   specs:
@@ -199,4 +199,4 @@ RUBY VERSION
    ruby 2.5.1p57
 
 BUNDLED WITH
-   2.0.1
+   2.0.2

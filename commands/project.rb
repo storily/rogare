@@ -39,7 +39,7 @@ class Rogare::Commands::Project
   end
 
   def show(m, id)
-    p = m.user.projects_dataset.where(id: id.to_i).first
+    p = Project.where(id: id.to_i).first
     return m.reply 'No such project' unless p
 
     m.reply format p
@@ -152,7 +152,7 @@ class Rogare::Commands::Project
   private
 
   def format(p)
-    deets = "[#{p.id}] (#{p.type}): “#{p.name}” — Starts #{p.start}, ends #{p.finish}"
+	  deets = "[#{p.id}] _#{p.user.nick.gsub('_', '\\_')}’s #{p.type}_: “#{p.name}” — Starts #{p.start}, ends #{p.finish}"
 
     if p.participating
       deets += ' _(participating)_.'
