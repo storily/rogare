@@ -3,7 +3,7 @@
 class User < Sequel::Model
   plugin :timestamps, create: :first_seen, update: :updated, update_on_create: true, allow_manual_update: true
 
-  one_to_many :novels
+  one_to_many :projects
   one_to_many :suggestions, class: :Suggestion, key: :user_id
   one_to_many :war_memberships, class: :WarMember, key: :user_id
   many_to_many :wars, join_table: :wars_members, class: :War
@@ -68,18 +68,21 @@ class User < Sequel::Model
     timezone.now
   end
 
-  def current_novels
-    potential_novels.where(participating: true)
+  def current_projects
+    all_current_projects.where(participating: true)
   end
 
-  def potential_novels
-    synced_novels_dataset
-      .where(participating: false)
+  def potential_projects
+    all_current_projects.where(participating: false)
+  end
+
+  def all_current_projects
+    projects_dataset
       .where do
-        (start - '30 days'.cast(:interval) < now.function) &
-          (finish + '30 days'.cast(:interval) > now.function)
+        (start - concat('30 days').cast(:interval) < now.function) &
+          (finish + concat('30 days').cast(:interval) > now.function)
       end
-      .reverse(:started)
+      .reverse(:start)
   end
 
   def nano_user_valid?
