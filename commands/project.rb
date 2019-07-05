@@ -24,9 +24,22 @@ class Rogare::Commands::Project
   match_command /(\d+)\s+(?:wc|word(?:s|count))\s+(sync|\d+)/, method: :set_words
   match_command /(\d+)\s+(?:wc|word(?:s|count))\s*$/, method: :get_words
   match_command /(\d+)/, method: :show
-  match_empty :show_all
+  match_command /all/, method: :show_all
+  match_empty :show_current
 
   def show_all(m)
+    projects = m.user.projects.map do |p|
+      format p
+    end.join("\n")
+
+    if projects.empty?
+      m.reply 'No projects'
+    else
+      m.reply projects
+    end
+  end
+
+  def show_current(m)
     projects = m.user.all_current_projects.map do |p|
       format p
     end.join("\n")
