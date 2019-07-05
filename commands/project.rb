@@ -53,12 +53,18 @@ class Rogare::Commands::Project
 
     p.participating = true
     p.save
-    m.reply 'Now participating! 🎆📝✨'
 
-    m.reply '⚠ This project cannot autosync goals, '
-    "customise yours with `#{Rogare.prefix}p #{p.id} goal 12345`" unless p.can_sync_goal?
-    m.reply '⚠ This project cannot autosync wordcount, '
-    "set yours with `#{Rogare.prefix}p #{p.id} wc 6789`" unless p.can_sync_words?
+    unless p.can_sync_goal?
+      m.reply '⚠ This project cannot autosync goals, ' \
+      "customise yours with `#{Rogare.prefix}p #{p.id} goal 12345`"
+    end
+
+    unless p.can_sync_words?
+      m.reply '⚠ This project cannot autosync wordcount, ' \
+      "set yours with `#{Rogare.prefix}p #{p.id} wc 6789`"
+    end
+
+    m.reply "Now participating in this #{p.type}! 🎆📝✨"
   end
 
   def get_name(m, id)

@@ -196,9 +196,10 @@ class Rogare::Commands::Wordcount
 
     name = count[:project][:name]
     name = name[0, 35] + '…' if name && name.length > 40
-    name = " _“#{name}”_" if name
+    name = " _“#{name.gsub('_', '\\_')}”_" if name
 
-    "[#{count[:project][:id]}] #{count[:user][:nick]}:#{name} — **#{count[:count]}** (#{deets.join(', ')})"
+    "[#{count[:project][:id]}] #{count[:user][:nick].gsub('_', '\\_').gsub('*', '\\*')}:" \
+    "#{name} — **#{count[:count]}** (#{deets.join(', ')})"
   end
 
   def goal_format(goal)
