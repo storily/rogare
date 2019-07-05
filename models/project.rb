@@ -26,15 +26,11 @@ class Project < Sequel::Model
   end
 
   def words_updated
-    return 'never' unless sync_words && words_synced
-
-    time_ago_in_words(words_synced) + ' ago'
+    time_words_since(sync_words && words_synced)
   end
 
   def goal_updated
-    return 'never' unless sync_goal && goal_synced
-
-    time_ago_in_words(goal_synced) + ' ago'
+    time_words_since(sync_words && words_synced)
   end
 
   def can_sync_words?
@@ -76,6 +72,19 @@ class Project < Sequel::Model
   end
 
   # private
+
+  def time_words_since(time)
+    return 'never' unless time
+
+    seconds = Time.now - time.to_time
+    if seconds > 60
+      time_ago_in_words(time) + ' ago'
+    elsif seconds < 3
+      'just now'
+    else
+      "#{seconds}s ago"
+    end
+  end
 
   def fetch_camp
     unless remote_id
