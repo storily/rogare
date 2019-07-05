@@ -129,4 +129,12 @@ class User < Sequel::Model
     # Then return the membership object too.
     [war, WarMember[war_id: war.id, user_id: id]]
   end
+
+  def fetch_camps
+	html = Typhoeus.get("https://campnanowrimo.org/campers/#{nano_user}/stats").body
+	dom = Nokogiri::HTML.parse html
+	dom.css('select#event_novel_slug option').map do |camp|
+		{ date: camp.text, slug: camp.attr('value') }
+	end
+  end
 end

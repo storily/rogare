@@ -54,4 +54,56 @@ class Project < Sequel::Model
       false
     end
   end
+
+  def fetch_goal
+	  case type
+	  when 'camp'
+		  fetch_camp_goal
+	  when 'nano'
+		  50000
+	  end
+  end
+
+  def fetch_words
+	  case type
+	  when 'camp'
+		  fetch_camp_words
+	  when 'nano'
+		  fetch_nano_words
+	  end
+  end
+
+  #private
+
+  def fetch_camp
+	  unless remote_id
+	camp = user.fetch_camps.find { |c| c[:date] == start.strftime('%B %Y') }
+	return unless camp
+	remote_id ||= camp[:slug]
+	  end
+	return unless remote_id
+	
+	html = Typhoeus.get("https://campnanowrimo.org/campers/#{user.nano_user}/projects/#{remote_id}/stats").body
+	Nokogiri::HTML.parse html
+  end
+
+
+  def fetch_camp_goal
+	  dom = fetch_camp
+	  return unless dom
+
+	  jsdata = dom.css('script:not([src])').map{|s|s.text.lines}.flatten(1).grep(/parData\s*=/).first
+	  jsdata.split(/[\[\]]/)[1].split(',').map(&:to_i).last
+  end
+
+  def fetch_camp_words
+	  dom = fetch_camp
+	  return unless dom
+
+	  jsdata = dom.css('script:not([src])').map{|s|s.text.lines}.flatten(1).grep(/rawCamperData\s*=/).first
+	  jsdata.split(/[\[\]]/)[1].split(',').map(&:to_i)
+  end
+
+  def fetch_nano_words
+  end
 end

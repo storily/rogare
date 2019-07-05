@@ -31,6 +31,8 @@ Sequel.migration do
       Boolean :sync_goal, null: false, default: true
       column :goal_synced, 'timestamp with time zone', null: true
 
+      String :remote_id, null: true
+
       index :user_id, type: 'btree'
       index :participating, type: 'btree'
       index :start, type: 'btree'
@@ -53,6 +55,7 @@ Sequel.migration do
     comment_on :column, %i[projects goal], 'This project’s goal, if there is one'
     comment_on :column, %i[projects sync_goal], 'Whether this project’s goal is synced, or set here'
     comment_on :column, %i[projects goal_synced], 'The last time the goal was synced'
+    comment_on :column, %i[projects remote_id], 'The ID or slug of the project on the remote source'
   end
 
   down do
