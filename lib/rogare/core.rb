@@ -75,7 +75,11 @@ module Rogare
         'Dashen',
         'Presscalibur',
         'Civilization VI: Gathering Dust',
-        'mind games'
+        'mind games',
+        'tricks',
+        'Eat The Bug',
+        'woolgathering',
+        'no, no, I’m writing, honest'
       ].sample
     end
 
