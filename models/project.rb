@@ -82,7 +82,7 @@ class Project < Sequel::Model
     elsif seconds < 3
       'just now'
     else
-      "#{seconds}s ago"
+      "#{seconds.round}s ago"
     end
   end
 
