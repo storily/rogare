@@ -38,10 +38,13 @@ class Rogare::Commands::Wordcount
     projects = get_counts([m.user]).first
 
     return m.reply 'Something is very wrong' unless projects
-    return m.reply [
-      'You have no current projects',
-      ("\t→ Show current potentials with `#{Rogare.prefix}p`" if rand > 0.5)
-    ].compact.join("\n") if projects.empty?
+
+    if projects.empty?
+      return m.reply [
+        'You have no current projects',
+        ("\t→ Show current potentials with `#{Rogare.prefix}p`" if rand > 0.5)
+      ].compact.join("\n")
+    end
 
     display_projects m, projects
   end
@@ -75,14 +78,14 @@ class Rogare::Commands::Wordcount
       count: 0
     }
 
-    if user.id == 10 && user.nick =~ /\[\d+\]$/ # tamgar sets their count in their nick
-      data[:count] = user.nick.split(/[\[\]]/).last.to_i
-    else
-      data[:count] = project.words || 0
-      #data[:today] = project.today if project.today.positive?
-      #data[:count] = nano_get_count(user.nano_user) || 0
-      #data[:today] = nano_get_today(user.nano_user) if data[:count].positive?
-    end
+    data[:count] = if user.id == 10 && user.nick =~ /\[\d+\]$/ # tamgar sets their count in their nick
+                     user.nick.split(/[\[\]]/).last.to_i
+                   else
+                     project.words || 0
+                     # data[:today] = project.today if project.today.positive?
+                     # data[:count] = nano_get_count(user.nano_user) || 0
+                     # data[:today] = nano_get_today(user.nano_user) if data[:count].positive?
+                   end
 
     goal = project.goal
     data[:goal] = goal
@@ -198,13 +201,13 @@ class Rogare::Commands::Wordcount
     "[#{count[:project][:id]}] #{count[:user][:nick]}:#{name} — **#{count[:count]}** (#{deets.join(', ')})"
   end
 
-	def goal_format(goal)
-		if goal < 1_000
-			"#{goal} words goal"
-		elsif goal < 10_000
-			"#{(goal / 1_000.0).round(1)}k goal"
-		else
-			"#{(goal / 1_000.0).round}k goal"
-		end
-	end
+  def goal_format(goal)
+    if goal < 1_000
+      "#{goal} words goal"
+    elsif goal < 10_000
+      "#{(goal / 1_000.0).round(1)}k goal"
+    else
+      "#{(goal / 1_000.0).round}k goal"
+    end
+  end
 end

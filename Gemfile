@@ -3,8 +3,8 @@
 source 'https://rubygems.org'
 ruby '~>2'
 
+gem 'actionview', '~> 5.0', require: ['action_view', 'action_view/helpers']
 gem 'activesupport', '~>5.0', require: 'active_support/all'
-gem 'actionview', '~> 5.0' , require: ['action_view', 'action_view/helpers']
 gem 'chronic', '~>0.10.2'
 gem 'chronic_duration', '~>0.10.2'
 gem 'discordrb', '~>3.3'

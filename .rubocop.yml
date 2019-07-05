@@ -43,6 +43,7 @@ Naming/UncommunicativeMethodParamName:
     - n
     - tz
     - wc
+    - p
     - q
 
 Style/AsciiComments:

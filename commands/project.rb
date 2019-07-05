@@ -12,7 +12,7 @@ class Rogare::Commands::Project
     '`!% <id> goal <words>` - Manually set the project’s goal',
     '`!% <id> goal sync` - Automatically sync the project’s goal where possible',
     '`!% <id> wc <words>` - Manually set the project’s wordcount',
-    '`!% <id> wc sync` - Automatically sync the project’s wordcount where possible',
+    '`!% <id> wc sync` - Automatically sync the project’s wordcount where possible'
   ]
   handle_help
 
@@ -55,8 +55,10 @@ class Rogare::Commands::Project
     p.save
     m.reply 'Now participating! 🎆📝✨'
 
-    m.reply "⚠ This project cannot autosync goals, customise yours with `#{Rogare.prefix}p #{p.id} goal 12345`" unless p.can_sync_goal?
-    m.reply "⚠ This project cannot autosync wordcount, set yours with `#{Rogare.prefix}p #{p.id} wc 6789`" unless p.can_sync_words?
+    m.reply '⚠ This project cannot autosync goals, '
+    "customise yours with `#{Rogare.prefix}p #{p.id} goal 12345`" unless p.can_sync_goal?
+    m.reply '⚠ This project cannot autosync wordcount, '
+    "set yours with `#{Rogare.prefix}p #{p.id} wc 6789`" unless p.can_sync_words?
   end
 
   def get_name(m, id)
@@ -85,7 +87,7 @@ class Rogare::Commands::Project
       m.reply [
         "**#{p.goal}**",
         ("[autosynced, last updated #{p.goal_updated}]" if p.sync_goal),
-        ('[manual]' unless p.sync_goal),
+        ('[manual]' unless p.sync_goal)
       ].compact.join(' ')
     elsif p.sync_goal
       m.reply 'goal not synced yet'
@@ -121,7 +123,7 @@ class Rogare::Commands::Project
       m.reply [
         "**#{p.words}**",
         ("[autosynced, last updated #{p.words_updated}]" if p.sync_words),
-        ('[manual]' unless p.sync_words),
+        ('[manual]' unless p.sync_words)
       ].compact.join(' ')
     elsif p.sync_words
       m.reply 'wordcount not synced yet'
@@ -152,27 +154,27 @@ class Rogare::Commands::Project
   private
 
   def format(p)
-	  deets = "[#{p.id}] _#{p.user.nick.gsub('_', '\\_')}’s #{p.type}_: “#{p.name}” — Starts #{p.start}, ends #{p.finish}"
+    deets = "[#{p.id}] _#{p.user.nick.gsub('_', '\\_')}’s #{p.type}_: “#{p.name}” — Starts #{p.start}, ends #{p.finish}"
 
     if p.participating
       deets += ' _(participating)_.'
 
       if p.goal
         deets += "\n\t— Goal: **#{p.goal}**"
-        if p.sync_goal
-          deets += " [autosynced, last updated #{p.goal_updated}]"
-        else
-          deets += ' [manual]'
-        end
+        deets += if p.sync_goal
+                   " [autosynced, last updated #{p.goal_updated}]"
+                 else
+                   ' [manual]'
+                 end
       end
 
       if p.words
         deets += "\n\t— Wordcount: **#{p.words}**"
-        if p.sync_words
-          deets += " [autosynced, last updated #{p.words_updated}]"
-        else
-          deets += ' [manual]'
-        end
+        deets += if p.sync_words
+                   " [autosynced, last updated #{p.words_updated}]"
+                 else
+                   ' [manual]'
+                 end
       end
     else
       deets += ' _(not participating)_.'

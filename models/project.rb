@@ -18,7 +18,7 @@ class Project < Sequel::Model
   end
 
   def days_to_finish
-    time_to_finish&.round.days
+    time_to_finish&.round&.days
   end
 
   def finished?
@@ -27,11 +27,13 @@ class Project < Sequel::Model
 
   def words_updated
     return 'never' unless sync_words && words_synced
+
     time_ago_in_words(words_synced) + ' ago'
   end
 
   def goal_updated
     return 'never' unless sync_goal && goal_synced
+
     time_ago_in_words(goal_synced) + ' ago'
   end
 
@@ -56,54 +58,53 @@ class Project < Sequel::Model
   end
 
   def fetch_goal
-	  case type
-	  when 'camp'
-		  fetch_camp_goal
-	  when 'nano'
-		  50000
-	  end
+    case type
+    when 'camp'
+      fetch_camp_goal
+    when 'nano'
+      50_000
+    end
   end
 
   def fetch_words
-	  case type
-	  when 'camp'
-		  fetch_camp_words
-	  when 'nano'
-		  fetch_nano_words
-	  end
+    case type
+    when 'camp'
+      fetch_camp_words
+    when 'nano'
+      fetch_nano_words
+    end
   end
 
-  #private
+  # private
 
   def fetch_camp
-	  unless remote_id
-	camp = user.fetch_camps.find { |c| c[:date] == start.strftime('%B %Y') }
-	return unless camp
-	remote_id ||= camp[:slug]
-	  end
-	return unless remote_id
-	
-	html = Typhoeus.get("https://campnanowrimo.org/campers/#{user.nano_user}/projects/#{remote_id}/stats").body
-	Nokogiri::HTML.parse html
+    unless remote_id
+      camp = user.fetch_camps.find { |c| c[:date] == start.strftime('%B %Y') }
+      return unless camp
+
+      remote_id ||= camp[:slug]
+    end
+    return unless remote_id
+
+    html = Typhoeus.get("https://campnanowrimo.org/campers/#{user.nano_user}/projects/#{remote_id}/stats").body
+    Nokogiri::HTML.parse html
   end
 
-
   def fetch_camp_goal
-	  dom = fetch_camp
-	  return unless dom
+    dom = fetch_camp
+    return unless dom
 
-	  jsdata = dom.css('script:not([src])').map{|s|s.text.lines}.flatten(1).grep(/parData\s*=/).first
-	  jsdata.split(/[\[\]]/)[1].split(',').map(&:to_i).last
+    jsdata = dom.css('script:not([src])').map { |s| s.text.lines }.flatten(1).grep(/parData\s*=/).first
+    jsdata.split(/[\[\]]/)[1].split(',').map(&:to_i).last
   end
 
   def fetch_camp_words
-	  dom = fetch_camp
-	  return unless dom
+    dom = fetch_camp
+    return unless dom
 
-	  jsdata = dom.css('script:not([src])').map{|s|s.text.lines}.flatten(1).grep(/rawCamperData\s*=/).first
-	  jsdata.split(/[\[\]]/)[1].split(',').map(&:to_i)
+    jsdata = dom.css('script:not([src])').map { |s| s.text.lines }.flatten(1).grep(/rawCamperData\s*=/).first
+    jsdata.split(/[\[\]]/)[1].split(',').map(&:to_i)
   end
 
-  def fetch_nano_words
-  end
+  def fetch_nano_words; end
 end
