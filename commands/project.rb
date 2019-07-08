@@ -209,7 +209,9 @@ class Rogare::Commands::Project
   def format(p)
     deets = "[#{p.id}] _#{p.user.nick.gsub('_', '\\_')}’s #{p.type}_: “#{p.name}” — Starts #{p.start}, ends #{p.finish}"
 
-    deets += if p.participating
+    deets += if p.finished?
+               ' _(finished)_.'
+             elsif p.participating
                ' _(participating)_.'
              else
                ' _(not participating)_.'
