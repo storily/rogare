@@ -78,6 +78,11 @@ class Rogare::Commands::Project
       "set yours with `#{Rogare.prefix}p #{p.id} wc 6789`"
     end
 
+    unless p.can_sync_name?
+      m.reply '⚠ This project cannot autosync its name, ' \
+      "set yours with `#{Rogare.prefix}p #{p.id} name Your fancy title`"
+    end
+
     m.reply "Now participating in this #{p.type}! 🎆📝✨"
   end
 

@@ -53,6 +53,17 @@ class Project < Sequel::Model
     end
   end
 
+  def can_sync_name?
+    case type
+    when 'camp'
+      true
+    when 'nano'
+      true
+    else
+      false
+    end
+  end
+
   def fetch_goal
     case type
     when 'camp'
