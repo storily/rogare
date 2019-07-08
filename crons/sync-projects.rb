@@ -13,10 +13,10 @@ projects = Project.where do
       (words_synced + Sequel.cast('7 days', :interval) < now.function) |
       (name_synced + Sequel.cast('7 days', :interval) < now.function) |
       (unit_synced + Sequel.cast('7 days', :interval) < now.function) |
-      is_null(goal_synced) |
-      is_null(words_synced) |
-      is_null(name_synced) |
-      is_null(unit_synced)
+      Sequel.~(goal_synced: nil) |
+      Sequel.~(words_synced: nil) |
+      Sequel.~(name_synced: nil) |
+      Sequel.~(unit_synced: nil)
     )
   ))
 end.eager(:user)

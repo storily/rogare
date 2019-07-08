@@ -24,5 +24,7 @@ class Rogare::Commands::QuickCheck
 
       ww.ex_war_stats(m)
     end
+
+    print ''
   end
 end
