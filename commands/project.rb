@@ -8,7 +8,8 @@ class Rogare::Commands::Project
   usage [
     '`!%` - Show all current and potential projects',
     '`!% <id> participate` - Activate said project',
-    '`!% <id> name <name...>` - Rename the project',
+    '`!% <id> name <name...>` - Manually rename the project',
+    '`!% <id> name sync` - Automatically sync the project’s name where possible',
     '`!% <id> goal <words>` - Manually set the project’s goal',
     '`!% <id> goal sync` - Automatically sync the project’s goal where possible',
     '`!% <id> wc <words>` - Manually set the project’s wordcount',
@@ -93,7 +94,15 @@ class Rogare::Commands::Project
 
     return get_name(m, id) if name.strip.empty?
 
+    if name =~ /sync/i
+      p.sync_name = true
+      p.save
+      m.reply 'name will now autosync'
+      return
+    end
+
     p.name = name
+    p.sync_name = false
     p.save
     m.reply format p
   end

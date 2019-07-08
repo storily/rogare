@@ -71,7 +71,16 @@ class Project < Sequel::Model
     end
   end
 
-  # private
+  def fetch_name
+    case type
+    when 'camp'
+      fetch_camp_name
+    when 'nano'
+      fetch_nano_name
+    end
+  end
+
+  private
 
   def time_words_since(time)
     return 'never' unless time
@@ -115,5 +124,14 @@ class Project < Sequel::Model
     jsdata.split(/[\[\]]/)[1].split(',').map(&:to_i)
   end
 
+  def fetch_camp_name
+    dom = fetch_camp
+    return unless dom
+
+    dom.at_css('#novel_title').text.strip
+  end
+
   def fetch_nano_words; end
+
+  def fetch_nano_name; end
 end

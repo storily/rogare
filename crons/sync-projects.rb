@@ -32,6 +32,16 @@ projects.each do |p|
     end
   end
 
+  if p.sync_name
+    print 'fetching name: '
+    name = p.fetch_name
+    if name
+      p.name = name
+      p.name_synced = p.user.now
+      print "“#{name}”... "
+    end
+  end
+
   puts 'saving.'
   p.save
 end
