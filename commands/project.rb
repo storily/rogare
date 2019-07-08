@@ -10,10 +10,10 @@ class Rogare::Commands::Project
     '`!% <id> participate` - Activate said project',
     '`!% <id> name <name...>` - Manually rename the project',
     '`!% <id> name sync` - Automatically sync the project’s name where possible',
-    '`!% <id> goal <words>` - Manually set the project’s goal',
+    '`!% <id> goal <N>` - Manually set the project’s goal',
     '`!% <id> goal sync` - Automatically sync the project’s goal where possible',
-    '`!% <id> wc <words>` - Manually set the project’s wordcount',
-    '`!% <id> wc sync` - Automatically sync the project’s wordcount where possible'
+    '`!% <id> total <N>` - Manually set the project’s total so far',
+    '`!% <id> total sync` - Automatically sync the project’s total where possible'
   ]
   handle_help
 
@@ -22,8 +22,8 @@ class Rogare::Commands::Project
   match_command /(\d+)\s+(?:re)?name\s*$/, method: :get_name
   match_command /(\d+)\s+goal\s+(sync|\d+)/, method: :set_goal
   match_command /(\d+)\s+goal\s*$/, method: :get_goal
-  match_command /(\d+)\s+(?:wc|word(?:s|count))\s+(sync|\d+)/, method: :set_words
-  match_command /(\d+)\s+(?:wc|word(?:s|count))\s*$/, method: :get_words
+  match_command /(\d+)\s+(?:wc|word(?:s|count)|total)\s+(sync|\d+)/, method: :set_words
+  match_command /(\d+)\s+(?:wc|word(?:s|count)|total)\s*$/, method: :get_words
   match_command /(\d+)/, method: :show
   match_command /all/, method: :show_all
   match_empty :show_current
@@ -74,8 +74,8 @@ class Rogare::Commands::Project
     end
 
     unless p.can_sync_words?
-      m.reply '⚠ This project cannot autosync wordcount, ' \
-      "set yours with `#{Rogare.prefix}p #{p.id} wc 6789`"
+      m.reply '⚠ This project cannot autosync its total, ' \
+      "set yours with `#{Rogare.prefix}p #{p.id} total 6789`"
     end
 
     unless p.can_sync_name?
@@ -159,9 +159,9 @@ class Rogare::Commands::Project
         ('[manual]' unless p.sync_words)
       ].compact.join(' ')
     elsif p.sync_words
-      m.reply 'wordcount not synced yet'
+      m.reply 'total not synced yet'
     else
-      m.reply 'wordcount not set yet'
+      m.reply 'total not set yet'
     end
   end
 
@@ -172,7 +172,7 @@ class Rogare::Commands::Project
     if words =~ /sync/i
       p.sync_words = true
       p.save
-      m.reply 'wordcount will now autosync'
+      m.reply 'total will now autosync'
       return
     end
 
@@ -205,7 +205,7 @@ class Rogare::Commands::Project
     end
 
     if p.words
-      deets += "\n\t— Wordcount: **#{p.words}**"
+      deets += "\n\t— So far: **#{p.words}**"
       deets += if p.sync_words
                  " [autosynced, last updated #{p.words_updated}]"
                else
