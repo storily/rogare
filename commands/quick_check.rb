@@ -9,21 +9,9 @@ class Rogare::Commands::QuickCheck
   match_empty :execute
 
   def execute(m, _param)
-    great = false
-
-    if defined? Rogare::Commands::Wordcount
-      wc = Rogare::Commands::Wordcount.new
-      novels = m.user.current_novels
-                .map { |novel| wc.get_novel_count novel, m.user }
-                .sort { |a, b| [b[:novel].last_update, b[:count]] <=> [a[:novel].last_update, a[:count]] }
-                .first(5)
-
-      if novels.empty?
-        m.reply 'You have no current novels!'
-      else
-        wc.display_novels m, novels
-        great = true
-      end
+    if defined? Rogare::Commands::Project
+      pro = Rogare::Commands::Project.new
+      pro.show_current m, novels
     end
 
     if defined? Rogare::Commands::Wordwar
@@ -36,7 +24,5 @@ class Rogare::Commands::QuickCheck
 
       ww.ex_war_stats(m)
     end
-
-    m.reply 'You’re doing great!' if great && rand > 0.95
   end
 end
