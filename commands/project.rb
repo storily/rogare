@@ -225,7 +225,7 @@ class Rogare::Commands::Project
     end
 
     if p.words
-      deets += "\n\t— So far: **#{p.words}** #{p.total_type}"
+      deets += "\n\t— So far: **#{p.words}** #{p.unit}"
       deets += if p.sync_words
                  " [autosynced, last updated #{p.words_updated}]"
                else
