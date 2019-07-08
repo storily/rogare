@@ -4,7 +4,7 @@
 require_relative '../cli'
 
 projects = Project.where do
-  (sync_goal | sync_words | sync_name) & ((
+  (sync_goal | sync_words | sync_name | sync_unit) & ((
   (finish > now.function) &
     (start - Sequel.cast('30 days', :interval) < now.function) &
     participating) | (
@@ -12,16 +12,19 @@ projects = Project.where do
       (goal_synced + Sequel.cast('7 days', :interval) < now.function) |
       (words_synced + Sequel.cast('7 days', :interval) < now.function) |
       (name_synced + Sequel.cast('7 days', :interval) < now.function) |
-      !goal_synced |
-      !words_synced |
-      !name_synced
+      (unit_synced + Sequel.cast('7 days', :interval) < now.function) |
+      is_null(goal_synced) |
+      is_null(words_synced) |
+      is_null(name_synced) |
+      is_null(unit_synced)
     )
   ))
 end.eager(:user)
 
 projects.each do |p|
   print "Checking project #{p.id}... "
-  if p.sync_goal
+
+  if p.can_sync_goal? && p.sync_goal
     print 'fetching goal: '
     goal = p.fetch_goal
     if goal
@@ -31,7 +34,7 @@ projects.each do |p|
     end
   end
 
-  if p.sync_words
+  if p.can_sync_words? && p.sync_words
     print 'fetching words: '
     words = p.fetch_words&.last
     if words
@@ -41,13 +44,23 @@ projects.each do |p|
     end
   end
 
-  if p.sync_name
+  if p.can_sync_name? && p.sync_name
     print 'fetching name: '
     name = p.fetch_name
     if name
       p.name = name
       p.name_synced = p.user.now
       print "“#{name}”... "
+    end
+  end
+
+  if p.can_sync_unit? && p.sync_unit
+    print 'fetching unit: '
+    unit = p.fetch_unit
+    if unit
+      p.unit = unit
+      p.unit_synced = p.user.now
+      print "‘#{unit}’... "
     end
   end
 

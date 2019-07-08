@@ -13,7 +13,9 @@ class Rogare::Commands::Project
     '`!% <id> goal <N>` - Manually set the project’s goal',
     '`!% <id> goal sync` - Automatically sync the project’s goal where possible',
     '`!% <id> total <N>` - Manually set the project’s total so far',
-    '`!% <id> total sync` - Automatically sync the project’s total where possible'
+    '`!% <id> total sync` - Automatically sync the project’s total where possible',
+    '`!% <id> unit <e.g. words, hours, pages...>` - Manually set the project’s unit',
+    '`!% <id> unit sync` - Automatically sync the project’s unit where possible'
   ]
   handle_help
 
@@ -24,6 +26,7 @@ class Rogare::Commands::Project
   match_command /(\d+)\s+goal\s*$/, method: :get_goal
   match_command /(\d+)\s+(?:wc|word(?:s|count)|total)\s+(sync|\d+)/, method: :set_words
   match_command /(\d+)\s+(?:wc|word(?:s|count)|total)\s*$/, method: :get_words
+  match_command /(\d+)\s+(?:unit|type)\s+(sync|\d+)/, method: :set_unit
   match_command /(\d+)/, method: :show
   match_command /all/, method: :show_all
   match_empty :show_current
@@ -99,7 +102,7 @@ class Rogare::Commands::Project
 
     return get_name(m, id) if name.strip.empty?
 
-    if name =~ /sync/i
+    if name =~ /^sync$/i
       p.sync_name = true
       p.save
       m.reply 'name will now autosync'
@@ -184,6 +187,23 @@ class Rogare::Commands::Project
     m.reply format p
   end
 
+  def set_unit(m, id, unit)
+    p = m.user.projects_dataset.where(id: id.to_i).first
+    return m.reply 'No such project' unless p
+
+    if unit =~ /^sync$/i
+      p.sync_unit = true
+      p.save
+      m.reply 'unit will now autosync'
+      return
+    end
+
+    p.unit = unit
+    p.sync_unit = false
+    p.save
+    m.reply format p
+  end
+
   private
 
   def format(p)
@@ -205,7 +225,7 @@ class Rogare::Commands::Project
     end
 
     if p.words
-      deets += "\n\t— So far: **#{p.words}**"
+      deets += "\n\t— So far: **#{p.words}** #{p.total_type}"
       deets += if p.sync_words
                  " [autosynced, last updated #{p.words_updated}]"
                else

@@ -64,6 +64,17 @@ class Project < Sequel::Model
     end
   end
 
+  def can_sync_unit?
+    case type
+    when 'camp'
+      true
+    when 'nano'
+      true
+    else
+      false
+    end
+  end
+
   def fetch_goal
     case type
     when 'camp'
@@ -88,6 +99,15 @@ class Project < Sequel::Model
       fetch_camp_name
     when 'nano'
       fetch_nano_name
+    end
+  end
+
+  def fetch_unit
+    case type
+    when 'camp'
+      fetch_camp_unit
+    when 'nano'
+      'words'
     end
   end
 
@@ -140,6 +160,13 @@ class Project < Sequel::Model
     return unless dom
 
     dom.at_css('#novel_title').text.strip
+  end
+
+  def fetch_camp_unit
+    dom = fetch_camp
+    return unless dom
+
+    dom.at_css('#camper_stats dl dt:nth-of-type(3)').text.strip.match(/\w+/)[0].downcase
   end
 
   def fetch_nano_words; end
