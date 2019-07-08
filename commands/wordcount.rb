@@ -13,24 +13,6 @@ class Rogare::Commands::Wordcount
   ]
   handle_help
 
-  def nano_get_today(name)
-    res = Typhoeus.get "https://nanowrimo.org/participants/#{name}/stats"
-    return unless res.code == 200
-
-    doc = Nokogiri::HTML res.body
-    doc.at_css('#novel_stats .stat:nth-child(2) .value').content.gsub(/[,\s]/, '').to_i
-  end
-
-  def nano_get_count(name)
-    res = Typhoeus.get "https://nanowrimo.org/wordcount_api/wc/#{name}"
-    return unless res.code == 200
-
-    doc = Nokogiri::XML(res.body)
-    return unless doc.css('error').empty?
-
-    doc.at_css('user_wordcount').content.to_i
-  end
-
   match_command /(.+)/, method: :other_counts
   match_empty :own_count
 
@@ -78,17 +60,17 @@ class Rogare::Commands::Wordcount
       count: 0
     }
 
-    data[:count] = if user.id == 10 && user.nick =~ /\[\d+\]$/ # tamgar sets their count in their nick
-                     user.nick.split(/[\[\]]/).last.to_i
-                   else
-                     project.words || 0
-                     # data[:today] = project.today if project.today.positive?
-                     # data[:count] = nano_get_count(user.nano_user) || 0
-                     # data[:today] = nano_get_today(user.nano_user) if data[:count].positive?
-                   end
+    if user.id == 10 && user.nick =~ /\[\d+\]$/ # tamgar sets their count in their nick
+      data[:count] = user.nick.split(/[\[\]]/).last.to_i
+      data[:unit] = 'words'
+    else
+      data[:count] = project.words || 0
+      # data[:today] = project.today if project.today.positive?
+    end
 
     goal = project.goal
     data[:goal] = goal
+    data[:unit] = project.unit
 
     # no need to do any time calculations if there's no time limit
     if goal && project.finish
@@ -144,7 +126,7 @@ class Rogare::Commands::Wordcount
 
   def display_projects(m, projects)
     if rand > 0.5 && !projects.select { |n| n[:project][:type] == 'nano' && n[:count] > 100_000 }.empty?
-      m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Monstrous].sample} Wordcount"
+      m.reply "Content Warning: #{%w[Astonishing Wondrous Beffudling Shocking Monstrous].sample} Count"
       sleep 1
     end
 
@@ -179,18 +161,18 @@ class Rogare::Commands::Wordcount
 
     if count[:goal]
       if count[:project][:type] == 'nano'
-        deets << goal_format(count[:goal]) unless count[:goal] == 50_000
+        deets << goal_format(count) unless count[:goal] == 50_000
         deets << 'nano has ended' if count[:days][:expired]
       elsif count[:days] && count[:days][:expired]
-        deets << goal_format(count[:goal])
+        deets << goal_format(count)
         deets << "over #{count[:days][:total]} days"
         deets << 'expired'
       elsif count[:target]
-        deets << goal_format(count[:goal])
+        deets << goal_format(count)
         days = (count[:days][:left] / 1.day.to_i).floor
         deets << (days == 1 ? 'one day left' : "#{days} days left")
       else
-        deets << goal_format(count[:goal])
+        deets << goal_format(count)
       end
     end
 
@@ -202,9 +184,12 @@ class Rogare::Commands::Wordcount
     "#{name} — **#{count[:count]}** (#{deets.join(', ')})"
   end
 
-  def goal_format(goal)
+  def goal_format(count)
+    goal = count[:goal]
+    unit = count[:unit]
+
     if goal < 1_000
-      "#{goal} words goal"
+      "#{goal} #{unit} goal"
     elsif goal < 10_000
       "#{(goal / 1_000.0).round(1)}k goal"
     else
