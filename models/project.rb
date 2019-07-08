@@ -2,6 +2,7 @@
 
 class Project < Sequel::Model
   include ActionView::Helpers::DateHelper
+  extend Memoist
 
   plugin :timestamps, create: :created, update: :updated, update_on_create: true
 
@@ -138,6 +139,7 @@ class Project < Sequel::Model
     html = Typhoeus.get("https://campnanowrimo.org/campers/#{user.nano_user}/projects/#{remote_id}/stats").body
     Nokogiri::HTML.parse html
   end
+  memoize :fetch_camp
 
   def fetch_camp_goal
     dom = fetch_camp
