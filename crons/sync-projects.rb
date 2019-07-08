@@ -4,10 +4,16 @@
 require_relative '../cli'
 
 projects = Project.where do
+  (sync_goal | sync_words | sync_name) & ((
   (finish > now.function) &
     (start - Sequel.cast('30 days', :interval) < now.function) &
-    participating &
-    (sync_goal | sync_words)
+    participating) | (
+    (finish < now.function) & (
+      (goal_synced + Sequel.cast('7 days', :interval) < now.function) |
+      (words_synced + Sequel.cast('7 days', :interval) < now.function) |
+      (name_synced + Sequel.cast('7 days', :interval) < now.function)
+    )
+  ))
 end.eager(:user)
 
 projects.each do |p|
@@ -44,4 +50,6 @@ projects.each do |p|
 
   puts 'saving.'
   p.save
+rescue StandardError => e
+  puts "Error syncing: #{e}"
 end

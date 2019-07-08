@@ -189,28 +189,28 @@ class Rogare::Commands::Project
   def format(p)
     deets = "[#{p.id}] _#{p.user.nick.gsub('_', '\\_')}’s #{p.type}_: “#{p.name}” — Starts #{p.start}, ends #{p.finish}"
 
-    if p.participating
-      deets += ' _(participating)_.'
+    deets += if p.participating
+               ' _(participating)_.'
+             else
+               ' _(not participating)_.'
+             end
 
-      if p.goal
-        deets += "\n\t— Goal: **#{p.goal}**"
-        deets += if p.sync_goal
-                   " [autosynced, last updated #{p.goal_updated}]"
-                 else
-                   ' [manual]'
-                 end
-      end
+    if p.goal
+      deets += "\n\t— Goal: **#{p.goal}**"
+      deets += if p.sync_goal
+                 " [autosynced, last updated #{p.goal_updated}]"
+               else
+                 ' [manual]'
+               end
+    end
 
-      if p.words
-        deets += "\n\t— Wordcount: **#{p.words}**"
-        deets += if p.sync_words
-                   " [autosynced, last updated #{p.words_updated}]"
-                 else
-                   ' [manual]'
-                 end
-      end
-    else
-      deets += ' _(not participating)_.'
+    if p.words
+      deets += "\n\t— Wordcount: **#{p.words}**"
+      deets += if p.sync_words
+                 " [autosynced, last updated #{p.words_updated}]"
+               else
+                 ' [manual]'
+               end
     end
 
     deets
