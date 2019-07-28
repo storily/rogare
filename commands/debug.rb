@@ -131,9 +131,9 @@ class Rogare::Commands::Debug
     ng = stats['firsts']
     ns = stats['lasts']
 
-    nm = stats['kinds'].delete 'male'
-    nf = stats['kinds'].delete 'female'
-    ne = stats['kinds'].delete 'enby'
+    nm = stats['genders']['male']
+    nf = stats['genders']['female']
+    ne = stats['genders']['enby']
 
     m.reply "**#{nt}** unique given names " \
       "(**#{ng}** total, with **#{nm}** male, **#{nf}** female, and **#{ne}** explicitely enby) " \

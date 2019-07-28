@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Rogare::Commands::Voice
   extend Rogare::Command
 
@@ -11,7 +13,7 @@ class Rogare::Commands::Voice
   match_command /bye/, method: :voice_bye
   match_command /play (.+)/, method: :voice_play
 
-  def voice_connect(m, chan)
+  def voice_connect(_m, chan)
     chan = 'General' if chan.empty?
     Rogare.discord.voice_connect Rogare.find_channel(chan).inner
   end
