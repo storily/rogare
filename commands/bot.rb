@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-class Rogare::Commands::Debug
+class Rogare::Commands::Bot
   extend Rogare::Command
 
-  command 'debug'
-  aliases 'show'
+  command 'bot'
+  aliases 'debug', 'show'
   usage [
     'All commands are restricted to #boating, and some are admin-restricted.',
     '**Public commands:**',
