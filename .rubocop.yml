@@ -2,6 +2,7 @@ AllCops:
   TargetRubyVersion: '2.6'
   Exclude:
     - 'lib/goalterms/grammar.rb'
+    - 'old-commands/**/*.*'
     - 'vendor/**/*.*'
     - 'vendor/**/*'
 
