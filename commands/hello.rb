@@ -16,6 +16,11 @@ class Rogare::Commands::Hello
                             end
 
     servers.each do |_id, server|
+      if ENV['RACK_ENV'] == 'production' && server.name == 'sassbot-test'
+        logs "skip sassbot test server in production"
+        next
+      end
+
       member = m.user.discord.on(server)
       person = server.roles.find { |role| role.name == 'person' }
       prefix = ("[**#{server.name}**]" if needs_prefix)
