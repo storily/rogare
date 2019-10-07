@@ -17,7 +17,7 @@ class Rogare::Commands::Hello
 
     servers.each do |_id, server|
       if ENV['RACK_ENV'] == 'production' && server.name == 'sassbot-test'
-        logs "skip sassbot test server in production"
+        logs 'skip sassbot test server in production'
         next
       end
 

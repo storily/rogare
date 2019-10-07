@@ -114,8 +114,10 @@ module Rogare
         end.seen!
       end
 
-      bot.member_join do |event|
-        welcome event.server, event.user
+      if ENV['RACK_ENV'] == 'production'
+        bot.member_join do |event|
+          welcome event.server, event.user
+        end
       end
 
       bot
