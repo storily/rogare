@@ -24,6 +24,8 @@ class Rogare::Commands::Bot
     '`!% game` - Cycle the bot’s playing now status',
     '`!% take a nap` - Voluntarily exit',
 
+    '`!% welcome @<discord user>` - Sends the welcome message to a user as PM',
+
     # '`!% name regen` - Regenerate the !name index.',
 
     '`!% chan name` - Show this channel’s internal name',
@@ -53,6 +55,7 @@ class Rogare::Commands::Bot
   match_command /chan find (.+)/, method: :chan_find
   match_command /user ids/, method: :user_ids
 
+  match_command /welcome (.+)/, method: :send_welcome
   match_command /wc set user (.+) (.+)/, method: :wc_set_user
 
   before_handler do |method, m|
@@ -182,5 +185,14 @@ class Rogare::Commands::Bot
     du.save
 
     m.reply "User `#{du.discord.id}` nanouser set to `#{nano}`"
+  end
+
+  def send_welcome(m, user)
+    du = Rogare.from_discord_mid user
+    du ||= User.from_discord(Rogare.discord.users.find { |_i, u| u.name == user }[1])
+    return m.reply('No such user') unless du
+
+    Rogare.welcome(m.channel.server, du.discord)
+    m.reply 'Sent'
   end
 end
