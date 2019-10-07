@@ -197,6 +197,8 @@ module Rogare
     end
 
     def welcome(server, user)
+      logs "Sending welcome to #{user.name}"
+
       dm = user.pm
       dm.send [
         "Hello from #{server.name}! My name is **sassbot**, and I’m the resident bot.",
