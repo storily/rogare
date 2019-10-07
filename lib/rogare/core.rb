@@ -114,6 +114,10 @@ module Rogare
         end.seen!
       end
 
+      bot.member_join do |event|
+        welcome event.server, event.user
+      end
+
       bot
     end
 
@@ -190,6 +194,20 @@ module Rogare
           chans
         end
       end
+    end
+
+    def welcome(server, user)
+      dm = user.pm
+      dm.send [
+        "Hello from #{server.name}! My name is **sassbot**, and I’m the resident bot.",
+        'You can talk to me anywhere, but **#boating** is my special space. ' \
+          "Get help with `#{Rogare.prefix}help`. Introduce yourself in **#beginning**! " \
+          'Present your pronouns and preferred names. ' \
+          'Tell us a lil about yourself, and be welcome in this space.',
+        # You can get pronoun and location roles/badges by asking me with `#{Rogare.prefix}pronoun <pronoun>`.
+        "Before you get started, though, please say `#{Rogare.prefix}hello` here. " \
+          'This constitutes agreement to the rules of the space, namely: don’t be a jerk.'
+      ].join("\n\n")
     end
 
     memoize :discord, :config, :nixnotif, :sql, :tz
