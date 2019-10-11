@@ -35,11 +35,11 @@ class Rogare::Commands::Hello
           if needs_prefix
             m.reply "#{prefix} You’re already all good here, but thanks for saying hi."
           else
-            m.reply 'Hiiii! You’re the best'
+            m.reply 'You can already speak in here! And hello to you too'
           end
         else
           member.add_role(person, 'Said hello to the bot')
-          m.reply "#{prefix} Thank you! Enjoy yourself!"
+          m.reply "#{prefix} You may speak! Thank you! Enjoy yourself!"
         end
       rescue StandardError => e
         m.reply "Something went wrong! Tell the #{prefix} admins!"
