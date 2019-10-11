@@ -116,6 +116,10 @@ module Rogare
 
       if ENV['RACK_ENV'] == 'production'
         bot.member_join do |event|
+          user_cache.getset(event.user.id) do
+            User.create_from_discord(event.user)
+          end.seen!
+
           welcome event.server, event.user
         end
       end

@@ -13,6 +13,8 @@ class User < Sequel::Model
 
   def self.from_discord(discu)
     u = where(discord_id: discu.id).first
+    return unless u
+
     u.discord = discu
     u
   end
