@@ -53,7 +53,7 @@ class Rogare::Commands::Badges
   end
 
   def add_badge(m, badges)
-    badges = badges.split
+    badges = badges.downcase.split
     member = m.user.discord
 
     if badges.length > 1
@@ -104,7 +104,7 @@ class Rogare::Commands::Badges
   end
 
   def remove_badge(m, badges)
-    badges = badges.split
+    badges = badges.downcase.split
     member = m.user.discord
 
     if badges.length > 1
