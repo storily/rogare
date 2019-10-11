@@ -208,14 +208,14 @@ module Rogare
       dm = user.pm
       dm.send [
         "Hello from #{server.name}! My name is **sassbot**, and I’m the resident bot.",
-        "You can talk to me anywhere, but **#boating** is my special space. " \
+        'You can talk to me anywhere, but **#boating** is my special space. ' \
           "Get help with `#{Rogare.prefix}help`. Introduce yourself in **#beginning**! " \
-          "Present your pronouns and preferred names. " \
-          "Tell us a lil about yourself, and be welcome in this space.",
+          'Present your pronouns and preferred names. ' \
+          'Tell us a lil about yourself, and be welcome in this space.',
         # You can get pronoun and location roles/badges by asking me with `#{Rogare.prefix}badges`.
         "Before you can get started, though, please say `#{Rogare.prefix}hello` here. " \
-          "This gives you “voice” i.e. permission to talk on the server, and constitutes " \
-          "agreement to the rules of the space, namely: don’t be a jerk.'
+          'This gives you “voice” i.e. permission to talk on the server, and constitutes ' \
+          'agreement to the rules of the space, namely: don’t be a jerk.'
       ].join("\n\n")
     end
 
