@@ -28,6 +28,7 @@ class Rogare::Commands::Badges
       it/its
       she/her
       they/them
+      any/pronoun
 
       auckland
       wellington
