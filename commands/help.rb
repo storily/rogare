@@ -45,7 +45,6 @@ class Rogare::Commands::Help
 
   def execute(m)
     m.reply "Commands: #{readable_commands.join(', ')}."
-    m.reply "Also use `#{Rogare.prefix}<command> help` to get help for any command."
   end
 
   memoize :bot_prefix, :command_list, :readable_commands
