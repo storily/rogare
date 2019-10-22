@@ -4,8 +4,7 @@ class Rogare::Commands::Wordwar
   extend Rogare::Command
   include Rogare::Utilities
 
-  command 'wordwar'
-  aliases 'war', 'ww'
+  command 'ww'
   usage [
     '`!% in [time before it starts (in minutes)] for [duration]`',
     'Or: `!% at [wall time e.g. 12:35] for [duration]`',

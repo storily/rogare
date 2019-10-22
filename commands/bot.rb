@@ -4,7 +4,6 @@ class Rogare::Commands::Bot
   extend Rogare::Command
 
   command 'bot'
-  aliases 'debug', 'show'
   usage [
     'All commands are restricted to #boating, and some are admin-restricted.',
     '**Public commands:**',
