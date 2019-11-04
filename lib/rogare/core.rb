@@ -102,7 +102,7 @@ module Rogare
       bot = Discordrb::Bot.new token: ENV['DISCORD_TOKEN']
       puts "This bot's discord invite URL is #{bot.invite_url}."
 
-      if ENV['RACK_ENV'] == 'production'
+      if ENV['RACK_ENV'] == 'production' && ENV['LEAVE_STATUS'].nil?
         bot.ready do
           bot.update_status('online', Rogare.game, nil)
         end
