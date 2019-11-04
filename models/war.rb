@@ -59,7 +59,11 @@ class War < Sequel::Model
   end
 
   def broadcast(msg)
-    discord_channels.each { |chan| chan.send_msg msg }
+    discord_channels.each do |chan|
+      chan.send_msg msg
+    rescue StandardError => e
+      logs e
+    end
   end
 
   def start!
