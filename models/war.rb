@@ -123,7 +123,7 @@ class War < Sequel::Model
         refresh
         next unless current?
 
-        extra = '' + (block.call unless block.nil?)
+        extra = '' + ((block.call unless block.nil?) || '')
         reply.call "Wordwar #{id} is starting #{time}! #{members.map(&:mid).join(', ')}#{extra}"
       }
 
