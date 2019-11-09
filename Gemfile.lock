@@ -1,5 +1,5 @@
 GIT
-  remote: git://github.com/mr-dxdy/sequel-pg-comment.git
+  remote: https://github.com/mr-dxdy/sequel-pg-comment.git
   revision: 88f91b550e4133b5fc865dfe2ce8692652f3163f
   branch: remove_git-version-bump
   specs:
@@ -27,7 +27,7 @@ GEM
       numerizer (~> 0.1.1)
     coderay (1.1.2)
     concurrent-ruby (1.1.5)
-    crass (1.0.4)
+    crass (1.0.5)
     discordrb (3.3.0)
       discordrb-webhooks (~> 3.3.0)
       ffi (>= 1.9.24)
@@ -60,7 +60,7 @@ GEM
     i18n (1.6.0)
       concurrent-ruby (~> 1.0)
     jaro_winkler (1.5.2)
-    loofah (2.2.3)
+    loofah (2.3.1)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     lru_redux (1.1.0)
