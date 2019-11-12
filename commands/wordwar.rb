@@ -8,7 +8,7 @@ class Rogare::Commands::Wordwar
   usage [
     '`!% in [time before it starts (in minutes)] for [duration]`',
     'Or: `!% at [wall time e.g. 12:35] for [duration]`',
-    'Or even (defaulting to a 15 minute run): `!% at/in [time]`',
+    'Or even (defaulting to a 20 minute run): `!% at/in [time]`',
     'And then everyone should: `!% join [wordwar ID]`',
     # 'And add their total at the end with `!% total [ID] [total]`',
     # 'Then get the summary with `!% summary [ID]`',
@@ -51,7 +51,7 @@ class Rogare::Commands::Wordwar
 
     atmode = time =~ /^at/i
     time = time.sub(/^at/i, '').strip if time.downcase.start_with? 'at'
-    durstr = '15 minutes' if durstr.nil? || durstr.empty?
+    durstr = '20 minutes' if durstr.nil? || durstr.empty?
 
     # TODO: timezones for 'at XXXX'
     timenow = Time.now
