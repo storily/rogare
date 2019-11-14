@@ -33,6 +33,14 @@ class Rogare::Commands::Badges
       auckland
       wellington
       christchurch
+      otago-southland
+      northland
+      central-north
+      waikato-taupo
+      palmerston-north
+      wairarapa
+      hawkes-bay
+      australia
       elsewhere
       overseas
     ]
