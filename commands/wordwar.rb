@@ -153,8 +153,10 @@ class Rogare::Commands::Wordwar
     others = war.others.count
     chans = war.discord_channels.map(&:pretty).join(', ')
 
+    terms = ['a war', 'a sprint', 'a stroll in the wordwood', 'lots of typing', 'a little jaunt']
+
     m.reply [
-      "#{war.id}: #{war.creator.nixnotif}'s war",
+      "#{war.id}: #{terms.sample}",
 
       if neg
         "started #{togo} ago"

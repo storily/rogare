@@ -132,7 +132,7 @@ class War < Sequel::Model
         next if cancelled
 
         reply.call "Wordwar #{id} has ended! #{members.map(&:mid).join(', ')}"
-        reply.call "Tell us your ending wordcount with `!ww words N`, then get a summary with `!ww summary #{id}`!`"
+        reply.call "Tell us your ending wordcount with `!ww words N`, then get a summary with `!ww summary #{id}`!"
       }
 
       if til_start.positive?
