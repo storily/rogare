@@ -20,6 +20,7 @@ class Rogare::Commands::Badges
   match_command /(?:get|add)/, method: :help_message
   match_command /(?:leave|re?m(?:ove)?|del(?:ete))/, method: :help_message
   match_command /clear/, method: :clear_badges
+  match_command /.+/, method: :help_message
 
   def known_badges
     %w[
