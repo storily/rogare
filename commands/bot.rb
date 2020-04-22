@@ -20,7 +20,6 @@ class Rogare::Commands::Bot
     # '`!% name adjust <name> <+/-kind>` - File an adjustment for a name to be (+) or not be (-) a particular kind.',
 
     "\n**Admin commands:**",
-    '`!% game` - Cycle the bot’s playing now status',
     '`!% take a nap` - Voluntarily exit',
 
     '`!% welcome @<discord user>` - Sends the welcome message to a user as PM',
@@ -31,12 +30,17 @@ class Rogare::Commands::Bot
     '`!% chan find <name>` - Find a channel from name or internals',
     '`!% user ids` - Display all known users and their IDs',
 
-    '`!% wc set user <discord user> <nano user>` - Set a user’s nano name for them'
+    '`!% wc set user <discord user> <nano user>` - Set a user’s nano name for them',
+
+    '`!% game cycle` - Cycle the bot’s playing now status',
+    '`!% game list` - List all the stored now playing statuses',
+    '`!% game add <text>` - Add a new now playing status to the rotation',
+    '`!% game toggle <id>` - Toggle whether the given now playing status is in the rotation',
+    '`!% game delete <id>` - Remove the given now playing status'
   ]
   handle_help
 
   match_command /uptime/, method: :uptime
-  match_command /game/, method: :cycle_game
   match_command /take a nap/, method: :take_a_nap
 
   match_command /my id/, method: :my_id
@@ -56,6 +60,12 @@ class Rogare::Commands::Bot
 
   match_command /welcome (.+)/, method: :send_welcome
   match_command /wc set user (.+) (.+)/, method: :wc_set_user
+
+  match_command /game cycle/, method: :game_cycle
+  match_command /game list/, method: :game_list
+  match_command /game add (.*)/, method: :game_add
+  match_command /game toggle (\d+)/, method: :game_toggle
+  match_command /game delete (\d+)/, method: :game_delete
 
   before_handler do |method, m|
     unless m.channel.name == 'boating'
@@ -81,10 +91,6 @@ class Rogare::Commands::Bot
     version = ENV['HEROKU_SLUG_DESCRIPTION'] || `git log -n1 --abbrev-commit --pretty=oneline` || 'around'
     m.reply "My name is sassbot, #{Socket.gethostname} is my home, running #{version}"
     m.reply "I made my debut at #{Rogare.boot}, #{(Time.now - Rogare.boot).round} seconds ago"
-  end
-
-  def cycle_game(_m)
-    Rogare.discord.update_status('online', Rogare.game, nil)
   end
 
   def take_a_nap(m)
@@ -193,5 +199,35 @@ class Rogare::Commands::Bot
 
     Rogare.welcome(m.channel.server, du.discord)
     m.reply 'Sent'
+  end
+
+  def game_cycle(_m)
+    Rogare.discord.update_status('online', Rogare.game, nil)
+  end
+
+  def game_list(m)
+    m.reply "**Now playing statuses**\n#{Game.all.map(&:display).join("\n")}"
+  end
+
+  def game_add(m, text)
+    game = Game.new(creator_id: m.user.id, text: text.strip).save
+    m.reply "📝 Added: #{game.display}"
+  end
+
+  def game_toggle(m, id)
+    game = Game[id.to_i]
+    m.reply "Unknown game ID `#{id}`" unless game
+
+    game.enabled = !game.enabled
+    game.save
+    m.reply game.display
+  end
+
+  def game_delete(m, id)
+    game = Game[id.to_i]
+    m.reply "Unknown game ID `#{id}`" unless game
+
+    game.delete
+    m.reply "🗑️ Deleted: #{game.display}"
   end
 end

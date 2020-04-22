@@ -32,55 +32,7 @@ module Rogare
     end
 
     def game
-      [
-        'with fire',
-        'at life — and winning',
-        'Plotting in the Dark',
-        'Killing Characters',
-        'Taking names and kicking ass',
-        'Breaking quills',
-        'Pulling out the full stops',
-        'with cute animals',
-        'Destiny… of your MC',
-        'the role of Fate',
-        'Shadow puppets',
-        'with your wordcount',
-        'World of Wordcraft',
-        'Plot Hole Hunters',
-        'Age of Myth',
-        'League of Writers',
-        'the fool',
-        'and drinking',
-        'Really old scrolls VI',
-        'you',
-        'Grand Write Into',
-        'Legend of Making Count',
-        'Writer’s DOOM',
-        'Two Fortnites (and this will be over)',
-        'Red Pen Redemption',
-        'Finally Fantasy',
-        'CoD: Blank Page',
-        'Dots 2',
-        'Half-Novel²',
-        'Poketome Go',
-        'Wordsmith’s Creed: Odyssey',
-        'Plotfinder: Kingmaker',
-        'and wandering and lusting',
-        'Super Script Bros',
-        'Tom Clancy’s The Pagebreak 2',
-        'Kingdom Inks III',
-        'Wolfenstein: YA debut',
-        'Ori and the Will of the Writs',
-        'Scribe of Solitude',
-        'Dashen',
-        'Presscalibur',
-        'Civilization VI: Gathering Dust',
-        'mind games',
-        'tricks',
-        'Eat The Bug',
-        'woolgathering',
-        'no, no, I’m writing, honest'
-      ].sample
+      Game.random_text
     end
 
     # Extremely short-lived global cache for initial user lookups.
