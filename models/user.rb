@@ -34,7 +34,7 @@ class User < Sequel::Model
     # keep same updated stamp unless we actually update something
     self.updated = updated unless nick != discord_nick
     self.last_seen = Time.now
-    self.nick = nick
+    self.nick = discord_nick
     save
 
     self
