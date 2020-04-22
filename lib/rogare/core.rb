@@ -114,7 +114,7 @@ module Rogare
       # or desktop clients shouldn't see anything, people with terminal
       # clients may see a space, and people with bad clients may see a
       # weird box or invalid char thing.
-      nick.sub(/^(.)/, "\\1\u200B")
+      nick&.sub(/^(.)/, "\\1\u200B")
     end
 
     def channel_list
