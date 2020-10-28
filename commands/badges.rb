@@ -25,6 +25,7 @@ class Rogare::Commands::Badges
   def known_badges
     %w[
       ey/em
+      xe/xem
       he/him
       it/its
       she/her
