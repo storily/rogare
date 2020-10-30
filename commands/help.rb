@@ -44,7 +44,7 @@ class Rogare::Commands::Help
   end
 
   def execute(m)
-    m.reply "More: #{readable_commands.join(', ')}."
+    m.reply "Legacy:\n#{readable_commands.join("\n")}."
   end
 
   memoize :bot_prefix, :command_list, :readable_commands
