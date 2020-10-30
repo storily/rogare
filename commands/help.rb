@@ -8,7 +8,7 @@ class Rogare::Commands::Help
   aliases 'list'
 
   match_command /.*/
-  match_empty :execute
+  match_empty :legacy
 
   def bot_prefix
     Rogare
@@ -44,6 +44,9 @@ class Rogare::Commands::Help
   end
 
   def execute(m)
+  end
+
+  def legacy(m)
     sleep 1
     m.reply "Legacy:\n#{readable_commands.join("\n")}\n---"
   end
