@@ -268,21 +268,21 @@ class Rogare::Commands::Wordwar
         "(#{member.ending} - #{member.starting}) = " \
         "**#{member.total}** #{member.total_type}."
 
-      ex_war_summary(m, war.id) unless war.memberships_dataset.where(ending: 0).count.positive?
+      ex_war_summary(m, war.id, true) unless war.memberships_dataset.where(ending: 0).count.positive?
     else
       member.save_starting! words
       m.reply "You’re starting war #{war.id} with **#{member.starting}** #{member.total_type}."
     end
   end
 
-  def ex_war_summary(m, id)
+  def ex_war_summary(m, id, tag = false)
     war = War[id.to_i] || m.user.latest_war & [0]
 
     return m.reply 'No such wordwar' unless war&.exists?
     return m.reply 'It’s not over yet' if war.current?
 
     m.reply "**Statistics for war #{id.to_i}:**\n" +
-            war.totals.join("\n")
+            war.totals(tag).join("\n")
   end
 
   def ex_war_stats(m, user = nil)
