@@ -104,11 +104,16 @@ class War < Sequel::Model
       .save_total!(total, type)
   end
 
-  def totals
+  def totals(tag = false)
     memberships_dataset.eager(:user)
                        .reject { |m| m.total.zero? }
                        .map do |m|
-      "#{m.user.mid}: **#{m.total}** #{m.total_type} (**" \
+      user = if tag
+        m.user.mid
+      else
+        m.user.nixnotif
+      end
+      "#{user}: **#{m.total}** #{m.total_type} (**" \
         "#{(m.total.to_f / (seconds / 60)).round(2)}** #{m.total_type} per minute)"
     end
   end
