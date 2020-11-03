@@ -82,6 +82,11 @@ module Rogare::Command
       plug = new
       params = DiscordMessageShim.new(event, pattern, my).params
       meth = pattern[1][:method]
+      
+      if params[0].user.bot?
+        logs 'Message author is a bot, skip'
+        next
+      end
 
       if my[:before_handler]
         logs 'Running before_handler'
