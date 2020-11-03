@@ -139,4 +139,8 @@ class User < Sequel::Model
       { date: camp.text, slug: camp.attr('value') }
     end
   end
+  
+  def bot?
+    @discord.bot_account?
+  end
 end
