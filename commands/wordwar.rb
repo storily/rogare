@@ -21,7 +21,7 @@ class Rogare::Commands::Wordwar
   match_command /leave(.*)/, method: :ex_leave_war
   match_command /cancel(.*)/, method: :ex_cancel_war
   match_command /total\s+(\d+)\s+(.*)/, method: :ex_total_war
-  match_command /words\s+(\d+k?)(?:\s+(start|end))?/, method: :ex_words_war
+  match_command /words?\s+(\d+k?)(?:\s+(start|end))?/, method: :ex_words_war
   match_command /info(.*)/, method: :ex_war_info
   match_command /stats(.*)/, method: :ex_war_stats
   match_command /summary(.*)/, method: :ex_war_summary
@@ -32,7 +32,7 @@ class Rogare::Commands::Wordwar
   match_command /(\d+)\s+leave/, method: :ex_leave_war
   match_command /(\d+)\s+cancel/, method: :ex_cancel_war
   match_command /(\d+)\s+total\s+(.*)/, method: :ex_total_war
-  match_command /(\d+)\s+words\s+(\d+k?)(?:\s+(start|end))?/, method: :ex_words_war
+  match_command /(\d+)\s+words?\s+(\d+k?)(?:\s+(start|end))?/, method: :ex_words_war
   match_command /(\d+)\s+info/, method: :ex_war_info
   match_command /(\d+)\s+summary/, method: :ex_war_summary
   match_command /(\d+)\s+members/, method: :ex_war_members
