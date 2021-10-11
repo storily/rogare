@@ -3,3 +3,4 @@
 .examples
 node_modules
 lib/goalterms/grammar.rb
+vendor/
