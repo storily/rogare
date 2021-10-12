@@ -192,7 +192,7 @@ DEPENDENCIES
   hashie (~> 3.3)
   lru_redux (~> 1.1)
   memoist (~> 0.15.0)
-  nokogiri (~> 1.10)
+  nokogiri (~> 1.12)
   numbers_in_words (~> 0.4.0)
   pg (~> 1.1)
   pry
