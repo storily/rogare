@@ -3,14 +3,14 @@
 source 'https://rubygems.org'
 ruby '~>2'
 
-gem 'actionview', '~>5.2', require: ['action_view', 'action_view/helpers']
-gem 'activesupport', '~>5.2', require: 'active_support/all'
+gem 'actionview', '~>7.0', require: ['action_view', 'action_view/helpers']
+gem 'activesupport', '~>7.0', require: 'active_support/all'
 gem 'chronic', '~>0.10.2'
 gem 'chronic_duration', '~>0.10.2'
 gem 'discordrb', '~>3.3'
 gem 'dotenv', '~>2.5', require: 'dotenv/load'
 gem 'foreman', require: false, group: :development
-gem 'graphql-client', '~>0.12.1', require: false
+gem 'graphql-client', '~>0.18.0', require: false
 gem 'hashie', '~>3.3'
 gem 'lru_redux', '~>1.1'
 gem 'memoist', '~>0.15.0'
@@ -29,7 +29,7 @@ gem 'sparkr', '~> 0.4.1'
 gem 'thwait', '~>0.2'
 gem 'treetop', '~>1.6'
 gem 'typhoeus', '~>0.6.9'
-gem 'tzinfo', '~>1.2'
+gem 'tzinfo', '~>2.0'
 
 group :development do
   gem 'tty-prompt', '~>0.18'
